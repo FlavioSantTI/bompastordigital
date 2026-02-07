@@ -8,8 +8,7 @@ import {
     Button,
     TextField,
     CircularProgress,
-    Alert,
-    Typography
+    Alert
 } from '@mui/material';
 import { supabase } from '../../lib/supabase';
 

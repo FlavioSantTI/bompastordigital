@@ -3,10 +3,10 @@ import {
     Box, Paper, Typography, TextField, Button, Alert, CircularProgress
 } from '@mui/material';
 import { supabase } from '../../lib/supabase';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export default function RegisterPage() {
-    const navigate = useNavigate();
+
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 

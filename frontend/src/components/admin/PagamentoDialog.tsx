@@ -13,7 +13,7 @@ import {
     Chip,
     Divider
 } from '@mui/material';
-import { AttachMoney, CheckCircle } from '@mui/icons-material';
+import { AttachMoney } from '@mui/icons-material';
 import ComprovantesManager from './ComprovantesManager';
 import { supabase } from '../../lib/supabase';
 
@@ -118,14 +118,12 @@ export default function PagamentoDialog({ open, inscricao, onClose, onStatusChan
                     <ComprovantesManager
                         inscricaoId={inscricao.id}
                         onUploadSuccess={() => setSuccessMsg('Comprovante enviado com sucesso!')}
-                        onComprovantesChange={(count) => {
+                        onComprovantesChange={(count: number) => {
                             // REGRA: Se tem arquivo e está pendente -> Confirma
                             if (count > 0 && !isConfirmed) {
                                 handleToggleStatus(true);
                                 setSuccessMsg('Comprovante detectado. Inscrição confirmada automaticamente! ✅');
                             }
-                            // REGRA OPCIONAL: Se não tem arquivo e está confirmada -> Volta pra pendente?
-                            // Por segurança, vamos apenas automatizar a confirmação positiva (upload -> ok).
                         }}
                     />
                 )}

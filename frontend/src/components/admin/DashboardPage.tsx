@@ -4,7 +4,6 @@ import {
     Card,
     CardContent,
     Typography,
-    Grid,
     Paper,
     Table,
     TableBody,
@@ -120,7 +119,7 @@ export default function DashboardPage() {
             cancelado: { label: 'Cancelado', color: 'error' },
         };
 
-        const statusInfo = statusMap[status] || { label: status, color: 'default' };
+        const statusInfo = statusMap[status as any] || { label: status, color: 'default' };
         return <Chip label={statusInfo.label} color={statusInfo.color} size="small" />;
     };
 
@@ -149,11 +148,12 @@ export default function DashboardPage() {
             {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
             {/* Cards de Estatísticas */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid item xs={12} sm={6} md={3}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 4 }}>
+                <Box sx={{ flex: '1 1 200px' }}>
                     <Card sx={{
                         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                         color: 'white',
+                        height: '100%'
                     }}>
                         <CardContent>
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -169,12 +169,13 @@ export default function DashboardPage() {
                             </Box>
                         </CardContent>
                     </Card>
-                </Grid>
+                </Box>
 
-                <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ flex: '1 1 200px' }}>
                     <Card sx={{
                         background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
                         color: 'white',
+                        height: '100%'
                     }}>
                         <CardContent>
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -190,12 +191,13 @@ export default function DashboardPage() {
                             </Box>
                         </CardContent>
                     </Card>
-                </Grid>
+                </Box>
 
-                <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ flex: '1 1 200px' }}>
                     <Card sx={{
                         background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
                         color: 'white',
+                        height: '100%'
                     }}>
                         <CardContent>
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -211,12 +213,13 @@ export default function DashboardPage() {
                             </Box>
                         </CardContent>
                     </Card>
-                </Grid>
+                </Box>
 
-                <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ flex: '1 1 200px' }}>
                     <Card sx={{
                         background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
                         color: 'white',
+                        height: '100%'
                     }}>
                         <CardContent>
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -232,8 +235,8 @@ export default function DashboardPage() {
                             </Box>
                         </CardContent>
                     </Card>
-                </Grid>
-            </Grid>
+                </Box>
+            </Box>
 
             {/* Tabela de Eventos Recentes */}
             <Paper sx={{ p: 3 }}>
