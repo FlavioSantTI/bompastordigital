@@ -2,14 +2,8 @@ version: '3.8'
 
 services:
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        # Passa as variáveis do host (arquivo .env) para o build image
-        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
-        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
-    image: bom-pastor-frontend:latest
+    # IMAGEM DO GHCR (GitHub Container Registry)
+    image: ghcr.io/flaviosantti/bom-pastor-frontend:latest
     container_name: bom-pastor-frontend
     restart: unless-stopped
     
@@ -22,6 +16,8 @@ services:
       - "traefik.http.routers.bompastor.entrypoints=websecure"
       # Define o resolver de certificado (geralmente 'myresolver' ou 'letsencrypt')
       - "traefik.http.routers.bompastor.tls.certresolver=myresolver"
+      # Define explicitamente a porta interna do container (Nginx roda na 80)
+      - "traefik.http.services.bompastor.loadbalancer.server.port=80"
       # Redirecionamento HTTP -> HTTPS (opcional se já tiver global no Traefik, mas bom garantir)
       - "traefik.http.middlewares.bompastor-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.bompastor-http.rule=Host(`bompastordigital.flaviosantiago.com.br`)"
