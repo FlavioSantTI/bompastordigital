@@ -10,6 +10,8 @@ services:
     # Labels do Traefik para roteamento e SSL
     labels:
       - "traefik.enable=true"
+      # Diz ao Traefik qual rede usar para alcançar este container (essencial se houver múltiplas redes)
+      - "traefik.docker.network=Favucanet"
       # Define a regra do host (domínio)
       - "traefik.http.routers.bompastor.rule=Host(`bompastordigital.flaviosantiago.com.br`)"
       # Define o entrypoint como HTTPS (websecure)
