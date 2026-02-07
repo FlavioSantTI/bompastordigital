@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Passa as variáveis do host (arquivo .env) para o build image
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+    image: bom-pastor-frontend:latest
+    container_name: bom-pastor-frontend
+    restart: unless-stopped
+    
+    # Labels do Traefik para roteamento e SSL
+    labels:
+      - "traefik.enable=true"
+      # Define a regra do host (domínio)
+      - "traefik.http.routers.bompastor.rule=Host(`bompastordigital.flaviosantiago.com.br`)"
+      # Define o entrypoint como HTTPS (websecure)
+      - "traefik.http.routers.bompastor.entrypoints=websecure"
+      # Define o resolver de certificado (geralmente 'myresolver' ou 'letsencrypt')
+      - "traefik.http.routers.bompastor.tls.certresolver=myresolver"
+      # Redirecionamento HTTP -> HTTPS (opcional se já tiver global no Traefik, mas bom garantir)
+      - "traefik.http.middlewares.bompastor-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.bompastor-http.rule=Host(`bompastordigital.flaviosantiago.com.br`)"
+      - "traefik.http.routers.bompastor-http.entrypoints=web"
+      - "traefik.http.routers.bompastor-http.middlewares=bompastor-https-redirect"
+
+    # Conecta à rede externa do Traefik (ajuste 'web' ou 'proxy' conforme sua configuração)
+    networks:
+      - Favucanet
+
+# Define a rede externa onde o Traefik está rodando
+networks:
+  Favucanet:
+    external: true
