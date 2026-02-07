@@ -30,21 +30,6 @@ services:
     networks:
       - Favucanet
 
-  # SERVIÇO DE DIAGNÓSTICO (Removemos depois)
-  # Acessível em: https://bompastordigital.flaviosantiago.com.br/debug
-  whoami:
-    image: traefik/whoami
-    container_name: debug-whoami
-    restart: unless-stopped
-    networks:
-      - Favucanet
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=Favucanet"
-      - "traefik.http.routers.debug.rule=Host(`bompastordigital.flaviosantiago.com.br`) && PathPrefix(`/whoami`)"
-      - "traefik.http.routers.debug.entrypoints=websecure"
-      - "traefik.http.routers.debug.tls.certresolver=myresolver"
-
 # Define a rede externa onde o Traefik está rodando
 networks:
   Favucanet:
