@@ -56,7 +56,7 @@ export default function EventSelectionStep() {
                         return evento;
                     })
                 );
-                setEventos(eventosComLocal);
+                setEventos(eventosComLocal as Evento[]);
             }
             setLoading(false);
         }

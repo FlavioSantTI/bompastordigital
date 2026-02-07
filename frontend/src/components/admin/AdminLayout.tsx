@@ -1,4 +1,4 @@
-import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, IconButton, Menu, MenuItem, Avatar, Tooltip } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment } from '@mui/icons-material';
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';

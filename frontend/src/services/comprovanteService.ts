@@ -49,7 +49,7 @@ export const comprovanteService = {
             const filePath = `${fileName}`;
 
             // 3. Upload para o Supabase Storage
-            const { data: uploadData, error: uploadError } = await supabase.storage
+            const { error: uploadError } = await (supabase as any).storage
                 .from('comprovantes')
                 .upload(filePath, file, {
                     cacheControl: '3600',
@@ -62,7 +62,7 @@ export const comprovanteService = {
             }
 
             // 4. Obter URL Pública
-            const { data: { publicUrl } } = supabase.storage
+            const { data: { publicUrl } } = (supabase as any).storage
                 .from('comprovantes')
                 .getPublicUrl(filePath);
 
@@ -81,7 +81,7 @@ export const comprovanteService = {
 
             if (dbError) {
                 // Se falhar no banco, idealmente deveríamos limpar o arquivo do storage (rollback manual)
-                await supabase.storage.from('comprovantes').remove([filePath]);
+                await (supabase as any).storage.from('comprovantes').remove([filePath]);
                 console.error('Erro ao salvar no banco:', dbError);
                 throw new Error('Falha ao registrar comprovante no banco de dados.');
             }
@@ -123,7 +123,7 @@ export const comprovanteService = {
      */
     async deleteComprovante(comprovanteId: string, pathStorage: string) {
         // 1. Remove do Storage
-        const { error: storageError } = await supabase.storage
+        const { error: storageError } = await (supabase as any).storage
             .from('comprovantes')
             .remove([pathStorage]);
 
