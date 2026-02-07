@@ -13,14 +13,18 @@ services:
       # Diz ao Traefik qual rede usar para alcançar este container (essencial se houver múltiplas redes)
       - "traefik.docker.network=Favucanet"
       # Define a regra do host (domínio)
-      - "traefik.http.routers.bompastor.rule=Host(`bompastordigital.flaviosantiago.com.br`)"
-      # Define o entrypoint como HTTPS (websecure)
-      - "traefik.http.routers.bompastor.entrypoints=websecure"
-      # Define o resolver de certificado (geralmente 'myresolver' ou 'letsencrypt')
-      - "traefik.http.routers.bompastor.tls.certresolver=myresolver"
-      # Define explicitamente a porta interna do container (Nginx roda na 80)
-      - "traefik.http.services.bompastor.loadbalancer.server.port=80"
-      # Redirecionamento HTTP -> HTTPS (opcional se já tiver global no Traefik, mas bom garantir)
+      - "traefik.http.routers.bompastor-frontend.rule=Host(`bompastordigital.flaviosantiago.com.br`)"
+      # Define o entrypoint e resolver
+      - "traefik.http.routers.bompastor-frontend.entrypoints=websecure"
+      - "traefik.http.routers.bompastor-frontend.tls.certresolver=myresolver"
+      
+      # Linka EXPLICITAMENTE o roteador ao serviço (Segurança extra)
+      - "traefik.http.routers.bompastor-frontend.service=bompastor-frontend-svc"
+      
+      # Define o serviço e a porta 80
+      - "traefik.http.services.bompastor-frontend-svc.loadbalancer.server.port=80"
+      
+      # Redirecionamento HTTP -> HTTPS
       - "traefik.http.middlewares.bompastor-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.bompastor-http.rule=Host(`bompastordigital.flaviosantiago.com.br`)"
       - "traefik.http.routers.bompastor-http.entrypoints=web"
