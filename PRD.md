@@ -1,8 +1,8 @@
 # Product Requirements Document (PRD)
 ## Bom Pastor Digital - Sistema de Gestão Pastoral
 
-**Versão**: 1.3  
-**Data**: 07/02/2026  
+**Versão**: 1.4  
+**Data**: 09/02/2026  
 **Autor**: Flávio Santiago  
 **Status**: Em Desenvolvimento Ativo
 
@@ -87,7 +87,10 @@ Todas as tabelas possuem **Row Level Security** habilitado:
 - Botão de chamada para inscrição
 - Design responsivo (mobile-first)
 
-#### 3.1.2 Formulário de Inscrição ✅
+**Etapa 0 - Seleção de Evento** (NOVO)
+- Lista de eventos disponíveis
+- Seleção obrigatória antes dos dados do casal
+
 **Etapa 1 - Dados do Casal**
 - Nome completo (esposo e esposa)
 - CPF com validação
@@ -113,6 +116,11 @@ Todas as tabelas possuem **Row Level Security** habilitado:
 - Checkbox de aceite dos termos
 - Botão de confirmação
 
+**Etapa 5 - Confirmação** (NOVO)
+- Geração automática de PDF com dados PIX
+- Mensagem de sucesso com número da inscrição
+- Orientação para consultar informações de pagamento no dashboard
+
 ### 3.2 Módulo de Autenticação ✅
 
 | Funcionalidade | Status |
@@ -121,7 +129,7 @@ Todas as tabelas possuem **Row Level Security** habilitado:
 | Magic Link (sem senha) | ✅ Implementado |
 | Recuperação de senha | ✅ Implementado |
 | Redefinição de senha | ✅ Implementado (com confirmação) |
-| Logout | ✅ Implementado |
+| Botão Sair visível no header | ✅ Implementado |
 | Proteção de rotas | ✅ Implementado |
 
 #### Configuração de Email (SMTP)
@@ -164,14 +172,17 @@ Remetente: contato@bompastordigital.com.br
 - **Fichas de Inscrição (PDF)**: Uma página por casal com layout profissional
 - **Lista de Presença (PDF)**: Tabela simples para check-in
 
-### 3.4 Área do Participante 🚧
+### 3.4 Área do Participante ✅
 
 | Funcionalidade | Status |
 |----------------|--------|
 | Ver dados da inscrição | ✅ Implementado |
 | Ver status do pagamento | ✅ Implementado |
-| Enviar comprovante | 🚧 Planejado |
-| Editar dados pessoais | 🚧 Planejado |
+| Informações PIX (QR Code, chave, copia-e-cola) | ✅ Implementado |
+| Contato WhatsApp para comprovante | ✅ Implementado |
+| Botão de edição (inscrições pendentes) | ✅ Implementado |
+| PDF de confirmação com dados PIX | ✅ Implementado |
+| Enviar comprovante pelo dashboard | 🚧 Planejado |
 
 ---
 
@@ -180,10 +191,10 @@ Remetente: contato@bompastordigital.com.br
 ### 4.1 Fluxo de Inscrição (Casal)
 
 ```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│   Landing   │───▶│  Formulário │───▶│   Revisão   │───▶│  Confirmação│
-│    Page     │    │  (4 steps)  │    │   & Termos  │    │   + Email   │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Landing   │───▶│  Selecionar │───▶│  Formulário │───▶│   Revisão   │───▶│ Confirmação │
+│    Page     │    │   Evento    │    │  (4 steps)  │    │   & Termos  │    │   + PDF     │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
 ```
 
 ### 4.2 Fluxo de Confirmação (Admin)
@@ -270,6 +281,7 @@ Remetente: contato@bompastordigital.com.br
 | 1.1 | 04/02/2026 | Formulário de inscrição completo |
 | 1.2 | 06/02/2026 | Módulo de relatórios (PDF/Excel), recuperação de senha via SMTP, correções de RLS |
 | 1.3 | 07/02/2026 | Área do participante (Dashboard), visualização de status e inscrição |
+| 1.4 | 09/02/2026 | Nova landing page, PDF de confirmação, PIX no dashboard, botão Sair visível, seleção de evento |
 
 ---
 
@@ -281,4 +293,4 @@ Remetente: contato@bompastordigital.com.br
 
 ---
 
-*Documento gerado em 06/02/2026 às 23:26*
+*Documento atualizado em 09/02/2026*

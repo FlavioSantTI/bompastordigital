@@ -119,17 +119,50 @@ export default function RegistrationStepper() {
         try {
             // Importar dinamicamente para evitar erro de build
             const { registerCouple } = await import('../services/registrationService');
+            const { pdfService } = await import('../services/pdfService');
 
             const result = await registerCouple({
                 ...data,
-                evento_id: data.evento_id, // Usando evento selecionado pelo usuário
+                evento_id: data.evento_id,
                 user_id: user?.id,
             });
 
-            if (result.success) {
-                alert(`✅ ${result.message}\n\nNúmero da inscrição: ${result.inscricaoId}`);
-                methods.reset(); // Limpar formulário
-                setActiveStep(0); // Voltar ao início
+            if (result.success && result.inscricaoId && result.evento) {
+                // Preparar dados para PDF
+                const confirmationData = {
+                    couple: {
+                        esposo: { nome: data.esposo.nome, email: data.esposo.email },
+                        esposa: { nome: data.esposa.nome, email: data.esposa.email }
+                    },
+                    event: {
+                        nome: result.evento.nome,
+                        data_inicio: new Date(result.evento.data_inicio).toLocaleDateString('pt-BR'),
+                        data_fim: new Date(result.evento.data_fim).toLocaleDateString('pt-BR'),
+                        local: result.evento.local || 'A definir'
+                    },
+                    inscricaoId: result.inscricaoId
+                };
+
+                // Gerar e fazer download do PDF
+                let pdfSuccess = false;
+                try {
+                    await pdfService.downloadConfirmationPDF(confirmationData);
+                    pdfSuccess = true;
+                } catch (pdfError) {
+                    console.error('Erro ao gerar PDF:', pdfError);
+                }
+
+                let message = `✅ ${result.message}\n\nNúmero da inscrição: ${result.inscricaoId}`;
+                if (pdfSuccess) {
+                    message += '\n\n📄 O comprovante PDF foi baixado!';
+                } else {
+                    message += '\n\n⚠️ Não foi possível gerar o PDF. Anote o número da inscrição.';
+                }
+                message += '\n\n💰 Veja as informações de pagamento em "Minhas Inscrições".';
+
+                alert(message);
+                methods.reset();
+                setActiveStep(0);
             } else {
                 alert(`❌ ${result.message}`);
             }

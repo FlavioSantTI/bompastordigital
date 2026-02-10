@@ -1,6 +1,5 @@
-import { Box, AppBar, Toolbar, Typography, Container, IconButton, Menu, MenuItem, Tooltip, ListItemIcon, ListItemText, Divider } from '@mui/material';
-import { AccountCircle, Logout } from '@mui/icons-material';
-import { useState } from 'react';
+import { Box, AppBar, Toolbar, Typography, Container, Button } from '@mui/material';
+import { Logout, AccountCircle } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -11,18 +10,8 @@ interface ClientLayoutProps {
 export default function ClientLayout({ children }: ClientLayoutProps) {
     const navigate = useNavigate();
     const { user, signOut } = useAuth();
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-    const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
 
     const handleLogout = async () => {
-        handleClose();
         await signOut();
         navigate('/login');
     };
@@ -36,63 +25,56 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
                         {/* Logo / Title */}
                         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
                             <Box
+                                component="img"
+                                src="/img/logo.png"
+                                alt="Logo"
                                 sx={{
-                                    width: 40, height: 40, borderRadius: '50%',
-                                    background: 'linear-gradient(135deg, #1E3A5F 0%, #6B9AC4 100%)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    color: 'white', fontWeight: 'bold', fontSize: '1rem', fontFamily: '"Playfair Display", serif',
+                                    width: 40,
+                                    height: 40,
+                                    objectFit: 'contain',
                                     mr: 2
                                 }}
-                            >
-                                BP
-                            </Box>
+                            />
                             <Typography variant="h6" component="div" sx={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, color: '#1E3A5F' }}>
                                 BOM PASTOR DIGITAL
                             </Typography>
                         </Box>
 
-                        {/* User Menu */}
+                        {/* User Info + Sair */}
                         {user && (
-                            <div>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' }, color: 'text.secondary' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    <AccountCircle sx={{ color: 'text.secondary', fontSize: 20 }} />
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            display: { xs: 'none', sm: 'block' },
+                                            color: 'text.secondary',
+                                            maxWidth: 200,
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                    >
                                         {user.email}
                                     </Typography>
-                                    <Tooltip title="Minha Conta">
-                                        <IconButton
-                                            size="large"
-                                            onClick={handleMenu}
-                                            color="primary"
-                                        >
-                                            <AccountCircle />
-                                        </IconButton>
-                                    </Tooltip>
                                 </Box>
-                                <Menu
-                                    id="menu-appbar"
-                                    anchorEl={anchorEl}
-                                    anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'right',
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    color="error"
+                                    startIcon={<Logout fontSize="small" />}
+                                    onClick={handleLogout}
+                                    sx={{
+                                        textTransform: 'none',
+                                        fontWeight: 600,
+                                        borderRadius: 2,
+                                        px: 2
                                     }}
-                                    keepMounted
-                                    transformOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
-                                    }}
-                                    open={Boolean(anchorEl)}
-                                    onClose={handleClose}
                                 >
-                                    <MenuItem disabled>Minha Inscrição</MenuItem>
-                                    <Divider />
-                                    <MenuItem onClick={handleLogout}>
-                                        <ListItemIcon>
-                                            <Logout fontSize="small" />
-                                        </ListItemIcon>
-                                        <ListItemText>Sair</ListItemText>
-                                    </MenuItem>
-                                </Menu>
-                            </div>
+                                    Sair
+                                </Button>
+                            </Box>
                         )}
                     </Toolbar>
                 </Container>

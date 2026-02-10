@@ -10,16 +10,18 @@ export default function LandingPage() {
             {/* Logo Placeholder */}
             <Box sx={{ mb: 4, textAlign: 'center' }}>
                 <Box
+                    component="img"
+                    src="/img/logo.png"
+                    alt="Logo Bom Pastor"
                     sx={{
-                        width: 120, height: 120, borderRadius: '50%', margin: '0 auto',
-                        background: 'linear-gradient(135deg, #1E3A5F 0%, #6B9AC4 100%)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: 'white', fontWeight: 'bold', fontSize: '2.5rem', fontFamily: '"Playfair Display", serif',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)', mb: 3
+                        width: 150,
+                        height: 150,
+                        objectFit: 'contain',
+                        margin: '0 auto',
+                        mb: 3,
+                        display: 'block'
                     }}
-                >
-                    BP
-                </Box>
+                />
                 <Typography variant="h3" color="primary" sx={{ mb: 1 }}>
                     BOM PASTOR DIGITAL
                 </Typography>

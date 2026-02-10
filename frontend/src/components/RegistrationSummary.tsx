@@ -1,5 +1,8 @@
-import { Box, Paper, Typography, Chip, Button, Divider, useTheme } from '@mui/material';
-import { Event, AccessTime, LocationOn, Person, WhatsApp, Edit } from '@mui/icons-material';
+import { Box, Paper, Typography, Chip, Button, Divider, useTheme, Alert } from '@mui/material';
+import { Event, AccessTime, LocationOn, Person, WhatsApp, Edit, ContentCopy, Pix } from '@mui/icons-material';
+import { useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
+import { PIX_CONFIG } from '../types';
 
 interface RegistrationSummaryProps {
     inscricao: any; // Tiparia melhor se tivesse os types globais, vou usar any por praticidade agora e garantir compatibilidade
@@ -8,6 +11,20 @@ interface RegistrationSummaryProps {
 
 export default function RegistrationSummary({ inscricao, onEdit }: RegistrationSummaryProps) {
     const theme = useTheme();
+    const [copiedChave, setCopiedChave] = useState(false);
+    const [copiedCola, setCopiedCola] = useState(false);
+
+    const handleCopyChave = () => {
+        navigator.clipboard.writeText(PIX_CONFIG.chave);
+        setCopiedChave(true);
+        setTimeout(() => setCopiedChave(false), 2000);
+    };
+
+    const handleCopyCola = () => {
+        navigator.clipboard.writeText(PIX_CONFIG.pixCopiaCola);
+        setCopiedCola(true);
+        setTimeout(() => setCopiedCola(false), 2000);
+    };
 
     if (!inscricao) return null;
 
@@ -125,14 +142,179 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
 
                     <Divider sx={{ my: 3 }} />
 
+                    {/* Seção de Pagamento PIX - Mostrar quando status é pendente */}
+                    {inscricao.status === 'pendente' && (
+                        <Box sx={{ mb: 3 }}>
+                            <Alert
+                                severity="warning"
+                                icon={<Pix />}
+                                sx={{
+                                    mb: 2,
+                                    border: '2px solid',
+                                    borderColor: 'warning.main',
+                                    bgcolor: '#FFF8E1'
+                                }}
+                            >
+                                <Typography variant="subtitle2" fontWeight="bold">
+                                    💰 Pagamento Pendente — Confirme sua participação!
+                                </Typography>
+                            </Alert>
+
+                            <Paper
+                                variant="outlined"
+                                sx={{
+                                    p: 3,
+                                    bgcolor: '#FAFAFA',
+                                    borderRadius: 2
+                                }}
+                            >
+                                {/* Valor */}
+                                <Box sx={{ textAlign: 'center', mb: 2 }}>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        Valor da Inscrição
+                                    </Typography>
+                                    <Typography variant="h4" fontWeight="bold" color="primary.main">
+                                        R$ 100,00
+                                    </Typography>
+                                </Box>
+
+                                <Divider sx={{ my: 2 }} />
+
+                                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'center' }}>
+                                    {/* QR Code */}
+                                    <Box sx={{ textAlign: 'center', flexShrink: 0 }}>
+                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                                            📱 Escaneie o QR Code
+                                        </Typography>
+                                        <Box sx={{
+                                            display: 'inline-block',
+                                            p: 1.5,
+                                            bgcolor: 'white',
+                                            borderRadius: 2,
+                                            border: '2px solid',
+                                            borderColor: 'primary.main'
+                                        }}>
+                                            <QRCodeSVG
+                                                value={PIX_CONFIG.pixCopiaCola}
+                                                size={150}
+                                                level="M"
+                                            />
+                                        </Box>
+                                    </Box>
+
+                                    {/* Dados do PIX */}
+                                    <Box sx={{ flex: 1, width: '100%' }}>
+                                        {/* Chave PIX */}
+                                        <Box sx={{ mb: 2 }}>
+                                            <Typography variant="caption" color="text.secondary">
+                                                Chave PIX ({PIX_CONFIG.chaveTipo})
+                                            </Typography>
+                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 0.5 }}>
+                                                <Typography
+                                                    variant="body2"
+                                                    fontWeight="bold"
+                                                    sx={{
+                                                        flex: 1, py: 1, px: 1.5,
+                                                        bgcolor: 'white',
+                                                        borderRadius: 1,
+                                                        border: '1px solid',
+                                                        borderColor: 'grey.300',
+                                                        fontFamily: 'monospace'
+                                                    }}
+                                                >
+                                                    {PIX_CONFIG.chave}
+                                                </Typography>
+                                                <Button
+                                                    size="small"
+                                                    variant="outlined"
+                                                    startIcon={<ContentCopy />}
+                                                    onClick={handleCopyChave}
+                                                    color={copiedChave ? 'success' : 'primary'}
+                                                >
+                                                    {copiedChave ? 'Copiado!' : 'Copiar'}
+                                                </Button>
+                                            </Box>
+                                        </Box>
+
+                                        {/* Beneficiário */}
+                                        <Typography variant="caption" color="text.secondary">
+                                            Beneficiário
+                                        </Typography>
+                                        <Typography variant="body2" fontWeight="bold" sx={{ mb: 2 }}>
+                                            {PIX_CONFIG.beneficiario}
+                                        </Typography>
+
+                                        {/* Copia e Cola */}
+                                        <Box sx={{ mb: 2 }}>
+                                            <Typography variant="caption" color="text.secondary">
+                                                PIX Copia e Cola
+                                            </Typography>
+                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 0.5 }}>
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{
+                                                        flex: 1, py: 1, px: 1.5,
+                                                        bgcolor: 'white',
+                                                        borderRadius: 1,
+                                                        border: '1px solid',
+                                                        borderColor: 'grey.300',
+                                                        fontFamily: 'monospace',
+                                                        wordBreak: 'break-all',
+                                                        maxHeight: '60px',
+                                                        overflow: 'auto'
+                                                    }}
+                                                >
+                                                    {PIX_CONFIG.pixCopiaCola}
+                                                </Typography>
+                                                <Button
+                                                    size="small"
+                                                    variant="outlined"
+                                                    startIcon={<ContentCopy />}
+                                                    onClick={handleCopyCola}
+                                                    color={copiedCola ? 'success' : 'primary'}
+                                                >
+                                                    {copiedCola ? 'Copiado!' : 'Copiar'}
+                                                </Button>
+                                            </Box>
+                                        </Box>
+                                    </Box>
+                                </Box>
+
+                                <Divider sx={{ my: 2 }} />
+
+                                {/* WhatsApp para enviar comprovante */}
+                                <Box sx={{ textAlign: 'center' }}>
+                                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                                        Após pagar, envie o comprovante via WhatsApp:
+                                    </Typography>
+                                    <Box sx={{
+                                        display: 'inline-block',
+                                        p: 1.5,
+                                        bgcolor: 'white',
+                                        borderRadius: 2,
+                                        border: '3px solid #FF5722',
+                                        boxShadow: '0 0 0 3px rgba(255, 87, 34, 0.15)'
+                                    }}>
+                                        <Typography
+                                            variant="h6"
+                                            fontWeight="bold"
+                                            sx={{ color: '#D32F2F', fontFamily: 'monospace' }}
+                                        >
+                                            {PIX_CONFIG.whatsappContato}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </Paper>
+                        </Box>
+                    )}
+
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                        {/* Botão Editar desabilitado temporariamente até implementarmos a edição no form */}
                         <Button
                             variant="outlined"
                             startIcon={<Edit />}
                             onClick={onEdit}
-                            disabled
-                            title="Edição em breve"
+                            disabled={inscricao.status === 'confirmado'}
+                            title={inscricao.status === 'confirmado' ? 'Inscrição já confirmada' : 'Editar inscrição'}
                         >
                             Editar Inscrição
                         </Button>

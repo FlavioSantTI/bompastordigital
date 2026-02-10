@@ -26,6 +26,7 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 | **Autenticação** | Supabase Auth com Magic Link |
 | **Estilização** | Emotion (CSS-in-JS) |
 | **Exportação** | jsPDF + jspdf-autotable + xlsx |
+| **QR Code** | qrcode.react |
 
 ---
 
@@ -36,7 +37,7 @@ bom-pastor-digital/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── admin/           # Páginas do painel administrativo
+│   │   │   ├── admin/               # Painel administrativo
 │   │   │   │   ├── AdminLayout.tsx
 │   │   │   │   ├── DashboardPage.tsx
 │   │   │   │   ├── DiocesesPage.tsx
@@ -46,30 +47,37 @@ bom-pastor-digital/
 │   │   │   │   ├── LoginPage.tsx
 │   │   │   │   ├── UpdatePasswordPage.tsx
 │   │   │   │   └── ForgotPasswordDialog.tsx
-│   │   │   ├── registration/    # Formulário de inscrição (stepper)
+│   │   │   ├── steps/               # Etapas do formulário
 │   │   │   │   ├── CoupleStep.tsx
 │   │   │   │   ├── LocationStep.tsx
 │   │   │   │   ├── JointStep.tsx
-│   │   │   │   └── ReviewStep.tsx
-│   │   │   ├── LandingPage.tsx  # Página inicial pública
-│   │   │   └── RegistrationStepper.tsx
+│   │   │   │   ├── ReviewStep.tsx
+│   │   │   │   ├── EventSelectionStep.tsx
+│   │   │   │   └── ConfirmationStep.tsx
+│   │   │   ├── ClientLayout.tsx     # Layout com header/logout
+│   │   │   ├── NewLandingPage.tsx    # Página inicial pública
+│   │   │   ├── ParticipantDashboard.tsx  # Dashboard do participante
+│   │   │   ├── RegistrationSummary.tsx  # Resumo + PIX
+│   │   │   └── RegistrationStepper.tsx  # Stepper multi-etapas
 │   │   ├── contexts/
-│   │   │   └── AuthContext.tsx  # Gerenciamento de autenticação
+│   │   │   └── AuthContext.tsx       # Autenticação
 │   │   ├── services/
 │   │   │   ├── registrationService.ts
-│   │   │   └── exportService.ts # Geração de PDF e Excel
+│   │   │   ├── pdfService.ts        # Geração de PDF de confirmação
+│   │   │   └── exportService.ts     # Exportação PDF/Excel (admin)
 │   │   ├── lib/
-│   │   │   └── supabase.ts      # Cliente Supabase
-│   │   └── App.tsx              # Rotas da aplicação
+│   │   │   └── supabase.ts          # Cliente Supabase
+│   │   ├── types.ts                 # Tipos e configuração PIX
+│   │   └── App.tsx                  # Rotas da aplicação
 │   └── package.json
 ├── supabase/
-│   ├── schema.sql               # Schema do banco de dados
-│   ├── seed.sql                 # Dados iniciais
-│   ├── fix_rls_jwt.sql          # Políticas RLS com JWT
+│   ├── schema.sql                   # Schema do banco de dados
+│   ├── seed.sql                     # Dados iniciais
+│   ├── fix_rls_jwt.sql              # Políticas RLS com JWT
 │   ├── fix_admin_permissions.sql
 │   └── secure_inscricoes.sql
-├── PRD.md                       # Documento de Requisitos
-└── README.md                    # Este arquivo
+├── PRD.md                           # Documento de Requisitos
+└── README.md                        # Este arquivo
 ```
 
 ---
@@ -130,6 +138,18 @@ Acesse: `http://localhost:5173`
 
 ---
 
+## 📜 Versões e Histórico de Mudanças
+
+| Versão | Data | Mudanças |
+|--------|----------|----------|
+| 1.0 | 03/02/2026 | Estrutura inicial, cadastro de eventos |
+| 1.1 | 04/02/2026 | Formulário de inscrição completo |
+| 1.2 | 06/02/2026 | Módulo de relatórios (PDF/Excel), recuperação de senha via SMTP, correções de RLS |
+| 1.3 | 07/02/2026 | Área do participante (Dashboard), visualização de status e inscrição |
+| 1.4 | 09/02/2026 | Nova landing page, PDF de confirmação, PIX no dashboard, botão Sair visível, seleção de evento |
+
+---
+
 ## 👥 Usuários e Permissões
 
 | Tipo | Acesso | Como Criar |
@@ -143,16 +163,18 @@ Acesse: `http://localhost:5173`
 
 ### ✅ Módulo de Inscrição
 - [x] Landing page com informações do evento
-- [x] Formulário multi-etapas (4 passos)
+- [x] Seleção de evento disponível
+- [x] Formulário multi-etapas (6 passos)
 - [x] Validação de CPF em tempo real
 - [x] Busca automática de municípios (IBGE)
+- [x] Geração de PDF de confirmação com dados PIX
 - [x] Persistência no Supabase
 
 ### ✅ Módulo de Autenticação
 - [x] Login com email/senha
 - [x] Recuperação de senha via email (Magic Link)
 - [x] Proteção de rotas (Admin vs Participante)
-- [x] Logout
+- [x] Botão de Logout visível no header
 
 ### ✅ Painel Administrativo
 - [x] Dashboard com métricas
@@ -170,14 +192,14 @@ Acesse: `http://localhost:5173`
 ### ✅ Segurança
 - [x] Row Level Security (RLS) em todas as tabelas
 - [x] Políticas baseadas em JWT metadata
-
 - [x] Bucket privado para comprovantes
 
 ### ✅ Área do Participante
 - [x] Dashboard com resumo da inscrição
 - [x] Visualização de status (Pendente/Confirmado)
+- [x] Informações PIX (QR Code, chave, copia-e-cola, WhatsApp)
+- [x] Botão de edição habilitado para inscrições pendentes
 - [ ] Upload de comprovante pelo próprio usuário (Em breve)
-- [ ] Edição de dados (Em breve)
 
 ---
 

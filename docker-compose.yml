@@ -4,33 +4,25 @@ services:
   frontend:
     # IMAGEM DO GHCR (GitHub Container Registry)
     image: ghcr.io/flaviosantti/bom-pastor-frontend:latest
-    container_name: bom-pastor-frontend
-    restart: unless-stopped
-    
-    # Labels do Traefik para roteamento e SSL
-    labels:
-      - "traefik.enable=true"
-      # Diz ao Traefik qual rede usar para alcançar este container (essencial se houver múltiplas redes)
-      - "traefik.docker.network=Favucanet"
-      # Define a regra do host (domínio)
-      - "traefik.http.routers.bompastor-frontend.rule=Host(`bompastordigital.flaviosantiago.com.br`)"
-      # Define o entrypoint e resolver
-      - "traefik.http.routers.bompastor-frontend.entrypoints=websecure"
-      - "traefik.http.routers.bompastor-frontend.tls.certresolver=myresolver"
-      
-      # Linka EXPLICITAMENTE o roteador ao serviço (Segurança extra)
-      - "traefik.http.routers.bompastor-frontend.service=bompastor-frontend-svc"
-      
-      # Define o serviço e a porta 80
-      - "traefik.http.services.bompastor-frontend-svc.loadbalancer.server.port=80"
-      
-      # Redirecionamento HTTP -> HTTPS
-      - "traefik.http.middlewares.bompastor-https-redirect.redirectscheme.scheme=https"
-      - "traefik.http.routers.bompastor-http.rule=Host(`bompastordigital.flaviosantiago.com.br`)"
-      - "traefik.http.routers.bompastor-http.entrypoints=web"
-      - "traefik.http.routers.bompastor-http.middlewares=bompastor-https-redirect"
 
-    # Conecta à rede externa do Traefik (ajuste 'web' ou 'proxy' conforme sua configuração)
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=Favucanet"
+        - "traefik.http.routers.bompastor-frontend.rule=Host(`bompastordigital.flaviosantiago.com.br`)"
+        - "traefik.http.routers.bompastor-frontend.entrypoints=websecure"
+        - "traefik.http.routers.bompastor-frontend.tls.certresolver=myresolver"
+        - "traefik.http.routers.bompastor-frontend.service=bompastor-frontend-svc"
+        - "traefik.http.services.bompastor-frontend-svc.loadbalancer.server.port=80"
+        - "traefik.http.middlewares.bompastor-https-redirect.redirectscheme.scheme=https"
+        - "traefik.http.routers.bompastor-http.rule=Host(`bompastordigital.flaviosantiago.com.br`)"
+        - "traefik.http.routers.bompastor-http.entrypoints=web"
+        - "traefik.http.routers.bompastor-http.middlewares=bompastor-https-redirect"
+
+    # Conecta à rede externa do Traefik
     networks:
       - Favucanet
 

@@ -58,8 +58,9 @@ export const PASTORAIS_DISPONIVEIS = [
  * TODO: Buscar do banco ou arquivo de configuração
  */
 export const PIX_CONFIG = {
-    chave: '000.000.000-00', // CPF da instituição
-    chaveTipo: 'CPF',
-    beneficiario: 'Bom Pastor Digital',
-    whatsappContato: '(00) 00000-0000',
+    chave: 'grayceperini@gmail.com',
+    chaveTipo: 'E-mail',
+    beneficiario: 'Grayce Kelly Perini Gomes',
+    whatsappContato: '(63) 98405-5758',
+    pixCopiaCola: '00020126440014BR.GOV.BCB.PIX0122grayceperini@gmail.com5204000053039865802BR5925Grayce Kelly Perini Gomes6009SAO PAULO621405103o0UGlysGH63049897',
 } as const;

@@ -96,23 +96,16 @@ export default function LoginPage() {
                 <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     {/* Aqui entraria a imagem real: <img src="/logo.png" width={120} /> */}
                     <Box
+                        component="img"
+                        src="/img/logo.png"
+                        alt="Logo Bom Pastor"
                         sx={{
-                            width: 80,
-                            height: 80,
-                            borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #1E3A5F 50%, #6B9AC4 50%)',
-                            mb: 2,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontWeight: 'bold',
-                            fontSize: '2rem',
-                            fontFamily: '"Playfair Display", serif'
+                            width: 120,
+                            height: 120,
+                            objectFit: 'contain',
+                            mb: 2
                         }}
-                    >
-                        BP
-                    </Box>
+                    />
                     <Typography variant="h5" color="primary" sx={{ fontFamily: '"Playfair Display", serif', fontWeight: 700 }}>
                         BOM PASTOR DIGITAL
                     </Typography>

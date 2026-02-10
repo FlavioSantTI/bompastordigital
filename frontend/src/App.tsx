@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Componentes Públicos
 import LandingPage from './components/LandingPage';
+import NewLandingPage from './components/NewLandingPage';
 import LoginPage from './components/admin/LoginPage';
 import RegisterPage from './components/admin/RegisterPage';
 
@@ -29,6 +30,7 @@ function App() {
           <Routes>
             {/* Rotas Públicas */}
             <Route path="/" element={<LandingPage />} />
+            <Route path="/landing" element={<NewLandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/update-password" element={<UpdatePasswordPage />} />

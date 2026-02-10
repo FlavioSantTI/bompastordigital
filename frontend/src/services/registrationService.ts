@@ -100,6 +100,12 @@ export async function registerCouple(payload: RegistrationPayload): Promise<{
     success: boolean;
     message: string;
     inscricaoId?: number;
+    evento?: {
+        nome: string;
+        data_inicio: string;
+        data_fim: string;
+        local: string;
+    };
 }> {
     try {
         console.log('Iniciando registro do casal...', payload);
@@ -215,10 +221,18 @@ export async function registerCouple(payload: RegistrationPayload): Promise<{
 
         console.log('Inscrição criada:', inscricaoData);
 
+        // 6. Buscar dados do evento para retornar
+        const { data: eventoData } = await supabase
+            .from('eventos')
+            .select('nome, data_inicio, data_fim, local')
+            .eq('id', payload.evento_id)
+            .single();
+
         return {
             success: true,
             message: 'Inscrição realizada com sucesso!',
             inscricaoId: inscricaoData.id,
+            evento: eventoData || undefined,
         };
     } catch (error: any) {
         console.error('Erro inesperado no registro:', error);
