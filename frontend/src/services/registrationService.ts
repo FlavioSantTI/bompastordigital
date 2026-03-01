@@ -99,141 +99,68 @@ function cleanPhone(phone: string): string {
 export async function registerCouple(payload: RegistrationPayload): Promise<{
     success: boolean;
     message: string;
-    inscricaoId?: number;
+    inscricaoId?: string;
     evento?: {
         nome: string;
         data_inicio: string;
         data_fim: string;
-        local: string;
+        local?: string;
     };
 }> {
     try {
-        console.log('Iniciando registro do casal...', payload);
+        console.log('Iniciando registro do casal via RPC atômica...', payload);
 
-        // 1. Validar disponibilidade dos CPFs
-        const validation = await validateCoupleAvailability(
-            payload.evento_id,
-            payload.esposo.cpf,
-            payload.esposa.cpf
-        );
-
-        if (!validation.available) {
-            return { success: false, message: validation.message || 'CPFs indisponíveis.' };
-        }
-
-        // 2. UPSERT dados do esposo na tabela pessoas (por CPF)
-        const { data: esposo, error: errorEsposo } = await supabase
-            .from('pessoas')
-            .upsert(
-                {
-                    cpf: payload.esposo.cpf,
-                    nome: payload.esposo.nome,
-                    nascimento: convertDateToISO(payload.esposo.nascimento),
-                    email: payload.esposo.email,
-                    telefone: cleanPhone(payload.esposo.telefone),
-                },
-                {
-                    onConflict: 'cpf',
-                    ignoreDuplicates: false
-                }
-            )
-            .select('id')
-            .single();
-
-        if (errorEsposo || !esposo) {
-            console.error('Erro ao inserir/atualizar esposo:', errorEsposo);
-            return { success: false, message: 'Erro ao cadastrar dados do esposo.' };
-        }
-
-        console.log('Esposo cadastrado:', esposo);
-
-        // 3. UPSERT dados da esposa na tabela pessoas (por CPF)
-        const { data: esposa, error: errorEsposa } = await supabase
-            .from('pessoas')
-            .upsert(
-                {
-                    cpf: payload.esposa.cpf,
-                    nome: payload.esposa.nome,
-                    nascimento: convertDateToISO(payload.esposa.nascimento),
-                    email: payload.esposa.email,
-                    telefone: cleanPhone(payload.esposa.telefone),
-                },
-                {
-                    onConflict: 'cpf',
-                    ignoreDuplicates: false
-                }
-            )
-            .select('id')
-            .single();
-
-        if (errorEsposa || !esposa) {
-            console.error('Erro ao inserir/atualizar esposa:', errorEsposa);
-            return { success: false, message: 'Erro ao cadastrar dados da esposa.' };
-        }
-
-        console.log('Esposa cadastrada:', esposa);
-
-        // 4. Buscar diocese_id do município selecionado
-        const { data: municipioData } = await supabase
-            .from('municipios')
-            .select('diocese_id')
-            .eq('codigo_tom', payload.contato.municipio_id)
-            .single();
-
-        // 5. Inserir inscrição com dados completos
-        const { data: inscricaoData, error: errorInscricao } = await supabase
-            .from('inscricoes')
-            .insert({
-                evento_id: payload.evento_id,
-                esposo_id: esposo.id,
-                esposa_id: esposa.id,
-                diocese_id: municipioData?.diocese_id || null,
-                user_id: payload.user_id, // Vinculando ao usuário logado
-                dados_conjuntos: {
-                    paroquia: payload.dados_conjuntos.paroquia,
-                    paroco: payload.dados_conjuntos.paroco,
-                    endereco: payload.dados_conjuntos.endereco,
-                    nova_uniao: payload.dados_conjuntos.nova_uniao,
-                    membro_pasfam: payload.dados_conjuntos.membro_pasfam,
-                    pastorais: payload.dados_conjuntos.pastorais || [],
-                    necessita_hospedagem: payload.dados_conjuntos.necessita_hospedagem,
-                    restricoes_alimentares: payload.dados_conjuntos.restricoes_alimentares || null,
-                    observacoes: payload.dados_conjuntos.observacoes || null,
-                },
-            })
-            .select('id')
-            .single();
-
-        if (errorInscricao) {
-            console.error('Erro ao inserir inscrição:', errorInscricao);
-
-            // Tratamento específico para duplicidade (Erro 23505)
-            if (errorInscricao.code === '23505') {
-                return { success: false, message: 'Já existe uma inscrição para este casal neste evento.' };
+        // 1. Chamar a procedure RPC no Supabase
+        const rpcPayload = {
+            ...payload,
+            esposo: {
+                ...payload.esposo,
+                nascimento: convertDateToISO(payload.esposo.nascimento),
+                telefone: cleanPhone(payload.esposo.telefone)
+            },
+            esposa: {
+                ...payload.esposa,
+                nascimento: convertDateToISO(payload.esposa.nascimento),
+                telefone: cleanPhone(payload.esposa.telefone)
             }
+        };
 
-            return { success: false, message: 'Erro ao finalizar inscrição: ' + (errorInscricao.message || 'desconhecido') };
+        const { data, error } = await supabase.rpc('registrar_casal_ecc', {
+            payload: rpcPayload as unknown as Record<string, any>
+        });
+
+        if (error) {
+            console.error('Erro na RPC registrar_casal_ecc:', error);
+            throw error;
         }
 
-        if (!inscricaoData) {
-            return { success: false, message: 'Erro ao recuperar dados da inscrição criada.' };
+        console.log('Resultado da RPC:', data);
+
+        // A RPC retorna um JSON com { success, message, inscricaoId, evento }
+        // Precisamos fazer um cast para o tipo correto pois o TypeScript vê como Json genérico
+        interface RpcResponse {
+            success: boolean;
+            message: string;
+            inscricaoId?: string;
+            evento?: { nome: string; data_inicio: string; data_fim: string };
         }
 
-        console.log('Inscrição criada:', inscricaoData);
+        const rpcResult = data as unknown as RpcResponse;
 
-        // 6. Buscar dados do evento para retornar
-        const { data: eventoData } = await supabase
-            .from('eventos')
-            .select('nome, data_inicio, data_fim, local')
-            .eq('id', payload.evento_id)
-            .single();
+        // A procedure retorna exatamente o formato do objeto de resultado esperado
+        if (!rpcResult?.success) {
+            return { success: false, message: rpcResult?.message || 'Erro desconhecido' };
+        }
+
+        console.log('Inscrição criada atômicamente:', rpcResult);
 
         return {
             success: true,
-            message: 'Inscrição realizada com sucesso!',
-            inscricaoId: inscricaoData.id,
-            evento: eventoData || undefined,
+            message: rpcResult.message,
+            inscricaoId: rpcResult.inscricaoId,
+            evento: rpcResult.evento,
         };
+
     } catch (error: any) {
         console.error('Erro inesperado no registro:', error);
         return { success: false, message: 'Erro inesperado: ' + (error?.message || 'Tente novamente.') };

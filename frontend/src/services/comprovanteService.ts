@@ -67,15 +67,17 @@ export const comprovanteService = {
                 .getPublicUrl(filePath);
 
             // 5. Inserir registro no Banco de Dados
+            const payload = {
+                inscricao_id: inscricaoId.toString(),
+                url_storage: publicUrl,
+                path_storage: filePath,
+                tipo_mimetype: file.type,
+                upload_por: adminId || null // Se tiver auth user
+            };
+
             const { data: dbData, error: dbError } = await supabase
                 .from('comprovantes_inscricao')
-                .insert({
-                    inscricao_id: inscricaoId,
-                    url_storage: publicUrl,
-                    path_storage: filePath,
-                    tipo_mimetype: file.type,
-                    upload_por: adminId || null // Se tiver auth user
-                })
+                .insert([payload])
                 .select()
                 .single();
 
@@ -104,10 +106,13 @@ export const comprovanteService = {
      * Busca os comprovantes de uma inscrição específica
      */
     async getComprovantes(inscricaoId: string | number) {
+        // Ensure inscricaoId is a string for the query, especially if the DB column is UUID
+        const idToQuery = typeof inscricaoId === 'number' ? inscricaoId.toString() : inscricaoId;
+
         const { data, error } = await supabase
             .from('comprovantes_inscricao')
             .select('*')
-            .eq('inscricao_id', inscricaoId)
+            .eq('inscricao_id', idToQuery)
             .order('created_at', { ascending: false });
 
         if (error) {

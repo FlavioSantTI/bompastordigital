@@ -1,25 +1,33 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { ThemeProvider, CssBaseline, Box, CircularProgress } from '@mui/material';
+import { Suspense, lazy } from 'react';
 import theme from './theme';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Componentes Públicos
+// Componentes Públicos e de carregamento rápido
 import LandingPage from './components/LandingPage';
 import NewLandingPage from './components/NewLandingPage';
 import LoginPage from './components/admin/LoginPage';
 import RegisterPage from './components/admin/RegisterPage';
-
-// Componentes Protegidos (Usuário e Admin)
 import ParticipantDashboard from './components/ParticipantDashboard';
 import ClientLayout from './components/ClientLayout';
-import AdminLayout from './components/admin/AdminLayout';
-import DashboardPage from './components/admin/DashboardPage';
-import UpdatePasswordPage from './components/admin/UpdatePasswordPage';
-import DiocesesPage from './components/admin/DiocesesPage';
-import EventosPage from './components/admin/EventosPage';
-import InscricoesPage from './components/admin/InscricoesPage';
-import ReportsPage from './components/admin/ReportsPage';
+
+// Componentes Protegidos (Área Administrativa) - Lazy Loading
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
+const DashboardPage = lazy(() => import('./components/admin/DashboardPage'));
+const UpdatePasswordPage = lazy(() => import('./components/admin/UpdatePasswordPage'));
+const DiocesesPage = lazy(() => import('./components/admin/DiocesesPage'));
+const EventosPage = lazy(() => import('./components/admin/EventosPage'));
+const InscricoesPage = lazy(() => import('./components/admin/InscricoesPage'));
+const ReportsPage = lazy(() => import('./components/admin/ReportsPage'));
+
+// Fallback de Loading para as rotas Lazy
+const LazyLoader = () => (
+  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+    <CircularProgress color="primary" />
+  </Box>
+);
 
 function App() {
   return (
@@ -33,10 +41,13 @@ function App() {
             <Route path="/landing" element={<NewLandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/update-password" element={<UpdatePasswordPage />} />
+            <Route path="/update-password" element={
+              <Suspense fallback={<LazyLoader />}>
+                <UpdatePasswordPage />
+              </Suspense>
+            } />
 
-            {/* Rota Protegida: Área do Casal (Inscrição) - Requer Login (user ou admin) */}
-            {/* Rota Protegida: Área do Casal (Inscrição) - Requer Login (user ou admin) */}
+            {/* Rota Protegida: Área do Casal (Inscrição) */}
             <Route element={<ProtectedRoute />}>
               <Route path="/inscricao" element={
                 <ClientLayout>
@@ -47,7 +58,11 @@ function App() {
 
             {/* Rota Protegida: Área Administrativa - Requer Admin */}
             <Route element={<ProtectedRoute requireAdmin={true} />}>
-              <Route path="/admin" element={<AdminLayout />}>
+              <Route path="/admin" element={
+                <Suspense fallback={<LazyLoader />}>
+                  <AdminLayout />
+                </Suspense>
+              }>
                 <Route index element={<DashboardPage />} />
                 <Route path="dioceses" element={<DiocesesPage />} />
                 <Route path="eventos" element={<EventosPage />} />

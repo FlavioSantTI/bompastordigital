@@ -5,8 +5,8 @@ import { supabase } from '../../lib/supabase';
 
 interface Municipio {
     codigo_tom: number;
-    nome_ibge: string;
-    uf: string;
+    nome_ibge: string | null;
+    uf: string | null;
 }
 
 export default function LocationStep() {
@@ -15,7 +15,7 @@ export default function LocationStep() {
     const [loading, setLoading] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [selectedMunicipio, setSelectedMunicipio] = useState<Municipio | null>(null);
-    const [selectedDiocese, setSelectedDiocese] = useState<{ nome_completo: string, bispo: string } | null>(null);
+    const [selectedDiocese, setSelectedDiocese] = useState<{ nome_completo: string, bispo: string | null } | null>(null);
 
     const searchMunicipios = async (searchText: string) => {
         if (searchText.length < 2) {

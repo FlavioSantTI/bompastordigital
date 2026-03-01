@@ -33,24 +33,25 @@ interface Pessoa {
     cpf: string;
     nome: string;
     nascimento: string;
-    email?: string;
-    telefone?: string;
+    email?: string | null;
+    telefone?: string | null;
 }
 
 interface Inscricao {
-    id: number;
-    evento_id: number;
-    esposo_id: string;
-    esposa_id: string;
-    status?: string;
+    id: string; // no banco o id e UUID (string)
+    evento_id: number | null;
+    esposo_id: string | null;
+    esposa_id: string | null;
+    diocese_id?: number | null;
+    status?: string | null;
     dados_conjuntos?: any;
     created_at: string;
     evento?: {
         nome: string;
         data_inicio: string;
-    };
-    esposo?: Pessoa;
-    esposa?: Pessoa;
+    } | null;
+    esposo?: Pessoa | null;
+    esposa?: Pessoa | null;
 }
 
 interface Evento {
@@ -117,24 +118,24 @@ export default function InscricoesPage() {
                     const { data: evento } = await supabase
                         .from('eventos')
                         .select('nome, data_inicio')
-                        .eq('id', inscricao.evento_id)
+                        .eq('id', inscricao.evento_id || 0)
                         .single();
 
                     // Buscar esposo
                     const { data: esposo } = await supabase
                         .from('pessoas')
                         .select('*')
-                        .eq('id', inscricao.esposo_id)
+                        .eq('id', inscricao.esposo_id || '')
                         .single();
 
                     // Buscar esposa
                     const { data: esposa } = await supabase
                         .from('pessoas')
                         .select('*')
-                        .eq('id', inscricao.esposa_id)
+                        .eq('id', inscricao.esposa_id || '')
                         .single();
 
-                    return { ...inscricao, evento, esposo, esposa };
+                    return { ...inscricao, evento, esposo, esposa } as Inscricao;
                 })
             );
             setInscricoes(inscricoesCompletas);
@@ -170,7 +171,7 @@ export default function InscricoesPage() {
         }
     };
 
-    const handleConfirm = async (id: number, currentStatus: string) => {
+    const handleConfirm = async (id: string, currentStatus: string) => {
         const newStatus = currentStatus === 'confirmada' ? 'pendente' : 'confirmada';
 
         const { error } = await supabase
@@ -196,7 +197,7 @@ export default function InscricoesPage() {
         setOpenPagamentoDialog(true);
     };
 
-    const handleDelete = async (id: number, nomeEsposo: string) => {
+    const handleDelete = async (id: string, nomeEsposo: string) => {
         if (!confirm(`Tem certeza que deseja excluir a inscrição do casal ${nomeEsposo}?`)) {
             return;
         }
@@ -341,7 +342,7 @@ export default function InscricoesPage() {
                                                     label={inscricao.status === 'confirmada' ? 'Confirmada' : 'Pendente'}
                                                     color={inscricao.status === 'confirmada' ? 'success' : 'warning'}
                                                     size="small"
-                                                    onClick={() => handleConfirm(inscricao.id, inscricao.status || 'pendente')}
+                                                    onClick={() => handleConfirm(inscricao.id.toString(), inscricao.status || 'pendente')}
                                                     sx={{
                                                         cursor: 'pointer',
                                                         fontWeight: 'bold',

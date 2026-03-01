@@ -26,9 +26,9 @@ import { supabase } from '../../lib/supabase';
 interface Diocese {
     id: number;
     nome_completo: string;
-    bispo: string;
-    uf: string;
-    sede_id?: number;
+    bispo: string | null;
+    uf: string | null;
+    sede_id?: number | null;
 }
 
 const UF_OPTIONS = [
@@ -46,7 +46,7 @@ export default function DiocesesPage() {
     const [success, setSuccess] = useState('');
 
     // Form state
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{ nome_completo: string; bispo: string; uf: string; sede_id?: number | null }>({
         nome_completo: '',
         bispo: '',
         uf: '',
@@ -77,7 +77,8 @@ export default function DiocesesPage() {
             setFormData({
                 nome_completo: diocese.nome_completo,
                 bispo: diocese.bispo || '',
-                uf: diocese.uf,
+                uf: diocese.uf || '',
+                sede_id: diocese.sede_id || 0
             });
         } else {
             setEditingDiocese(null);

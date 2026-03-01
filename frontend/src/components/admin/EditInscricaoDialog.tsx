@@ -25,27 +25,27 @@ interface Pessoa {
     cpf: string;
     nome: string;
     nascimento: string;
-    email?: string;
-    telefone?: string;
+    email?: string | null;
+    telefone?: string | null;
 }
 
 interface Municipio {
     codigo_tom: number;
-    nome_ibge: string;
-    uf: string;
-    diocese_id?: number;
+    nome_ibge: string | null;
+    uf: string | null;
+    diocese_id?: number | null;
 }
 
 interface Inscricao {
-    id: number;
-    evento_id: number;
-    esposo_id: string;
-    esposa_id: string;
-    diocese_id?: number;
-    status?: string;
+    id: string; // no banco o id eh UUID
+    evento_id: number | null;
+    esposo_id: string | null;
+    esposa_id: string | null;
+    diocese_id?: number | null;
+    status?: string | null;
     dados_conjuntos?: any;
-    esposo?: Pessoa;
-    esposa?: Pessoa;
+    esposo?: Pessoa | null;
+    esposa?: Pessoa | null;
 }
 
 interface EditInscricaoDialogProps {
@@ -70,7 +70,8 @@ const PASTORAIS_OPCOES = [
 
 export default function EditInscricaoDialog({ open, inscricao, eventos, onClose, onSave }: EditInscricaoDialogProps) {
     const [error, setError] = useState('');
-    const [eventoId, setEventoId] = useState(0);
+    const [, setSaving] = useState(false);
+    const [eventoId, setEventoId] = useState<number | null>(null);
 
     // Dados do Esposo
     const [esposoNome, setEsposoNome] = useState('');
@@ -105,40 +106,41 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
     const [observacoes, setObservacoes] = useState('');
 
     useEffect(() => {
+        if (!inscricao) return;
+        setEventoId(inscricao.evento_id || null);
+
+        // Esposo
+        setEsposoNome(inscricao?.esposo?.nome || '');
+        setEsposoCpf(inscricao?.esposo?.cpf || '');
+        setEsposoNascimento(inscricao?.esposo?.nascimento || '');
+        setEsposoEmail(inscricao?.esposo?.email || '');
+        setEsposoTelefone(inscricao?.esposo?.telefone || '');
+
+        // Esposa
+        setEsposaNome(inscricao?.esposa?.nome || '');
+        setEsposaCpf(inscricao?.esposa?.cpf || '');
+        setEsposaNascimento(inscricao?.esposa?.nascimento || '');
+        setEsposaEmail(inscricao?.esposa?.email || '');
+        setEsposaTelefone(inscricao?.esposa?.telefone || '');
+
+        loadCurrentMunicipio(inscricao?.diocese_id || undefined);
+
+        // Dados Pastorais/Conjugais
+        setParoquia(inscricao.dados_conjuntos?.paroquia || '');
+        setParoquia(inscricao?.dados_conjuntos?.paroquia || '');
+        setParoco(inscricao?.dados_conjuntos?.paroco || '');
+        setEndereco(inscricao?.dados_conjuntos?.endereco || '');
+        setNovaUniao(inscricao?.dados_conjuntos?.nova_uniao || false);
+        setMembroPasfam(inscricao?.dados_conjuntos?.membro_pasfam || false);
+        setPastorais(inscricao?.dados_conjuntos?.pastorais || []);
+        setNecessitaHospedagem(inscricao?.dados_conjuntos?.necessita_hospedagem || false);
         if (inscricao) {
-            setEventoId(inscricao.evento_id);
-
-            // Esposo
-            setEsposoNome(inscricao.esposo?.nome || '');
-            setEsposoCpf(inscricao.esposo?.cpf || '');
-            setEsposoNascimento(inscricao.esposo?.nascimento || '');
-            setEsposoEmail(inscricao.esposo?.email || '');
-            setEsposoTelefone(inscricao.esposo?.telefone || '');
-
-            // Esposa
-            setEsposaNome(inscricao.esposa?.nome || '');
-            setEsposaCpf(inscricao.esposa?.cpf || '');
-            setEsposaNascimento(inscricao.esposa?.nascimento || '');
-            setEsposaEmail(inscricao.esposa?.email || '');
-            setEsposaTelefone(inscricao.esposa?.telefone || '');
-
-            // Carregar município atual
-            loadCurrentMunicipio(inscricao.diocese_id);
-
-            // Dados Pastorais/Conjugais
-            setParoquia(inscricao.dados_conjuntos?.paroquia || '');
-            setParoco(inscricao.dados_conjuntos?.paroco || '');
-            setEndereco(inscricao.dados_conjuntos?.endereco || '');
-            setNovaUniao(inscricao.dados_conjuntos?.nova_uniao || false);
-            setMembroPasfam(inscricao.dados_conjuntos?.membro_pasfam || false);
-            setPastorais(inscricao.dados_conjuntos?.pastorais || []);
-            setNecessitaHospedagem(inscricao.dados_conjuntos?.necessita_hospedagem || false);
             setRestricoesAlimentares(inscricao.dados_conjuntos?.restricoes_alimentares || '');
             setObservacoes(inscricao.dados_conjuntos?.observacoes || '');
         }
     }, [inscricao]);
 
-    const loadCurrentMunicipio = async (dioceseId?: number) => {
+    const loadCurrentMunicipio = async (dioceseId?: number | null) => {
         if (!dioceseId) return;
 
         // Buscar município pela diocese
@@ -171,7 +173,7 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
         setLoadingMunicipios(false);
     };
 
-    const fetchDiocese = async (dioceseId?: number) => {
+    const fetchDiocese = async (dioceseId?: number | null) => {
         if (!dioceseId) {
             setDioceseNome('');
             return;
@@ -192,8 +194,10 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
         if (!inscricao) return;
 
         setError('');
-
         try {
+            setSaving(true);
+            setError('');
+
             // 1. Atualizar dados do esposo
             const { error: esposoError } = await supabase
                 .from('pessoas')
@@ -203,7 +207,7 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
                     email: esposoEmail,
                     telefone: esposoTelefone.replace(/\D/g, ''),
                 })
-                .eq('id', inscricao.esposo_id);
+                .eq('id', inscricao?.esposo_id || '');
 
             if (esposoError) throw esposoError;
 
@@ -216,7 +220,7 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
                     email: esposaEmail,
                     telefone: esposaTelefone.replace(/\D/g, ''),
                 })
-                .eq('id', inscricao.esposa_id);
+                .eq('id', inscricao?.esposa_id || '');
 
             if (esposaError) throw esposaError;
 
@@ -238,7 +242,7 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
                         observacoes: observacoes || null,
                     },
                 })
-                .eq('id', inscricao.id);
+                .eq('id', inscricao?.id);
 
             if (inscricaoError) throw inscricaoError;
 
@@ -247,8 +251,14 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
         } catch (err: any) {
             console.error('Erro ao salvar:', err);
             setError('Erro ao salvar alterações: ' + err.message);
+        } finally {
+            setSaving(false);
         }
     };
+
+    if (!inscricao) {
+        return null; // Devolver conteúdo nulo caso a inscrição seja inexistente
+    }
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth scroll="paper">
@@ -386,7 +396,7 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
                                 onChange={(_, newValue) => {
                                     setSelectedMunicipio(newValue);
                                     if (newValue) {
-                                        fetchDiocese(newValue.diocese_id);
+                                        fetchDiocese(newValue.diocese_id || undefined);
                                     } else {
                                         setDioceseNome('');
                                     }

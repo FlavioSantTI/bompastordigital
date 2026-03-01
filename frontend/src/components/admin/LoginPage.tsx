@@ -114,10 +114,6 @@ export default function LoginPage() {
                     </Typography>
                 </Box>
 
-                <Typography variant="h6" gutterBottom sx={{ mb: 3, fontWeight: 600 }}>
-                    Acesse sua Conta
-                </Typography>
-
                 {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
                 <form onSubmit={handleLogin}>
@@ -201,7 +197,7 @@ export default function LoginPage() {
 
                 <Box sx={{ mt: 4 }}>
                     <Typography variant="caption" color="text.secondary">
-                        © 2026 Bom Pastor Digital
+                        © 2026 Bom Pastor Digital - Versão 1.0
                     </Typography>
                 </Box>
             </Paper>

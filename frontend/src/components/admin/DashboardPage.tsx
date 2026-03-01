@@ -17,8 +17,9 @@ import {
 } from '@mui/material';
 import {
     Church,
-    Event,
+    Event as EventIcon,
     People,
+    Group,
     CheckCircle,
     TrendingUp,
 } from '@mui/icons-material';
@@ -35,7 +36,7 @@ interface EventoRecente {
     id: number;
     nome: string;
     data_inicio: string;
-    status: string;
+    status: string | null;
     inscricoes_count: number;
     vagas: number;
 }
@@ -48,6 +49,7 @@ export default function DashboardPage() {
         eventosAbertos: 0,
     });
     const [eventosRecentes, setEventosRecentes] = useState<EventoRecente[]>([]);
+    const [ultimasInscricoes, setUltimasInscricoes] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -82,6 +84,39 @@ export default function DashboardPage() {
                 .order('data_inicio', { ascending: false })
                 .limit(5);
 
+            // Carregar últimas 5 inscrições detalhadas
+            const { data: inscricoesRecentes } = await supabase
+                .from('inscricoes')
+                .select(`
+                    id, 
+                    created_at, 
+                    status,
+                    esposo_id,
+                    esposa_id,
+                    evento_id
+                `)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            if (inscricoesRecentes) {
+                // Fetch de dependências (Pessoas e Eventos) para o grid final
+                const inscricoesDetalhes = await Promise.all(
+                    inscricoesRecentes.map(async (insc) => {
+                        const { data: esposa } = await supabase.from('pessoas').select('nome').eq('id', insc.esposa_id?.toString() || '').single();
+                        const { data: esposo } = await supabase.from('pessoas').select('nome').eq('id', insc.esposo_id?.toString() || '').single();
+                        const { data: evento } = await supabase.from('eventos').select('nome').eq('id', insc.evento_id ? Number(insc.evento_id) : 0).single();
+
+                        return {
+                            ...insc,
+                            esposo,
+                            esposa,
+                            evento
+                        };
+                    })
+                );
+                setUltimasInscricoes(inscricoesDetalhes);
+            }
+
             if (eventos) {
                 // Contar inscrições para cada evento
                 const eventosComContagem = await Promise.all(
@@ -107,7 +142,8 @@ export default function DashboardPage() {
         }
     };
 
-    const formatDate = (dateStr: string) => {
+    const formatDate = (dateStr?: string | null) => {
+        if (!dateStr) return '-';
         return new Date(dateStr).toLocaleDateString('pt-BR');
     };
 
@@ -187,7 +223,7 @@ export default function DashboardPage() {
                                         Eventos
                                     </Typography>
                                 </Box>
-                                <Event sx={{ fontSize: 48, opacity: 0.3 }} />
+                                <EventIcon sx={{ fontSize: 48, opacity: 0.3 }} />
                             </Box>
                         </CardContent>
                     </Card>
@@ -272,7 +308,7 @@ export default function DashboardPage() {
                                         <TableRow key={evento.id}>
                                             <TableCell>{evento.nome}</TableCell>
                                             <TableCell>{formatDate(evento.data_inicio)}</TableCell>
-                                            <TableCell>{getStatusChip(evento.status)}</TableCell>
+                                            <TableCell>{getStatusChip(evento.status || 'aberto')}</TableCell>
                                             <TableCell>
                                                 {evento.inscricoes_count} / {evento.vagas}
                                             </TableCell>
@@ -309,6 +345,48 @@ export default function DashboardPage() {
                     </Table>
                 </TableContainer>
             </Paper>
+            <Box mt={4}>
+                <Typography variant="h6" gutterBottom fontWeight="bold" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Group /> Últimas Inscrições
+                </Typography>
+                <TableContainer component={Paper} elevation={0} variant="outlined">
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Casal</TableCell>
+                                <TableCell>Evento</TableCell>
+                                <TableCell>Data/Hora</TableCell>
+                                <TableCell>Status</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {ultimasInscricoes?.map((inscricao: any) => (
+                                <TableRow key={inscricao.id} hover>
+                                    <TableCell>
+                                        <Typography variant="body2" fontWeight="bold">
+                                            {inscricao.esposo?.nome?.split(' ')[0] || 'N/A'} & {inscricao.esposa?.nome?.split(' ')[0] || 'N/A'}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>{inscricao.evento?.nome || 'N/A'}</TableCell>
+                                    <TableCell>{formatDate(inscricao.created_at)}</TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={inscricao.status === 'confirmada' ? 'Confirmada' : 'Pendente'}
+                                            color={inscricao.status === 'confirmada' ? 'success' : 'warning'}
+                                            size="small"
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                            {(!ultimasInscricoes || ultimasInscricoes.length === 0) && (
+                                <TableRow>
+                                    <TableCell colSpan={4} align="center">Nenhuma inscrição recente</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Box>
         </Box>
     );
 }

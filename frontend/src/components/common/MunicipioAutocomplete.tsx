@@ -4,8 +4,8 @@ import { supabase } from '../../lib/supabase';
 
 interface Municipio {
     codigo_tom: number;
-    nome_ibge: string;
-    uf: string;
+    nome_ibge: string | null;
+    uf: string | null;
 }
 
 interface MunicipioAutocompleteProps {

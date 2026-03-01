@@ -30,14 +30,14 @@ interface Evento {
     nome: string;
     data_inicio: string;
     data_fim: string;
-    hora_inicio?: string;
-    hora_fim?: string;
-    municipio_id: number;
+    hora_inicio?: string | null;
+    hora_fim?: string | null;
+    municipio_id: number | null;
     vagas: number;
-    status: string;
+    status: string | null;
     municipio?: {
-        nome_ibge: string;
-        uf: string;
+        nome_ibge: string | null;
+        uf: string | null;
     };
 }
 
@@ -81,7 +81,7 @@ export default function EventosPage() {
 
         if (error) {
             setError('Erro ao carregar eventos: ' + error.message);
-            setEventos([]);
+            setEventos((data || []) as unknown as Evento[]);
         } else {
             // Buscar informações dos municípios
             const eventosComLocal = await Promise.all(
@@ -98,7 +98,17 @@ export default function EventosPage() {
                     return evento;
                 })
             );
-            setEventos(eventosComLocal);
+            const finalEventos = eventosComLocal.map((evt: any) => {
+                const mun = evt.municipio;
+                return {
+                    ...evt,
+                    municipio: mun ? {
+                        nome_ibge: mun.nome_ibge || null,
+                        uf: mun.uf || null
+                    } : undefined
+                };
+            }) as Evento[];
+            setEventos(finalEventos);
         }
         setLoading(false);
     };
@@ -112,9 +122,9 @@ export default function EventosPage() {
                 data_fim: evento.data_fim,
                 hora_inicio: evento.hora_inicio || '',
                 hora_fim: evento.hora_fim || '',
-                municipio_id: evento.municipio_id,
+                municipio_id: evento.municipio_id || 0,
                 vagas: evento.vagas,
-                status: evento.status,
+                status: evento.status || 'aberto',
             });
         } else {
             setEditingEvento(null);
@@ -304,7 +314,7 @@ export default function EventosPage() {
                                             <div>{formatDate(evento.data_inicio)} - {formatDate(evento.data_fim)}</div>
                                             {(evento.hora_inicio || evento.hora_fim) && (
                                                 <Typography variant="caption" color="text.secondary">
-                                                    {formatTime(evento.hora_inicio)} - {formatTime(evento.hora_fim)}
+                                                    {formatTime(evento.hora_inicio || undefined)} - {formatTime(evento.hora_fim || undefined)}
                                                 </Typography>
                                             )}
                                         </TableCell>
@@ -312,7 +322,7 @@ export default function EventosPage() {
                                             {evento.municipio ? `${evento.municipio.nome_ibge} - ${evento.municipio.uf}` : '-'}
                                         </TableCell>
                                         <TableCell>{evento.vagas}</TableCell>
-                                        <TableCell>{getStatusChip(evento.status)}</TableCell>
+                                        <TableCell>{getStatusChip(evento.status || 'aberto')}</TableCell>
                                         <TableCell align="right">
                                             <IconButton
                                                 color="primary"
