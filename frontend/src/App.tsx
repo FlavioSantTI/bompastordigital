@@ -21,6 +21,8 @@ const DiocesesPage = lazy(() => import('./components/admin/DiocesesPage'));
 const EventosPage = lazy(() => import('./components/admin/EventosPage'));
 const InscricoesPage = lazy(() => import('./components/admin/InscricoesPage'));
 const ReportsPage = lazy(() => import('./components/admin/ReportsPage'));
+const UsuariosPage = lazy(() => import('./components/admin/UsuariosPage'));
+const CrachasPage = lazy(() => import('./components/admin/CrachasPage'));
 
 // Fallback de Loading para as rotas Lazy
 const LazyLoader = () => (
@@ -68,6 +70,8 @@ function App() {
                 <Route path="eventos" element={<EventosPage />} />
                 <Route path="inscricoes" element={<InscricoesPage />} />
                 <Route path="relatorios" element={<ReportsPage />} />
+                <Route path="crachas" element={<CrachasPage />} />
+                <Route path="usuarios" element={<UsuariosPage />} />
               </Route>
             </Route>
 

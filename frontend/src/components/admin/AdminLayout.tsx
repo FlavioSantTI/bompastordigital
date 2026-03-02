@@ -1,5 +1,5 @@
 import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
-import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment } from '@mui/icons-material';
+import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment, BadgeOutlined } from '@mui/icons-material';
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,6 +12,8 @@ const menuItems = [
     { text: 'Eventos', icon: <Event />, path: '/admin/eventos' },
     { text: 'Inscrições', icon: <People />, path: '/admin/inscricoes' },
     { text: 'Relatórios & Fichas', icon: <Assessment />, path: '/admin/relatorios' },
+    { text: 'Crachás', icon: <BadgeOutlined />, path: '/admin/crachas' },
+    { text: 'Usuários', icon: <AccountCircle />, path: '/admin/usuarios' },
 ];
 
 export default function AdminLayout() {
@@ -44,13 +46,16 @@ export default function AdminLayout() {
                 <Toolbar>
                     <Typography variant="h6" noWrap component="div" sx={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, flexGrow: 1 }}>
                         BOM PASTOR DIGITAL - Administração
+                        <Typography component="span" sx={{ ml: 1.5, fontSize: '0.7rem', fontWeight: 'bold', color: '#FF1744', verticalAlign: 'super' }}>
+                            v2.0
+                        </Typography>
                     </Typography>
 
                     {user && (
                         <div>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
-                                    {user.email}
+                                    {user.user_metadata?.nome || user.user_metadata?.full_name || user.email}
                                 </Typography>
                                 <Tooltip title="Minha Conta">
                                     <IconButton

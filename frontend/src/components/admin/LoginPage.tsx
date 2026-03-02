@@ -197,7 +197,7 @@ export default function LoginPage() {
 
                 <Box sx={{ mt: 4 }}>
                     <Typography variant="caption" color="text.secondary">
-                        © 2026 Bom Pastor Digital - Versão 1.0
+                        © 2026 Bom Pastor Digital - Versão 2.0
                     </Typography>
                 </Box>
             </Paper>

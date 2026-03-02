@@ -58,7 +58,7 @@ export default function CoupleStep() {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {user?.email && (
                 <Alert severity="info" sx={{ mb: 2 }}>
-                    Logado como <strong>{user.email}</strong>. Para agilizar, identifique-se:
+                    Logado como <strong>{user.user_metadata?.nome || user.user_metadata?.full_name || user.email}</strong>. Para agilizar, identifique-se:
                     <Box sx={{ mt: 1, display: 'flex', gap: 2 }}>
                         <Button variant="outlined" size="small" onClick={() => fillEmail('esposo.email')}>
                             Sou o Esposo

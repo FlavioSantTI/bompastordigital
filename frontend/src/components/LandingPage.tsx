@@ -53,6 +53,12 @@ export default function LandingPage() {
                     </Button>
                 </Box>
             </Paper>
+
+            <Box sx={{ mt: 4, textAlign: 'center' }}>
+                <Typography variant="caption" color="text.secondary">
+                    © 2026 Bom Pastor Digital - Versão 2.0
+                </Typography>
+            </Box>
         </Box>
     );
 }

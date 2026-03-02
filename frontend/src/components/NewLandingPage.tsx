@@ -368,7 +368,7 @@ export default function NewLandingPage() {
                         }}
                     />
                     <Typography variant="caption" sx={{ opacity: 0.5 }}>
-                        © 2026 Bom Pastor Digital. Todos os direitos reservados.
+                        © 2026 Bom Pastor Digital - Versão 2.0. Todos os direitos reservados.
                     </Typography>
                 </Container>
             </Box>

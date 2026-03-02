@@ -56,7 +56,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
                                             whiteSpace: 'nowrap'
                                         }}
                                     >
-                                        {user.email}
+                                        {user.user_metadata?.nome || user.user_metadata?.full_name || user.email}
                                     </Typography>
                                 </Box>
                                 <Button
