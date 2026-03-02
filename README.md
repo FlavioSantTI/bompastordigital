@@ -22,10 +22,10 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 |--------|------------|
 | **Frontend** | React 18 + TypeScript + Vite |
 | **UI Library** | Material UI (MUI) v5 |
-| **Backend** | Supabase (PostgreSQL + Auth + Storage) |
+| **Backend** | Supabase (PostgreSQL + Auth + Storage + Edge Functions) |
 | **Autenticação** | Supabase Auth com Magic Link |
 | **Estilização** | Emotion (CSS-in-JS) |
-| **Exportação** | jsPDF + jspdf-autotable + xlsx |
+| **Geração de PDF** | @react-pdf/renderer (crachás) + jsPDF + xlsx (relatórios) |
 | **QR Code** | qrcode.react |
 
 ---
@@ -44,6 +44,11 @@ bom-pastor-digital/
 │   │   │   │   ├── EventosPage.tsx
 │   │   │   │   ├── InscricoesPage.tsx
 │   │   │   │   ├── ReportsPage.tsx
+│   │   │   │   ├── UsuariosPage.tsx       # v2.0
+│   │   │   │   ├── ManageUserDialog.tsx   # v2.0
+│   │   │   │   ├── CrachasPage.tsx        # v2.0
+│   │   │   │   ├── CrachaTemplate.tsx     # v2.0
+│   │   │   │   ├── CrachaPreviewDialog.tsx # v2.0
 │   │   │   │   ├── LoginPage.tsx
 │   │   │   │   ├── UpdatePasswordPage.tsx
 │   │   │   │   └── ForgotPasswordDialog.tsx
@@ -75,7 +80,12 @@ bom-pastor-digital/
 │   ├── seed.sql                     # Dados iniciais
 │   ├── fix_rls_jwt.sql              # Políticas RLS com JWT
 │   ├── fix_admin_permissions.sql
-│   └── secure_inscricoes.sql
+│   ├── secure_inscricoes.sql
+│   ├── rpc_registrar_casal.sql      # RPC transacional
+│   ├── rpc_admin_users.sql          # v2.0
+│   ├── rpc_inscritos_para_cracha.sql # v2.0
+│   └── functions/
+│       └── admin-users/index.ts     # Edge Function (Deno) v2.0
 ├── PRD.md                           # Documento de Requisitos
 └── README.md                        # Este arquivo
 ```
@@ -147,6 +157,7 @@ Acesse: `http://localhost:5173`
 | 1.2 | 06/02/2026 | Módulo de relatórios (PDF/Excel), recuperação de senha via SMTP, correções de RLS |
 | 1.3 | 07/02/2026 | Área do participante (Dashboard), visualização de status e inscrição |
 | 1.4 | 09/02/2026 | Nova landing page, PDF de confirmação, PIX no dashboard, botão Sair visível, seleção de evento |
+| **2.0** | **02/03/2026** | **Gerenciamento de Usuários (CRUD via Edge Function Deno), Módulo de Crachás (PDF A4 casal com @react-pdf/renderer), exibição de nome do usuário logado, versionamento v2.0 global** |
 
 ---
 
@@ -154,7 +165,7 @@ Acesse: `http://localhost:5173`
 
 | Tipo | Acesso | Como Criar |
 |------|--------|------------|
-| **Admin** | Painel completo (`/admin/*`) | Supabase Dashboard > Auth > Users > Editar `user_metadata`: `{"role": "admin"}` |
+| **Admin** | Painel completo (`/admin/*`) | Via tela Gerenciar Usuários (`/admin/usuarios`) com role `admin` |
 | **Casal** | Área do participante | Criado automaticamente na inscrição |
 
 ---
@@ -184,6 +195,21 @@ Acesse: `http://localhost:5173`
 - [x] Visualização de comprovantes
 - [x] Alteração de status (Pendente/Confirmada)
 
+### ✅ Gerenciamento de Usuários (v2.0)
+- [x] CRUD completo de usuários via Edge Function (Deno)
+- [x] Atribuição de roles (Admin / Usuário Padrão)
+- [x] Criação segura server-side com `SERVICE_ROLE_KEY` invisível ao frontend
+- [x] Deleção com confirmação e cascata em `public.pessoas`
+- [x] Exibição do nome do usuário logado na barra superior
+
+### ✅ Módulo de Crachás (v2.0)
+- [x] Seleção de evento e listagem de inscritos com checkbox
+- [x] Busca por nome, paróquia ou diocese
+- [x] Geração de PDF A4 com 2 crachás por folha (esposo + esposa)
+- [x] Marcas de corte para impressão profissional
+- [x] Logo da organização, nome do evento e rodapé personalizados
+- [x] Download e impressão direta pelo navegador
+
 ### ✅ Módulo de Relatórios
 - [x] Exportação para Excel (.xlsx)
 - [x] Fichas de inscrição em PDF (uma página por casal)
@@ -193,6 +219,7 @@ Acesse: `http://localhost:5173`
 - [x] Row Level Security (RLS) em todas as tabelas
 - [x] Políticas baseadas em JWT metadata
 - [x] Bucket privado para comprovantes
+- [x] Edge Functions com validação de token e role admin (v2.0)
 
 ### ✅ Área do Participante
 - [x] Dashboard com resumo da inscrição
@@ -209,8 +236,9 @@ Acesse: `http://localhost:5173`
 |------------|---------|
 | Alta | Upload de comprovante pelo participante |
 | Alta | Notificações por email (confirmação de inscrição) |
-| Média | Geração de crachás em PDF |
-| Média | Check-in no dia do evento (QR Code) |
+| Alta | Deploy online (Vercel + domínio customizado) |
+| Média | Área do Participante — edição de dados cadastrais |
+| Média | Check-in no dia do evento (validação via QR Code do crachá) |
 | Baixa | Dashboard com gráficos (Chart.js) |
 | Baixa | Multi-idioma (i18n) |
 
