@@ -1,6 +1,6 @@
 # ✝️ Bom Pastor Digital
 
-**Sistema de Gestão de Inscrições para Encontros de Casais com Cristo (ECC) e Eventos Pastorais**
+**Sistema de Gestão de Inscrições para Encontros de Casais de Nova União  e Eventos Pastorais**
 
 Uma plataforma moderna desenvolvida para facilitar o processo de inscrição, gestão financeira e organização de eventos pastorais.
 
