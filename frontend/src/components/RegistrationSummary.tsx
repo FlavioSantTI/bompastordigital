@@ -1,11 +1,11 @@
-import { Box, Paper, Typography, Chip, Button, Divider, useTheme, Alert } from '@mui/material';
+import { Box, Paper, Typography, Chip, Button, Divider, useTheme, Alert, IconButton, Tooltip } from '@mui/material';
 import { Event, AccessTime, LocationOn, Person, WhatsApp, Edit, ContentCopy, Pix } from '@mui/icons-material';
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { PIX_CONFIG } from '../types';
 
 interface RegistrationSummaryProps {
-    inscricao: any; // Tiparia melhor se tivesse os types globais, vou usar any por praticidade agora e garantir compatibilidade
+    inscricao: any;
     onEdit: () => void;
 }
 
@@ -47,270 +47,246 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
     };
 
     return (
-        <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4 }}>
-            {/* Cabeçalho do Cartão */}
+        <Box sx={{ maxWidth: 600, mx: 'auto', mt: 3 }}>
             <Paper
-                elevation={3}
+                elevation={2}
                 sx={{
                     overflow: 'hidden',
-                    borderRadius: 3,
+                    borderRadius: 2,
                     border: '1px solid',
                     borderColor: 'divider'
                 }}
             >
+                {/* Cabeçalho */}
                 <Box
                     sx={{
                         bgcolor: 'primary.main',
                         color: 'white',
-                        p: 3,
+                        px: 2.5,
+                        py: 2,
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'flex-start'
                     }}
                 >
                     <Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                            <Event fontSize="small" />
-                            <Typography variant="overline" sx={{ opacity: 0.9, letterSpacing: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                            <Event sx={{ fontSize: 16 }} />
+                            <Typography variant="overline" sx={{ opacity: 0.9, fontSize: '0.65rem', letterSpacing: 1 }}>
                                 ENCONTRO DE CASAIS
                             </Typography>
                         </Box>
-                        <Typography variant="h5" fontWeight="bold">
+                        <Typography variant="subtitle1" fontWeight="bold" sx={{ lineHeight: 1.3 }}>
                             {evento?.nome || 'Nome do Evento Indisponível'}
                         </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1, opacity: 0.9 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 0.5, opacity: 0.9 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <AccessTime fontSize="small" />
-                                <Typography variant="body2">
-                                    {formatDate(evento?.data_inicio)}
-                                </Typography>
+                                <AccessTime sx={{ fontSize: 14 }} />
+                                <Typography variant="caption">{formatDate(evento?.data_inicio)}</Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <LocationOn fontSize="small" />
-                                <Typography variant="body2">
-                                    {inscricao.dioceses?.nome_completo || 'Local à definir'}
-                                </Typography>
+                                <LocationOn sx={{ fontSize: 14 }} />
+                                <Typography variant="caption">{inscricao.dioceses?.nome_completo || 'Local à definir'}</Typography>
                             </Box>
                         </Box>
                     </Box>
                     <Chip
                         label={(inscricao.status || 'Pendente').toUpperCase()}
                         color={getStatusColor(inscricao.status) as any}
-                        sx={{ fontWeight: 'bold', bgcolor: 'white', color: 'primary.main' }}
+                        size="small"
+                        sx={{ fontWeight: 'bold', bgcolor: 'white', color: 'primary.main', fontSize: '0.7rem' }}
                     />
                 </Box>
 
-                {/* Corpo do Cartão */}
-                <Box sx={{ p: 4 }}>
-                    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
+                {/* Corpo */}
+                <Box sx={{ px: 2.5, py: 2 }}>
+                    {/* Dados do Casal */}
+                    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
                         <Box sx={{ flex: 1 }}>
-                            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Person fontSize="small" /> DADOS DO ESPOSO
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                                <Person sx={{ fontSize: 14 }} /> ESPOSO
                             </Typography>
-                            <Typography variant="h6" color="primary.dark">
+                            <Typography variant="body2" fontWeight="bold" color="primary.dark">
                                 {esposo?.nome}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="caption" color="text.secondary">
                                 CPF: {esposo?.cpf}
                             </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, color: 'success.main' }}>
-                                <WhatsApp fontSize="small" />
-                                <Typography variant="body2" fontWeight="medium">
-                                    {esposo?.telefone || 'Não informado'}
-                                </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'success.main' }}>
+                                <WhatsApp sx={{ fontSize: 14 }} />
+                                <Typography variant="caption">{esposo?.telefone || 'Não informado'}</Typography>
                             </Box>
                         </Box>
 
-                        <Box sx={{ flex: 1, borderLeft: { md: `1px solid ${theme.palette.divider}` }, pl: { md: 4 } }}>
-                            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Person fontSize="small" /> DADOS DA ESPOSA
+                        <Box sx={{ flex: 1, borderLeft: { sm: `1px solid ${theme.palette.divider}` }, pl: { sm: 2 } }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                                <Person sx={{ fontSize: 14 }} /> ESPOSA
                             </Typography>
-                            <Typography variant="h6" color="secondary.main">
+                            <Typography variant="body2" fontWeight="bold" color="secondary.main">
                                 {esposa?.nome}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="caption" color="text.secondary">
                                 CPF: {esposa?.cpf}
                             </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, color: 'success.main' }}>
-                                <WhatsApp fontSize="small" />
-                                <Typography variant="body2" fontWeight="medium">
-                                    {esposa?.telefone || 'Não informado'}
-                                </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'success.main' }}>
+                                <WhatsApp sx={{ fontSize: 14 }} />
+                                <Typography variant="caption">{esposa?.telefone || 'Não informado'}</Typography>
                             </Box>
                         </Box>
                     </Box>
 
-                    <Divider sx={{ my: 3 }} />
+                    <Divider sx={{ my: 2 }} />
 
-                    {/* Seção de Pagamento PIX - Mostrar quando status é pendente */}
+                    {/* Seção PIX — quando pendente */}
                     {inscricao.status === 'pendente' && (
-                        <Box sx={{ mb: 3 }}>
+                        <Box sx={{ mb: 2 }}>
+                            {/* Alerta com valor integrado */}
                             <Alert
                                 severity="warning"
                                 icon={<Pix />}
                                 sx={{
-                                    mb: 2,
-                                    border: '2px solid',
+                                    mb: 1.5,
+                                    py: 0.5,
+                                    border: '1px solid',
                                     borderColor: 'warning.main',
-                                    bgcolor: '#FFF8E1'
+                                    bgcolor: '#FFF8E1',
+                                    '& .MuiAlert-message': { width: '100%' }
                                 }}
                             >
-                                <Typography variant="subtitle2" fontWeight="bold">
-                                    💰 Pagamento Pendente — Confirme sua participação!
-                                </Typography>
-                            </Alert>
-
-                            <Paper
-                                variant="outlined"
-                                sx={{
-                                    p: 3,
-                                    bgcolor: '#FAFAFA',
-                                    borderRadius: 2
-                                }}
-                            >
-                                {/* Valor */}
-                                <Box sx={{ textAlign: 'center', mb: 2 }}>
-                                    <Typography variant="subtitle2" color="text.secondary">
-                                        Valor da Inscrição
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Typography variant="body2" fontWeight="bold">
+                                        Pagamento Pendente
                                     </Typography>
-                                    <Typography variant="h4" fontWeight="bold" color="primary.main">
+                                    <Typography variant="h6" fontWeight="bold" color="primary.main">
                                         R$ 100,00
                                     </Typography>
                                 </Box>
+                            </Alert>
 
-                                <Divider sx={{ my: 2 }} />
-
-                                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'center' }}>
-                                    {/* QR Code */}
-                                    <Box sx={{ textAlign: 'center', flexShrink: 0 }}>
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                                            📱 Escaneie o QR Code
-                                        </Typography>
-                                        <Box sx={{
-                                            display: 'inline-block',
-                                            p: 1.5,
-                                            bgcolor: 'white',
-                                            borderRadius: 2,
-                                            border: '2px solid',
-                                            borderColor: 'primary.main'
-                                        }}>
-                                            <QRCodeSVG
-                                                value={PIX_CONFIG.pixCopiaCola}
-                                                size={150}
-                                                level="M"
-                                            />
-                                        </Box>
-                                    </Box>
-
-                                    {/* Dados do PIX */}
-                                    <Box sx={{ flex: 1, width: '100%' }}>
-                                        {/* Chave PIX */}
-                                        <Box sx={{ mb: 2 }}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                Chave PIX ({PIX_CONFIG.chaveTipo})
-                                            </Typography>
-                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 0.5 }}>
-                                                <Typography
-                                                    variant="body2"
-                                                    fontWeight="bold"
-                                                    sx={{
-                                                        flex: 1, py: 1, px: 1.5,
-                                                        bgcolor: 'white',
-                                                        borderRadius: 1,
-                                                        border: '1px solid',
-                                                        borderColor: 'grey.300',
-                                                        fontFamily: 'monospace'
-                                                    }}
-                                                >
-                                                    {PIX_CONFIG.chave}
-                                                </Typography>
-                                                <Button
-                                                    size="small"
-                                                    variant="outlined"
-                                                    startIcon={<ContentCopy />}
-                                                    onClick={handleCopyChave}
-                                                    color={copiedChave ? 'success' : 'primary'}
-                                                >
-                                                    {copiedChave ? 'Copiado!' : 'Copiar'}
-                                                </Button>
-                                            </Box>
-                                        </Box>
-
-                                        {/* Beneficiário */}
-                                        <Typography variant="caption" color="text.secondary">
-                                            Beneficiário
-                                        </Typography>
-                                        <Typography variant="body2" fontWeight="bold" sx={{ mb: 2 }}>
-                                            {PIX_CONFIG.beneficiario}
-                                        </Typography>
-
-                                        {/* Copia e Cola */}
-                                        <Box sx={{ mb: 2 }}>
-                                            <Typography variant="caption" color="text.secondary">
-                                                PIX Copia e Cola
-                                            </Typography>
-                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 0.5 }}>
-                                                <Typography
-                                                    variant="caption"
-                                                    sx={{
-                                                        flex: 1, py: 1, px: 1.5,
-                                                        bgcolor: 'white',
-                                                        borderRadius: 1,
-                                                        border: '1px solid',
-                                                        borderColor: 'grey.300',
-                                                        fontFamily: 'monospace',
-                                                        wordBreak: 'break-all',
-                                                        maxHeight: '60px',
-                                                        overflow: 'auto'
-                                                    }}
-                                                >
-                                                    {PIX_CONFIG.pixCopiaCola}
-                                                </Typography>
-                                                <Button
-                                                    size="small"
-                                                    variant="outlined"
-                                                    startIcon={<ContentCopy />}
-                                                    onClick={handleCopyCola}
-                                                    color={copiedCola ? 'success' : 'primary'}
-                                                >
-                                                    {copiedCola ? 'Copiado!' : 'Copiar'}
-                                                </Button>
-                                            </Box>
-                                        </Box>
-                                    </Box>
-                                </Box>
-
-                                <Divider sx={{ my: 2 }} />
-
-                                {/* WhatsApp para enviar comprovante */}
-                                <Box sx={{ textAlign: 'center' }}>
-                                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                                        Após pagar, envie o comprovante via WhatsApp:
+                            {/* QR Code + Dados PIX */}
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: { xs: 'column', sm: 'row' },
+                                gap: 2,
+                                alignItems: { xs: 'center', sm: 'flex-start' },
+                                p: 2,
+                                bgcolor: '#FAFAFA',
+                                borderRadius: 1.5,
+                                border: '1px solid',
+                                borderColor: 'grey.200'
+                            }}>
+                                {/* QR Code */}
+                                <Box sx={{ textAlign: 'center', flexShrink: 0 }}>
+                                    <Typography variant="caption" fontWeight="bold" sx={{ display: 'block', mb: 0.5 }}>
+                                        📱 QR Code PIX
                                     </Typography>
                                     <Box sx={{
                                         display: 'inline-block',
-                                        p: 1.5,
+                                        p: 1,
                                         bgcolor: 'white',
-                                        borderRadius: 2,
-                                        border: '3px solid #FF5722',
-                                        boxShadow: '0 0 0 3px rgba(255, 87, 34, 0.15)'
+                                        borderRadius: 1,
+                                        border: '1px solid',
+                                        borderColor: 'primary.main'
                                     }}>
+                                        <QRCodeSVG value={PIX_CONFIG.pixCopiaCola} size={120} level="M" />
+                                    </Box>
+                                </Box>
+
+                                {/* Dados */}
+                                <Box sx={{ flex: 1, width: '100%', minWidth: 0 }}>
+                                    {/* Chave PIX */}
+                                    <Typography variant="caption" color="text.secondary">
+                                        Chave PIX ({PIX_CONFIG.chaveTipo})
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', mb: 1 }}>
                                         <Typography
-                                            variant="h6"
+                                            variant="body2"
                                             fontWeight="bold"
-                                            sx={{ color: '#D32F2F', fontFamily: 'monospace' }}
+                                            sx={{
+                                                flex: 1,
+                                                py: 0.5, px: 1,
+                                                bgcolor: 'white',
+                                                borderRadius: 0.5,
+                                                border: '1px solid',
+                                                borderColor: 'grey.300',
+                                                fontFamily: 'monospace',
+                                                fontSize: '0.8rem',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap'
+                                            }}
                                         >
+                                            {PIX_CONFIG.chave}
+                                        </Typography>
+                                        <Tooltip title={copiedChave ? '✅ Copiado!' : 'Copiar chave'}>
+                                            <IconButton
+                                                size="small"
+                                                onClick={handleCopyChave}
+                                                color={copiedChave ? 'success' : 'primary'}
+                                            >
+                                                <ContentCopy sx={{ fontSize: 16 }} />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Box>
+
+                                    {/* Beneficiário */}
+                                    <Typography variant="caption" color="text.secondary">Beneficiário</Typography>
+                                    <Typography variant="body2" fontWeight="bold" sx={{ mb: 1, fontSize: '0.8rem' }}>
+                                        {PIX_CONFIG.beneficiario}
+                                    </Typography>
+
+                                    {/* Copia e Cola */}
+                                    <Typography variant="caption" color="text.secondary">PIX Copia e Cola</Typography>
+                                    <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', mb: 1 }}>
+                                        <Typography
+                                            variant="caption"
+                                            sx={{
+                                                flex: 1,
+                                                py: 0.5, px: 1,
+                                                bgcolor: 'white',
+                                                borderRadius: 0.5,
+                                                border: '1px solid',
+                                                borderColor: 'grey.300',
+                                                fontFamily: 'monospace',
+                                                fontSize: '0.65rem',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap'
+                                            }}
+                                        >
+                                            {PIX_CONFIG.pixCopiaCola}
+                                        </Typography>
+                                        <Tooltip title={copiedCola ? '✅ Copiado!' : 'Copiar código'}>
+                                            <IconButton
+                                                size="small"
+                                                onClick={handleCopyCola}
+                                                color={copiedCola ? 'success' : 'primary'}
+                                            >
+                                                <ContentCopy sx={{ fontSize: 16 }} />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Box>
+
+                                    {/* WhatsApp inline */}
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                                        <WhatsApp sx={{ fontSize: 16, color: '#25D366' }} />
+                                        <Typography variant="caption" color="text.secondary">
+                                            Envie o comprovante:
+                                        </Typography>
+                                        <Typography variant="body2" fontWeight="bold" sx={{ color: '#D32F2F', fontFamily: 'monospace', fontSize: '0.85rem' }}>
                                             {PIX_CONFIG.whatsappContato}
                                         </Typography>
                                     </Box>
                                 </Box>
-                            </Paper>
+                            </Box>
                         </Box>
                     )}
 
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                    {/* Botão Editar */}
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <Button
                             variant="outlined"
+                            size="small"
                             startIcon={<Edit />}
                             onClick={onEdit}
                             disabled={inscricao.status === 'confirmado'}
@@ -322,9 +298,9 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
                 </Box>
             </Paper>
 
-            <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Box sx={{ mt: 1.5, textAlign: 'center' }}>
                 <Typography variant="caption" color="text.secondary">
-                    Número de Protocolo: #{inscricao.id}
+                    Protocolo: #{inscricao.id}
                 </Typography>
             </Box>
         </Box>

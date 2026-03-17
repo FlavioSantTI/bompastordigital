@@ -91,7 +91,7 @@ export default function ParticipantDashboard() {
                     </Typography>
                 </Box>
 
-                <RegistrationStepper />
+                <RegistrationStepper onSuccess={() => window.location.reload()} />
             </Container>
         );
     }

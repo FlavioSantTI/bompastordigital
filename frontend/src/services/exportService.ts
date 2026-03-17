@@ -23,15 +23,13 @@ interface DadosExportacao {
     };
     endereco: {
         cidade: string;
-        bairro: string;
-        rua: string;
-        numero: string;
+        completo: string;
     };
-    casamento: {
-        data?: string;
-        igreja?: string;
-        paroquia?: string;
+    pastoral: {
+        paroquia: string;
+        diocese: string;
     };
+    observacoes: string;
     status: string;
     data_inscricao: string;
 }
@@ -55,9 +53,10 @@ export const exportService = {
             'Esposa - Email': item.esposa.email || '-',
             'Esposa - Nascimento': new Date(item.esposa.nascimento).toLocaleDateString(),
             'Cidade': item.endereco.cidade,
-            'Bairro': item.endereco.bairro,
-            'Casamento - Data': item.casamento.data ? new Date(item.casamento.data).toLocaleDateString() : '-',
-            'Casamento - Igreja': item.casamento.igreja || '-'
+            'Endereço': item.endereco.completo,
+            'Diocese': item.pastoral.diocese,
+            'Paróquia': item.pastoral.paroquia,
+            'Observações': item.observacoes
         }));
 
         const worksheet = XLSX.utils.json_to_sheet(linhas);
@@ -141,14 +140,14 @@ export const exportService = {
 
             // Bloco Endereço
             desenharBloco('ENDEREÇO RESIDENCIAL', [
-                `Rua: ${inscricao.endereco.rua}, Nº ${inscricao.endereco.numero}`,
-                `Bairro: ${inscricao.endereco.bairro}   |   Cidade: ${inscricao.endereco.cidade}`
+                `Cidade: ${inscricao.endereco.cidade}`,
+                `Endereço Completo: ${inscricao.endereco.completo}`
             ]);
 
-            // Bloco Casamento
-            desenharBloco('DADOS DO MATRIMÔNIO', [
-                `Data Casamento: ${inscricao.casamento.data ? new Date(inscricao.casamento.data).toLocaleDateString() : '-'}`,
-                `Igreja: ${inscricao.casamento.igreja || '-'}   |   Paróquia: ${inscricao.casamento.paroquia || '-'}`
+            // Bloco Pastoral e Variados
+            desenharBloco('DADOS PASTORAIS E EXTRA', [
+                `Diocese: ${inscricao.pastoral.diocese}   |   Paróquia: ${inscricao.pastoral.paroquia}`,
+                `Observações: ${inscricao.observacoes}`
             ]);
 
             // Rodapé

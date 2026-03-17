@@ -26,6 +26,7 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 | **Autenticação** | Supabase Auth com Magic Link |
 | **Estilização** | Emotion (CSS-in-JS) |
 | **Geração de PDF** | @react-pdf/renderer (crachás) + jsPDF + xlsx (relatórios) |
+| **Icons** | Material Icons + Lucide React |
 | **QR Code** | qrcode.react |
 
 ---
@@ -158,6 +159,7 @@ Acesse: `http://localhost:5173`
 | 1.3 | 07/02/2026 | Área do participante (Dashboard), visualização de status e inscrição |
 | 1.4 | 09/02/2026 | Nova landing page, PDF de confirmação, PIX no dashboard, botão Sair visível, seleção de evento |
 | **2.0** | **02/03/2026** | **Gerenciamento de Usuários (CRUD via Edge Function Deno), Módulo de Crachás (PDF A4 casal com @react-pdf/renderer), exibição de nome do usuário logado, versionamento v2.0 global** |
+| **2.1** | **17/03/2026** | **Refatoração de Localização (Diocese e Cidade independentes), salvamento da Cidade no banco, nova Coluna de Localização unificada no Admin (Inscrições e Crachás), Melhoria nos Relatórios Excel/PDF com dados estruturados e Redirecionamento Automático pós-inscrição.** |
 
 ---
 
@@ -177,7 +179,9 @@ Acesse: `http://localhost:5173`
 - [x] Seleção de evento disponível
 - [x] Formulário multi-etapas (6 passos)
 - [x] Validação de CPF em tempo real
-- [x] Busca automática de municípios (IBGE)
+- [x] Seleção independente de Diocese e Cidade (Nova lógica v2.1)
+- [x] Busca de municípios via API do IBGE
+- [x] Salvamento persistente da Cidade nos dados do casal
 - [x] Geração de PDF de confirmação com dados PIX
 - [x] Persistência no Supabase
 
@@ -211,8 +215,8 @@ Acesse: `http://localhost:5173`
 - [x] Download e impressão direta pelo navegador
 
 ### ✅ Módulo de Relatórios
-- [x] Exportação para Excel (.xlsx)
-- [x] Fichas de inscrição em PDF (uma página por casal)
+- [x] Exportação para Excel (.xlsx) com colunas de Localização, Diocese e Observações
+- [x] Fichas de inscrição em PDF atualizadas com dados pastorais e endereço completo
 - [x] Lista de presença simplificada (PDF)
 
 ### ✅ Segurança

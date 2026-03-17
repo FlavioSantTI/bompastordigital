@@ -58,12 +58,13 @@ export default function ReviewStep() {
                 <Paper variant="outlined" sx={{ p: 2 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                         <Box>
+                            <Typography variant="body2" color="text.secondary">Diocese</Typography>
+                            <Typography variant="body1" fontWeight="bold" sx={{ mb: 1 }}>
+                                {(data.contato as any).diocese_nome || 'Não selecionada'}
+                            </Typography>
                             <Typography variant="body2" color="text.secondary">Município</Typography>
                             <Typography variant="body1" fontWeight="bold">
                                 {(data.contato as any).municipio_nome || 'Não selecionado'}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                                (Diocese detectada automaticamente)
                             </Typography>
                         </Box>
 

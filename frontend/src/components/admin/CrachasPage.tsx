@@ -72,7 +72,8 @@ export default function CrachasPage() {
     const filtrados = participantes.filter((p) =>
         p.nome?.toLowerCase().includes(busca.toLowerCase()) ||
         p.paroquia?.toLowerCase().includes(busca.toLowerCase()) ||
-        p.diocese?.toLowerCase().includes(busca.toLowerCase())
+        p.diocese?.toLowerCase().includes(busca.toLowerCase()) ||
+        p.cidade?.toLowerCase().includes(busca.toLowerCase())
     );
 
     // ── Seleção de checkbox ───────────────────────────
@@ -186,8 +187,7 @@ export default function CrachasPage() {
                             </TableCell>
                             <TableCell><strong>Nome</strong></TableCell>
                             <TableCell><strong>Tipo</strong></TableCell>
-                            <TableCell><strong>Paróquia</strong></TableCell>
-                            <TableCell><strong>Diocese</strong></TableCell>
+                            <TableCell><strong>Localização</strong></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -235,13 +235,14 @@ export default function CrachasPage() {
                                             />
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant="body2" color="text.secondary">
-                                                {p.paroquia || '—'}
+                                            <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                📍 {p.cidade || '—'}
                                             </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2" color="text.secondary">
-                                                {p.diocese || '—'}
+                                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                                🏛️ {p.diocese || '—'}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                                ⛪ {p.paroquia || '—'}
                                             </Typography>
                                         </TableCell>
                                     </TableRow>

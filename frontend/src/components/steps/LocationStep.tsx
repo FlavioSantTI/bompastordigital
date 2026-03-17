@@ -1,6 +1,6 @@
-import { Box, TextField, Typography, Autocomplete, CircularProgress, Paper } from '@mui/material';
+import { Box, TextField, Typography, Autocomplete, CircularProgress } from '@mui/material';
 import { useFormContext, Controller } from 'react-hook-form';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 
 interface Municipio {
@@ -9,13 +9,29 @@ interface Municipio {
     uf: string | null;
 }
 
+interface Diocese {
+    id: number;
+    nome_completo: string;
+}
+
 export default function LocationStep() {
     const { control, formState: { errors }, register, setValue } = useFormContext();
     const [options, setOptions] = useState<Municipio[]>([]);
     const [loading, setLoading] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [selectedMunicipio, setSelectedMunicipio] = useState<Municipio | null>(null);
-    const [selectedDiocese, setSelectedDiocese] = useState<{ nome_completo: string, bispo: string | null } | null>(null);
+    const [dioceses, setDioceses] = useState<Diocese[]>([]);
+
+    useEffect(() => {
+        const loadDioceses = async () => {
+            const { data } = await supabase
+                .from('dioceses')
+                .select('id, nome_completo')
+                .order('nome_completo');
+            if (data) setDioceses(data);
+        };
+        loadDioceses();
+    }, []);
 
     const searchMunicipios = async (searchText: string) => {
         if (searchText.length < 2) {
@@ -32,30 +48,6 @@ export default function LocationStep() {
 
         setOptions(data || []);
         setLoading(false);
-    };
-
-    const fetchDiocese = async (municipioId: number) => {
-        const { data: municipioData } = await supabase
-            .from('municipios')
-            .select('diocese_id')
-            .eq('codigo_tom', municipioId)
-            .single();
-
-        if (municipioData?.diocese_id) {
-            const { data: dioceseData } = await supabase
-                .from('dioceses')
-                .select('nome_completo, bispo')
-                .eq('id', municipioData.diocese_id)
-                .single();
-
-            if (dioceseData) {
-                setSelectedDiocese(dioceseData);
-            } else {
-                setSelectedDiocese(null);
-            }
-        } else {
-            setSelectedDiocese(null);
-        }
     };
 
     return (
@@ -80,10 +72,8 @@ export default function LocationStep() {
                             // Salvar também o nome para exibição posterior
                             if (newValue) {
                                 setValue('contato.municipio_nome', `${newValue.nome_ibge} - ${newValue.uf}`);
-                                fetchDiocese(newValue.codigo_tom);
                             } else {
                                 setValue('contato.municipio_nome', '');
-                                setSelectedDiocese(null);
                             }
                         }}
                         inputValue={inputValue}
@@ -117,32 +107,41 @@ export default function LocationStep() {
                 )}
             />
 
-            {selectedDiocese && (
-                <Paper variant="outlined" sx={{ p: 2, bgcolor: 'success.50', borderColor: 'success.main' }}>
-                    <Typography variant="subtitle2" color="success.dark">
-                        ✅ Diocese Identificada Automaticamente:
-                    </Typography>
-                    <Typography variant="body1" fontWeight="bold">
-                        {selectedDiocese.nome_completo}
-                    </Typography>
-                    {selectedDiocese.bispo && (
-                        <Typography variant="body2" color="text.secondary">
-                            Bispo: {selectedDiocese.bispo}
-                        </Typography>
-                    )}
-                </Paper>
-            )}
+            <Controller
+                name="contato.diocese_id"
+                control={control}
+                render={({ field }) => (
+                    <Autocomplete
+                        options={dioceses}
+                        getOptionLabel={(option) => option.nome_completo}
+                        value={dioceses.find(d => d.id === field.value) || null}
+                        onChange={(_, newValue) => {
+                            field.onChange(newValue?.id || 0);
+                            setValue('contato.diocese_nome', newValue?.nome_completo || '');
+                        }}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Diocese *"
+                                error={!!(errors.contato as any)?.diocese_id}
+                                helperText={(errors.contato as any)?.diocese_id?.message}
+                                placeholder="Selecione a sua diocese"
+                            />
+                        )}
+                    />
+                )}
+            />
 
             {/* Campo de Endereço Completo */}
             <TextField
                 fullWidth
                 multiline
                 rows={3}
-                label="Endereço Completo *"
+                label="Endereço (Rua, Número, Bairro, CEP) *"
                 {...register('dados_conjuntos.endereco')}
                 error={!!(errors.dados_conjuntos as any)?.endereco}
                 helperText={(errors.dados_conjuntos as any)?.endereco?.message}
-                placeholder="Rua, número, complemento, bairro, CEP"
+                placeholder="Exemplo: Rua das Acácias, 123, Bairro Bela Vista, 77000-000"
             />
         </Box>
     );

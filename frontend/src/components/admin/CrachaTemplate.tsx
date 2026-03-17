@@ -23,6 +23,7 @@ export interface CrachaData {
     nome: string;
     paroquia: string | null;
     diocese: string | null;
+    cidade: string | null;
     evento: string;
 }
 
@@ -263,6 +264,10 @@ function Cracha({ p }: { p: CrachaData }) {
                     <View style={s.infoRow}>
                         <Text style={s.infoLabel}>Diocese</Text>
                         <Text style={s.infoValue}>{p.diocese || '—'}</Text>
+                    </View>
+                    <View style={s.infoRow}>
+                        <Text style={s.infoLabel}>Cidade</Text>
+                        <Text style={s.infoValue}>{p.cidade || '—'}</Text>
                     </View>
                 </View>
             </View>

@@ -52,6 +52,7 @@ interface Inscricao {
     } | null;
     esposo?: Pessoa | null;
     esposa?: Pessoa | null;
+    diocese?: { nome_completo?: string, nome?: string };
 }
 
 interface Evento {
@@ -135,7 +136,18 @@ export default function InscricoesPage() {
                         .eq('id', inscricao.esposa_id || '')
                         .single();
 
-                    return { ...inscricao, evento, esposo, esposa } as Inscricao;
+                    // Buscar diocese
+                    let diocese = null;
+                    if (inscricao.diocese_id) {
+                        const { data } = await supabase
+                            .from('dioceses')
+                            .select('*')
+                            .eq('id', inscricao.diocese_id)
+                            .single();
+                        diocese = data;
+                    }
+
+                    return { ...inscricao, evento, esposo, esposa, diocese } as Inscricao;
                 })
             );
             setInscricoes(inscricoesCompletas);
@@ -279,10 +291,10 @@ export default function InscricoesPage() {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell><strong>Evento</strong></TableCell>
                                 <TableCell><strong>Esposo</strong></TableCell>
                                 <TableCell><strong>Esposa</strong></TableCell>
                                 <TableCell><strong>Contato</strong></TableCell>
+                                <TableCell><strong>Localização</strong></TableCell>
                                 <TableCell><strong>Status</strong></TableCell>
                                 <TableCell><strong>Data Inscrição</strong></TableCell>
                                 <TableCell align="right"><strong>Ações</strong></TableCell>
@@ -298,16 +310,6 @@ export default function InscricoesPage() {
                             ) : (
                                 inscricoes.map((inscricao) => (
                                     <TableRow key={inscricao.id}>
-                                        <TableCell>
-                                            <Typography variant="body2" fontWeight="medium">
-                                                {inscricao.evento?.nome || '-'}
-                                            </Typography>
-                                            {inscricao.evento?.data_inicio && (
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {formatDate(inscricao.evento.data_inicio)}
-                                                </Typography>
-                                            )}
-                                        </TableCell>
                                         <TableCell>
                                             <Typography variant="body2">
                                                 {inscricao.esposo?.nome || '-'}
@@ -335,6 +337,17 @@ export default function InscricoesPage() {
                                                     📱 {inscricao.esposo.telefone}
                                                 </Typography>
                                             )}
+                                        </TableCell>
+                                        <TableCell sx={{ minWidth: 200, maxWidth: 300 }}>
+                                            <Typography variant="body2" fontWeight="medium" noWrap title={inscricao.dados_conjuntos?.cidade || inscricao.dados_conjuntos?.endereco || '-'}>
+                                                📍 {inscricao.dados_conjuntos?.cidade || inscricao.dados_conjuntos?.endereco || '-'}
+                                            </Typography>
+                                            <Typography variant="body2" fontSize="0.85rem" noWrap title={inscricao.diocese?.nome_completo || '-'}>
+                                                🏛️ {inscricao.diocese?.nome_completo || '-'}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }} title={inscricao.dados_conjuntos?.paroquia || '-'}>
+                                                ⛪ {inscricao.dados_conjuntos?.paroquia || '-'}
+                                            </Typography>
                                         </TableCell>
                                         <TableCell>
                                             <Tooltip title="Clique para alterar o status">

@@ -48,10 +48,15 @@ BEGIN
         telefone = EXCLUDED.telefone
     RETURNING id INTO v_esposa_id;
 
-    -- 3. Obter a Diocese com base no Município
-    SELECT diocese_id INTO v_diocese_id 
-    FROM municipios 
-    WHERE codigo_tom = (payload->'contato'->>'municipio_id')::INTEGER;
+    -- 3. Obter a Diocese (agora pode vir do front-end)
+    v_diocese_id := (payload->'contato'->>'diocese_id')::INTEGER;
+    
+    -- Fallback caso não venha no payload (compatibilidade com versões anteriores)
+    IF v_diocese_id IS NULL THEN
+        SELECT diocese_id INTO v_diocese_id 
+        FROM municipios 
+        WHERE codigo_tom = (payload->'contato'->>'municipio_id')::INTEGER;
+    END IF;
 
     -- 4. Inserir a Inscrição (verifica se já não existe antes para este evento)
     IF EXISTS (

@@ -1,10 +1,10 @@
 # Product Requirements Document (PRD)
 ## Bom Pastor Digital - Sistema de Gestão Pastoral
 
-**Versão**: 1.4  
-**Data**: 09/02/2026  
+**Versão**: 2.1  
+**Data**: 17/03/2026  
 **Autor**: Flávio Santiago  
-**Status**: Em Desenvolvimento Ativo
+**Status**: Estável / Evolução Ativa
 
 ---
 
@@ -99,11 +99,11 @@ Todas as tabelas possuem **Row Level Security** habilitado:
 - Telefone individual
 - Religião
 
-**Etapa 2 - Localização**
-- Estado (select)
-- Município (autocomplete via IBGE API)
-- Bairro
-- Rua e número
+**Etapa 2 - Localização (v2.1)**
+- Diocese (Seleção por lista oficial)
+- Estado (Seleção automática ou manual)
+- Município (Autocomplete via IBGE - Independente da Diocese)
+- Endereço Completo (Rua, Número, Bairro em campo único para flexibilidade)
 
 **Etapa 3 - Dados Conjuntos**
 - Data do casamento
@@ -282,6 +282,8 @@ Remetente: contato@bompastordigital.com.br
 | 1.2 | 06/02/2026 | Módulo de relatórios (PDF/Excel), recuperação de senha via SMTP, correções de RLS |
 | 1.3 | 07/02/2026 | Área do participante (Dashboard), visualização de status e inscrição |
 | 1.4 | 09/02/2026 | Nova landing page, PDF de confirmação, PIX no dashboard, botão Sair visível, seleção de evento |
+| 2.0 | 02/03/2026 | Gerenciamento de Usuários (Edge Functions), Módulo de Crachás, Identificação de Admin logado |
+| 2.1 | 17/03/2026 | Refatoração de Localização (Cidades e Dioceses), Melhoria em Relatórios Exportáveis e UI de Inscrições |
 
 ---
 
@@ -293,4 +295,4 @@ Remetente: contato@bompastordigital.com.br
 
 ---
 
-*Documento atualizado em 09/02/2026*
+*Documento atualizado em 17/03/2026*

@@ -12,6 +12,7 @@ RETURNS TABLE(
     nome         TEXT,
     paroquia     TEXT,
     diocese      TEXT,
+    cidade       TEXT,    -- Nova coluna para a cidade do casal
     evento       TEXT     -- Nome do evento para o cabeçalho do crachá
 )
 LANGUAGE sql
@@ -25,6 +26,7 @@ AS $$
         p.nome         AS nome,
         (i.dados_conjuntos->>'paroquia')::TEXT AS paroquia,
         d.nome_completo AS diocese,
+        (i.dados_conjuntos->>'cidade')::TEXT AS cidade,
         e.nome          AS evento
     FROM inscricoes i
     JOIN pessoas  p ON p.id = i.esposo_id
@@ -42,6 +44,7 @@ AS $$
         p.nome         AS nome,
         (i.dados_conjuntos->>'paroquia')::TEXT AS paroquia,
         d.nome_completo AS diocese,
+        (i.dados_conjuntos->>'cidade')::TEXT AS cidade,
         e.nome          AS evento
     FROM inscricoes i
     JOIN pessoas  p ON p.id = i.esposa_id

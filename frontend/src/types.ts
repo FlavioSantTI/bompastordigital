@@ -14,6 +14,7 @@ export interface DadosConjuntos {
     paroquia: string;
     paroco: string;
     endereco: string;
+    cidade?: string;
     nova_uniao: boolean;
     membro_pasfam: boolean;
     pastorais?: string[];
@@ -23,7 +24,10 @@ export interface DadosConjuntos {
 }
 
 export interface Contato {
+    diocese_id?: number;
+    diocese_nome?: string;
     municipio_id: number;
+    municipio_nome?: string;
 }
 
 export interface RegistrationData {

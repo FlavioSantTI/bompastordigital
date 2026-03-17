@@ -38,6 +38,8 @@ const registrationSchema = z.object({
         telefone: z.string().min(15, 'Telefone inválido'),
     }),
     contato: z.object({
+        diocese_id: z.number().min(1, 'Diocese obrigatória'),
+        diocese_nome: z.string().optional(),
         municipio_id: z.number().min(1, 'Município obrigatório'),
         municipio_nome: z.string().optional(),
     }),
@@ -45,6 +47,7 @@ const registrationSchema = z.object({
         paroquia: z.string().min(3, 'Paróquia obrigatória'),
         paroco: z.string().min(3, 'Nome do pároco obrigatório'),
         endereco: z.string().min(10, 'Endereço obrigatório'),
+        cidade: z.string().optional(),
         nova_uniao: z.boolean(),
         membro_pasfam: z.boolean(),
         pastorais: z.array(z.string()).optional(),
@@ -56,7 +59,11 @@ const registrationSchema = z.object({
 
 type RegistrationData = z.infer<typeof registrationSchema>;
 
-export default function RegistrationStepper() {
+interface RegistrationStepperProps {
+    onSuccess?: () => void;
+}
+
+export default function RegistrationStepper({ onSuccess }: RegistrationStepperProps) {
     const { user } = useAuth();
     const [activeStep, setActiveStep] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -65,7 +72,7 @@ export default function RegistrationStepper() {
         evento_id: 0,
         esposo: { nome: '', cpf: '', nascimento: '', email: '', telefone: '' },
         esposa: { nome: '', cpf: '', nascimento: '', email: '', telefone: '' },
-        contato: { municipio_id: 0 },
+        contato: { diocese_id: 0, municipio_id: 0 },
         dados_conjuntos: {
             paroquia: '',
             paroco: '',
@@ -123,6 +130,10 @@ export default function RegistrationStepper() {
 
             const result = await registerCouple({
                 ...data,
+                dados_conjuntos: {
+                    ...data.dados_conjuntos,
+                    cidade: data.contato.municipio_nome
+                },
                 evento_id: data.evento_id,
                 user_id: user?.id,
             });
@@ -161,8 +172,12 @@ export default function RegistrationStepper() {
                 message += '\n\n💰 Veja as informações de pagamento em "Minhas Inscrições".';
 
                 alert(message);
-                methods.reset();
-                setActiveStep(0);
+                if (onSuccess) {
+                    onSuccess();
+                } else {
+                    methods.reset();
+                    setActiveStep(0);
+                }
             } else {
                 alert(`❌ ${result.message}`);
             }

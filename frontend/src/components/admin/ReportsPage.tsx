@@ -60,7 +60,8 @@ export default function ReportsPage() {
                     *,
                     evento:eventos(nome),
                     esposo:pessoas!esposo_id(*),
-                    esposa:pessoas!esposa_id(*)
+                    esposa:pessoas!esposa_id(*),
+                    diocese:dioceses!diocese_id(nome_completo)
                 `)
                 .eq('evento_id', selectedEvento);
 
@@ -90,16 +91,14 @@ export default function ReportsPage() {
                     telefone: insc.esposa?.telefone,
                 },
                 endereco: {
-                    cidade: insc.dados_conjuntos?.endereco?.cidade || '-',
-                    bairro: insc.dados_conjuntos?.endereco?.bairro || '-',
-                    rua: insc.dados_conjuntos?.endereco?.rua || '-',
-                    numero: insc.dados_conjuntos?.endereco?.numero || '-',
+                    cidade: insc.dados_conjuntos?.cidade || '-',
+                    completo: insc.dados_conjuntos?.endereco || '-',
                 },
-                casamento: {
-                    data: insc.dados_conjuntos?.casamento?.data,
-                    igreja: insc.dados_conjuntos?.casamento?.igreja,
-                    paroquia: insc.dados_conjuntos?.casamento?.paroquia,
+                pastoral: {
+                    paroquia: insc.dados_conjuntos?.paroquia || '-',
+                    diocese: insc.diocese?.nome_completo || '-',
                 },
+                observacoes: insc.dados_conjuntos?.observacoes || '-',
                 status: insc.status || 'pendente',
                 data_inscricao: insc.created_at
             }));
