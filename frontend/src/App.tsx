@@ -10,6 +10,7 @@ import LoginPage from './components/admin/LoginPage';
 import RegisterPage from './components/admin/RegisterPage';
 import ParticipantDashboard from './components/ParticipantDashboard';
 import ClientLayout from './components/ClientLayout';
+import AgendaRedirect from './components/AgendaRedirect';
 
 import AdminLayout from './components/admin/AdminLayout';
 import DashboardPage from './components/admin/DashboardPage';
@@ -56,7 +57,8 @@ function App() {
               <AuthRedirect />
             } />
             <Route path="/landing" element={<NewLandingPage />} />
-            <Route path="/agenda/:eventoId" element={<CronogramaPublico />} />
+            <Route path="/cronograma/:eventoId" element={<CronogramaPublico />} />
+            <Route path="/agenda" element={<AgendaRedirect />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/update-password" element={<UpdatePasswordPage />} />
