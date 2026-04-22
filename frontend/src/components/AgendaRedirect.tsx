@@ -13,8 +13,8 @@ export default function AgendaRedirect() {
     useEffect(() => {
         async function buscarEventoAtivo() {
             try {
-                // Busca o evento que está aberto ou o mais recente ativo
-                const { data, error } = await supabase
+                // 1. Tenta buscar o evento que está explicitamente ATIVO
+                let { data, error } = await supabase
                     .from('eventos')
                     .select('id')
                     .eq('ativo', true)
@@ -22,8 +22,21 @@ export default function AgendaRedirect() {
                     .limit(1)
                     .single();
 
+                // 2. Se não encontrar um ativo, busca o último evento qualquer cadastrado
                 if (error || !data) {
-                    console.warn('Nenhum evento ativo encontrado para o link /agenda');
+                    const { data: lastEvent, error: lastError } = await supabase
+                        .from('eventos')
+                        .select('id')
+                        .order('data_inicio', { ascending: false })
+                        .limit(1)
+                        .single();
+                    
+                    data = lastEvent;
+                    error = lastError;
+                }
+
+                if (error || !data) {
+                    console.warn('Nenhum evento encontrado para o link /agenda');
                     navigate('/', { replace: true });
                     return;
                 }

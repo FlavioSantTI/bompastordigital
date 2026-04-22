@@ -174,7 +174,8 @@ Acesse: `http://localhost:5173`
 | **3.7** | **12/04/2026** | **Dashboard Analítico com gráficos Recharts (Pizza: status e tipo, Barras: inscrições por evento com gradientes), Tabela Pivot Diocese × Tipo (Casal/Individual) com heatmap visual, correção crítica de dados faltantes em relatórios (inscrições individuais excluídas por INNER JOIN do Supabase), paginação automática em todos os relatórios PDF (Lista de Presença, Lista Geral, Fichas), Lista de Presença com uma pessoa por linha em ordem alfabética, e Lista Geral enriquecida com colunas de Contato e Tipo.** |
 | **4.0** | **21/04/2026** | **Módulo de Cronograma do Evento: Gestão dinâmica de Salas e Atividades, Categorias Dinâmicas no banco (com nomes, cores e ícones customizados), Suporte a ícones de imagem (PNG) da pasta pública, Grid de Horários administrativo com "Ajuste Magnético" de continuidade, Timeline Pública para participantes, e Exportação do Cronograma (PDF/Excel).** |
 | **4.1** | **21/04/2026** | **Novo Relatório: Lista de Presença por Diocese (Individualizado com quebra de página automática no PDF e XLS), inclusão de campo para Assinatura, exportação XLS com colunas simplificadas (#, Diocese, Nome, Tipo, Assinatura) e feedback visual de carregamento (Backdrop com Circular Progress).** |
-| **4.2** | **21/04/2026** | **Estabilização Crítica: Implementação de Seletores Nativos (native: true) para máxima confiabilidade em Drawers, design "Premium" para cards de atividade (Labels de Categoria, Preview de Descrição e visual de Rascunho pontilhado), correção de contraste nos botões de download e remoção da restrição de categorias no banco de dados.** |
+| **4.2** | **21/04/2026** | **Estabilização Crítica: Implementação de Seletores Nativos (native: true), design Premium para cards e visual de rascunho.** |
+| **4.3** | **21/04/2026** | **Link Amigável /agenda: Redirecionamento inteligente para o cronograma do evento ativo.** |
 
 ---
 
