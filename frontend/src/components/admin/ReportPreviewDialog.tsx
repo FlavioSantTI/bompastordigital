@@ -7,13 +7,13 @@ import { useState } from 'react';
 import { Download, Close, CloudUpload } from '@mui/icons-material';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import { Backdrop } from '@mui/material';
-import { ListaPresencaTemplate, FichasInscricaoTemplate, ListaGeralTemplate, ListaPresencaDioceseTemplate } from './ReportTemplates';
+import { ListaPresencaTemplate, FichasInscricaoTemplate, ListaGeralTemplate, ListaPresencaDioceseTemplate, CrachasEmBrancoTemplate } from './ReportTemplates';
 import CrachaTemplate, { type CrachaData } from './CrachaTemplate';
 import { type DadosExportacao, exportService } from '../../services/exportService';
 
 interface ReportPreviewDialogProps {
     open: boolean;
-    tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese';
+    tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco';
     dados: DadosExportacao[];
     tituloEvento: string;
     onClose: () => void;
@@ -45,13 +45,16 @@ export default function ReportPreviewDialog({
         if (tipo === 'lista_presenca_diocese') {
             return <ListaPresencaDioceseTemplate dados={dados} tituloEvento={tituloEvento} />;
         }
+        if (tipo === 'crachas_branco') {
+            return <CrachasEmBrancoTemplate />;
+        }
         
         // Mapeamento para Crachás
         const crachaParticipants: CrachaData[] = [];
         dados.forEach(d => {
             crachaParticipants.push({
                 inscricao_id: d.id,
-                tipo: 'esposo',
+                tipo: d.tipo === 'individual' ? 'individual' : 'esposo',
                 nome: d.esposo.nome,
                 paroquia: d.pastoral.paroquia,
                 diocese: d.pastoral.diocese,
@@ -80,6 +83,7 @@ export default function ReportPreviewDialog({
             case 'fichas': return 'Pré-visualização: Fichas de Inscrição';
             case 'crachas': return 'Pré-visualização: Crachás do Evento';
             case 'lista_presenca_diocese': return 'Pré-visualização: Lista de Presença por Diocese';
+            case 'crachas_branco': return 'Pré-visualização: Crachás em Branco';
             default: return 'Pré-visualização';
         }
     };

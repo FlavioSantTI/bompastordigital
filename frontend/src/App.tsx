@@ -23,6 +23,7 @@ import UsuariosPage from './components/admin/UsuariosPage';
 import CrachasPage from './components/admin/CrachasPage';
 import CronogramaPage from './components/admin/CronogramaPage';
 import CronogramaPublico from './components/CronogramaPublico';
+import { PresencaQRCodePage } from './components/admin/PresencaQRCodePage';
 
 // Fallback de Loading para as rotas Lazy
 const LazyLoader = () => (
@@ -83,6 +84,7 @@ function App() {
                 <Route path="crachas" element={<CrachasPage />} />
                 <Route path="cronograma" element={<CronogramaPage />} />
                 <Route path="usuarios" element={<UsuariosPage />} />
+                <Route path="presenca" element={<PresencaQRCodePage />} />
               </Route>
             </Route>
 

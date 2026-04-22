@@ -27,7 +27,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
                         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
                             <Box
                                 component="img"
-                                src="/img/logo.png"
+                                src="/img/logo.jpg"
                                 alt="Logo"
                                 sx={{
                                     width: 40,

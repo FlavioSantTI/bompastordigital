@@ -8,8 +8,9 @@ import {
     CircularProgress,
 } from '@mui/material';
 import { Download, Print, Close } from '@mui/icons-material';
-import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
+import { PDFViewer, PDFDownloadLink, pdf } from '@react-pdf/renderer';
 import CrachaTemplate, { type CrachaData } from './CrachaTemplate';
+import * as XLSX from 'xlsx';
 
 interface CrachaPreviewDialogProps {
     open: boolean;
@@ -24,6 +25,27 @@ export default function CrachaPreviewDialog({
 }: CrachaPreviewDialogProps) {
     const eventoNome = participantes[0]?.evento ?? 'crachas';
     const nomeArquivo = `crachas_${eventoNome.replace(/\s+/g, '_').toLowerCase()}.pdf`;
+
+        const rows = participantes.map(p => ({
+            'Nome': p.nome,
+            'Paróquia': p.paroquia || '-',
+            'Diocese': p.diocese || '-',
+            'Cidade': p.cidade || '-'
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Crachas');
+        XLSX.writeFile(workbook, `lista_impressao_${eventoNome.replace(/\s+/g, '_').toLowerCase()}.xlsx`);
+    };
+
+    const handleDirectPrint = async () => {
+        const doc = <CrachaTemplate participantes={participantes} />;
+        const blob = await pdf(doc).toBlob();
+        const url = URL.createObjectURL(blob);
+        const win = window.open(url, '_blank');
+        if (win) win.focus();
+    };
 
 
 
@@ -58,11 +80,21 @@ export default function CrachaPreviewDialog({
 
                 <Button
                     variant="outlined"
-                    startIcon={<Print />}
-                    onClick={() => window.open('', '_blank')}
+                    color="success"
+                    startIcon={<Download />}
+                    onClick={exportToExcel}
                     disabled={participantes.length === 0}
                 >
-                    Imprimir Direto
+                    Baixar XLS
+                </Button>
+
+                <Button
+                    variant="outlined"
+                    startIcon={<Print />}
+                    onClick={handleDirectPrint}
+                    disabled={participantes.length === 0}
+                >
+                    Abrir para Imprimir
                 </Button>
 
                 <PDFDownloadLink

@@ -179,7 +179,7 @@ export const ListaPresencaTemplate = ({ dados, tituloEvento }: { dados: DadosExp
         <Document title={`Lista de Presenca - ${tituloEvento}`}>
             <Page size="A4" style={s.page} orientation="landscape" wrap>
                 <View style={s.header} fixed>
-                    <Image src="/img/logo.png" style={s.logo} />
+                            <Image src="/img/logo.jpg" style={s.logo} />
                     <View style={s.headerText}>
                         <Text style={s.title}>Lista de Presença (Check-in)</Text>
                         <Text style={s.subtitle}>{tituloEvento} — {linhas.length} participante(s)</Text>
@@ -229,7 +229,7 @@ export const ListaGeralTemplate = ({ dados, tituloEvento }: { dados: DadosExport
     <Document title={`Lista Geral - ${tituloEvento}`}>
         <Page size="A4" style={s.page} orientation="landscape" wrap>
             <View style={s.header} fixed>
-                <Image src="/img/logo.png" style={s.logo} />
+                <Image src="/img/logo.jpg" style={s.logo} />
                 <View style={s.headerText}>
                     <Text style={s.title}>Lista Geral de Inscritos</Text>
                     <Text style={s.subtitle}>{tituloEvento} — Organização por Diocese/Paróquia — {dados.length} registro(s)</Text>
@@ -287,7 +287,7 @@ export const FichasInscricaoTemplate = ({ dados, tituloEvento }: { dados: DadosE
         {dados.map((d, i) => (
             <Page key={i} size="A4" style={s.page}>
                 <View style={s.header}>
-                    <Image src="/img/logo.png" style={s.logo} />
+                            <Image src="/img/logo.jpg" style={s.logo} />
                     <View style={s.headerText}>
                         <Text style={s.title}>Ficha de Inscrição</Text>
                         <Text style={s.subtitle}>{tituloEvento} | Status: {d.status.toUpperCase()}</Text>
@@ -373,7 +373,7 @@ export const ListaPresencaDioceseTemplate = ({ dados, tituloEvento }: { dados: D
                 return (
                     <Page key={dioceseNome} size="A4" style={s.page} orientation="landscape" wrap>
                         <View style={s.header} fixed>
-                            <Image src="/img/logo.png" style={s.logo} />
+                                    <Image src="/img/logo.jpg" style={s.logo} />
                             <View style={s.headerText}>
                                 <Text style={s.title}>Lista de Presença</Text>
                                 <Text style={s.subtitle}>EVENTO: {tituloEvento} | DIOCESE: {dioceseNome.toUpperCase()}</Text>
@@ -412,3 +412,43 @@ export const ListaPresencaDioceseTemplate = ({ dados, tituloEvento }: { dados: D
     );
 };
 
+// 5. NOVO Template: Crachás em Branco
+export const CrachasEmBrancoTemplate = () => {
+    const s = StyleSheet.create({
+        page: { width: 595.28, height: 841.89, backgroundColor: '#FFFFFF' },
+        half: { height: 420.94, width: '100%', alignItems: 'center', justifyContent: 'center', position: 'relative' },
+        separator: { position: 'absolute', top: 420.44, left: 0, width: '100%', height: 1, backgroundColor: '#E0E0E0' },
+        card: {
+            width: 283.46, height: 396.85, backgroundColor: '#FFFFFF', borderRadius: 5,
+            border: '1.5pt solid #90CAF9', overflow: 'hidden', padding: 15
+        },
+        header: { alignItems: 'center', marginBottom: 10 },
+        logo: { width: 60, height: 60, objectFit: 'contain', marginBottom: 5 },
+        eventTitle: { fontSize: 10, fontWeight: 'bold', color: '#1A237E', textAlign: 'center' },
+        nameLine: { borderBottom: '1pt solid #EEEEEE', width: '100%', height: 40, marginTop: 40, marginBottom: 30 },
+        infoRow: { flexDirection: 'row', marginBottom: 12, borderBottom: '0.5pt solid #F0F0F0', paddingBottom: 2 },
+        label: { fontSize: 10, fontWeight: 'bold', color: '#2C3E50', width: 65 },
+    });
+
+    const Badge = () => (
+        <View style={s.card}>
+            <View style={s.header}>
+                <Image src="/img/logo.jpg" style={s.logo} />
+                <Text style={s.eventTitle}>1ª Formação Regional Norte 3 - Bom Pastor</Text>
+            </View>
+            <View style={s.nameLine} />
+            <View style={s.infoRow}><Text style={s.label}>PARÓQUIA:</Text></View>
+            <View style={s.infoRow}><Text style={s.label}>DIOCESE:</Text></View>
+            <View style={s.infoRow}><Text style={s.label}>CIDADE:</Text></View>
+        </View>
+    );
+
+    return (
+        <Document title="Crachás em Branco">
+            <Page size="A4" style={s.page}>
+                <View style={s.half}><Badge /><View style={s.separator} /></View>
+                <View style={s.half}><Badge /></View>
+            </Page>
+        </Document>
+    );
+};

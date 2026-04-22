@@ -41,7 +41,7 @@ export default function ReportsPage() {
 
     // Estados para o Preview de PDF
     const [previewOpen, setPreviewOpen] = useState(false);
-    const [previewTipo, setPreviewTipo] = useState<'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese'>('lista');
+    const [previewTipo, setPreviewTipo] = useState<'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco'>('lista');
     const [previewDados, setPreviewDados] = useState<DadosExportacao[]>([]);
     const [previewTitulo, setPreviewTitulo] = useState('');
 
@@ -63,7 +63,15 @@ export default function ReportsPage() {
         }
     };
 
-    const handleExport = async (tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese') => {
+    const handleExport = async (tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco') => {
+        if (tipo === 'crachas_branco') {
+            setPreviewDados([]);
+            setPreviewTitulo('Regional Norte 3');
+            setPreviewTipo('crachas_branco');
+            setPreviewOpen(true);
+            return;
+        }
+
         if (!selectedEvento) {
             setError('Por favor, selecione um evento primeiro.');
             return;
@@ -306,6 +314,20 @@ export default function ReportsPage() {
                                             <Typography variant="body2" fontWeight="bold">Fichas Insc.</Typography>
                                             <Typography variant="caption" color="text.secondary" display="block">
                                                 Completo
+                                            </Typography>
+                                        </CardContent>
+                                    </CardActionArea>
+                                </Card>
+                            </Grid>
+                            {/* Crachás em Branco (NOVO) */}
+                            <Grid size={{ xs: 12, sm: 3 }}>
+                                <Card variant="outlined" sx={{ borderRadius: 3, border: '1px dashed #9C27B0' }}>
+                                    <CardActionArea onClick={() => handleExport('crachas_branco')} disabled={loading}>
+                                        <CardContent sx={{ textAlign: 'center', py: 1.5 }}>
+                                            <BadgeIcon sx={{ fontSize: 32, mb: 0.5, color: '#9C27B0', opacity: 0.7 }} />
+                                            <Typography variant="body2" fontWeight="bold">Crachás Branco</Typography>
+                                            <Typography variant="caption" color="text.secondary" display="block">
+                                                Para preenchimento
                                             </Typography>
                                         </CardContent>
                                     </CardActionArea>

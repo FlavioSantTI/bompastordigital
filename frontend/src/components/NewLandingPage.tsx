@@ -358,7 +358,7 @@ export default function NewLandingPage() {
                     </Typography>
                     <Box
                         component="img"
-                        src="/img/logo.png"
+                        src="/img/logo.jpg"
                         alt="Logo"
                         sx={{
                             width: 40,

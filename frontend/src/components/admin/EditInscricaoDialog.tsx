@@ -124,38 +124,55 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
         setEsposaEmail(inscricao?.esposa?.email || '');
         setEsposaTelefone(inscricao?.esposa?.telefone || '');
 
-        loadCurrentMunicipio(inscricao?.diocese_id || undefined);
-
         // Dados Pastorais/Conjugais
+        const cidadePreservada = inscricao.dados_conjuntos?.cidade || '';
         setParoquia(inscricao.dados_conjuntos?.paroquia || '');
-        setParoquia(inscricao?.dados_conjuntos?.paroquia || '');
-        setParoco(inscricao?.dados_conjuntos?.paroco || '');
-        setEndereco(inscricao?.dados_conjuntos?.endereco || '');
-        setNovaUniao(inscricao?.dados_conjuntos?.nova_uniao || false);
-        setMembroPasfam(inscricao?.dados_conjuntos?.membro_pasfam || false);
-        setPastorais(inscricao?.dados_conjuntos?.pastorais || []);
-        setNecessitaHospedagem(inscricao?.dados_conjuntos?.necessita_hospedagem || false);
-        if (inscricao) {
-            setRestricoesAlimentares(inscricao.dados_conjuntos?.restricoes_alimentares || '');
-            setObservacoes(inscricao.dados_conjuntos?.observacoes || '');
-        }
+        setParoco(inscricao.dados_conjuntos?.paroco || '');
+        setEndereco(inscricao.dados_conjuntos?.endereco || '');
+        setNovaUniao(inscricao.dados_conjuntos?.nova_uniao || false);
+        setMembroPasfam(inscricao.dados_conjuntos?.membro_pasfam || false);
+        setPastorais(inscricao.dados_conjuntos?.pastorais || []);
+        setNecessitaHospedagem(inscricao.dados_conjuntos?.necessita_hospedagem || false);
+        setRestricoesAlimentares(inscricao.dados_conjuntos?.restricoes_alimentares || '');
+        setObservacoes(inscricao.dados_conjuntos?.observacoes || '');
+
+        loadInitialLocation(inscricao?.diocese_id, cidadePreservada);
     }, [inscricao]);
 
-    const loadCurrentMunicipio = async (dioceseId?: number | null) => {
-        if (!dioceseId) return;
+    const loadInitialLocation = async (dioceseId?: number | null, cidadeNome?: string) => {
+        if (cidadeNome) {
+            setInputMunicipio(cidadeNome);
+            // Tenta encontrar o objeto municipio correspondente para o Autocomplete
+            const [nome] = cidadeNome.split(' - ');
+            const { data: municipio } = await supabase
+                .from('municipios')
+                .select('codigo_tom, nome_ibge, uf, diocese_id')
+                .ilike('nome_ibge', nome)
+                .limit(1)
+                .single();
 
-        // Buscar município pela diocese
-        const { data: municipio } = await supabase
-            .from('municipios')
-            .select('codigo_tom, nome_ibge, uf, diocese_id')
-            .eq('diocese_id', dioceseId)
-            .limit(1)
-            .single();
+            if (municipio) {
+                setSelectedMunicipio(municipio);
+            }
+        }
 
-        if (municipio) {
-            setSelectedMunicipio(municipio);
-            setInputMunicipio(`${municipio.nome_ibge} - ${municipio.uf}`);
-            fetchDiocese(municipio.diocese_id);
+        if (dioceseId && !cidadeNome) {
+            // Fallback apenas se não tiver cidade mas tiver diocese
+            const { data: municipio } = await supabase
+                .from('municipios')
+                .select('codigo_tom, nome_ibge, uf, diocese_id')
+                .eq('diocese_id', dioceseId)
+                .limit(1)
+                .single();
+
+            if (municipio) {
+                setSelectedMunicipio(municipio);
+                setInputMunicipio(`${municipio.nome_ibge} - ${municipio.uf}`);
+            }
+        }
+
+        if (dioceseId) {
+            fetchDiocese(dioceseId);
         }
     };
 
@@ -236,6 +253,7 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
                     evento_id: eventoId,
                     diocese_id: selectedMunicipio?.diocese_id || null,
                     dados_conjuntos: {
+                        cidade: selectedMunicipio ? `${selectedMunicipio.nome_ibge} - ${selectedMunicipio.uf}` : (inputMunicipio || null),
                         paroquia,
                         paroco,
                         endereco,

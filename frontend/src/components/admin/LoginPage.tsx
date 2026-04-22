@@ -118,7 +118,7 @@ export default function LoginPage() {
                 <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Box
                         component="img"
-                        src="/img/logo.png"
+                        src="/img/logo.jpg"
                         alt="Logo Bom Pastor"
                         sx={{
                             width: 80,

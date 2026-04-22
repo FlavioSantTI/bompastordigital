@@ -19,7 +19,7 @@ import {
 
 export interface CrachaData {
     inscricao_id: string;
-    tipo: 'esposo' | 'esposa';
+    tipo: 'esposo' | 'esposa' | 'individual';
     nome: string;
     paroquia: string | null;
     diocese: string | null;
@@ -247,7 +247,7 @@ function Cracha({ p }: { p: CrachaData }) {
         <View style={s.card}>
             {/* Cabeçalho */}
             <View style={s.header}>
-                <Image style={s.logo} src="/img/logo.png" />
+                <Image style={s.logo} src="/img/logo.jpg" />
                 <View style={s.headerDivider} />
                 <Text style={s.eventName}>{p.evento}</Text>
             </View>
@@ -299,16 +299,43 @@ function HalfPage({ p }: { p: CrachaData | null }) {
     );
 }
 
-// ── Agrupa participantes em pares (esposo + esposa por inscrição) ───────
-function agruparCasais(participantes: CrachaData[]) {
-    const map = new Map<string, { esposo?: CrachaData; esposa?: CrachaData }>();
-    for (const p of participantes) {
-        const entry = map.get(p.inscricao_id) ?? {};
-        if (p.tipo === 'esposo') entry.esposo = p;
-        else entry.esposa = p;
-        map.set(p.inscricao_id, entry);
+// ── Agrupa participantes em páginas (2 por folha A4) ────────────────────
+function organizarPaginas(participantes: CrachaData[]) {
+    const paginas: Array<{ top: CrachaData | null, bottom: CrachaData | null }> = [];
+    
+    // 1. Separar casais de individuais
+    const porInscricao = new Map<string, CrachaData[]>();
+    participantes.forEach(p => {
+        const list = porInscricao.get(p.inscricao_id) || [];
+        list.push(p);
+        porInscricao.set(p.inscricao_id, list);
+    });
+
+    const listaInscricoes = Array.from(porInscricao.values());
+    const avulsos: CrachaData[] = [];
+
+    // 2. Processar Casais
+    listaInscricoes.forEach(insc => {
+        if (insc.length >= 2) {
+            const esposo = insc.find(p => p.tipo === 'esposo');
+            const esposa = insc.find(p => p.tipo === 'esposa');
+            if (esposo || esposa) {
+                paginas.push({ top: esposo || null, bottom: esposa || null });
+            }
+        } else {
+            avulsos.push(insc[0]);
+        }
+    });
+
+    // 3. Processar Individuais (Agrupa 2 por página para economizar papel)
+    for (let i = 0; i < avulsos.length; i += 2) {
+        paginas.push({ 
+            top: avulsos[i] || null, 
+            bottom: avulsos[i + 1] || null 
+        });
     }
-    return Array.from(map.values());
+
+    return paginas;
 }
 
 // ── Componente principal exportado ─────────────────────────────────────
@@ -317,20 +344,20 @@ interface CrachaTemplateProps {
 }
 
 export default function CrachaTemplate({ participantes }: CrachaTemplateProps) {
-    const casais = agruparCasais(participantes);
+    const paginas = organizarPaginas(participantes);
 
     return (
-        <Document title="Crachás – Bom Pastor Digital" author="Bom Pastor Digital">
-            {casais.map((casal, i) => (
+        <Document title={`Crachás – ${participantes[0]?.evento || 'Bom Pastor'}`} author="Bom Pastor Digital">
+            {paginas.map((par, i) => (
                 <Page key={i} size="A4" style={s.page}>
-                    {/* Metade superior → Esposo */}
-                    <HalfPage p={casal.esposo ?? null} />
+                    {/* Topo da folha */}
+                    <HalfPage p={par.top} />
 
                     {/* Linha divisória central */}
                     <View style={s.separator} />
 
-                    {/* Metade inferior → Esposa */}
-                    <HalfPage p={casal.esposa ?? null} />
+                    {/* Fundo da folha */}
+                    <HalfPage p={par.bottom} />
                 </Page>
             ))}
         </Document>

@@ -12,7 +12,7 @@ export default function LandingPage() {
             <Box sx={{ mb: 4, textAlign: 'center' }}>
                 <Box
                     component="img"
-                    src="/img/logo.png"
+                    src="/img/logo.jpg"
                     alt="Logo Bom Pastor"
                     sx={{
                         width: 150,

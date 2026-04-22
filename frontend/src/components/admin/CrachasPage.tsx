@@ -229,9 +229,10 @@ export default function CrachasPage() {
                                         </TableCell>
                                         <TableCell>
                                             <Chip
-                                                label={p.tipo === 'esposo' ? 'Esposo' : 'Esposa'}
+                                                label={p.tipo === 'esposo' ? 'Esposo' : p.tipo === 'esposa' ? 'Esposa' : 'Individual'}
                                                 size="small"
-                                                color={p.tipo === 'esposo' ? 'primary' : 'secondary'}
+                                                color={p.tipo === 'esposo' ? 'primary' : p.tipo === 'esposa' ? 'secondary' : 'default'}
+                                                variant={p.tipo === 'individual' ? 'outlined' : 'filled'}
                                             />
                                         </TableCell>
                                         <TableCell>
