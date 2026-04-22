@@ -10,7 +10,7 @@ import {
     CircularProgress,
     Alert
 } from '@mui/material';
-import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Email, Lock, CalendarToday } from '@mui/icons-material';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
@@ -207,6 +207,18 @@ export default function LoginPage() {
                         sx={{ mt: 2, py: 1, fontWeight: 'bold' }}
                     >
                         {loading ? <CircularProgress size={24} color="inherit" /> : 'ENTRAR'}
+                    </Button>
+
+                    <Button
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        color="primary"
+                        startIcon={<CalendarToday fontSize="small" />}
+                        onClick={() => navigate('/agenda')}
+                        sx={{ mt: 1.5, py: 0.8, textTransform: 'none', borderStyle: 'dashed' }}
+                    >
+                        Ver Programação do Evento
                     </Button>
 
                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #eee' }}>
