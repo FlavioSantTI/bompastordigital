@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box,
     Paper,
@@ -14,13 +14,34 @@ import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
+import { useAuth } from '../../contexts/AuthContext';
+import { APP_VERSION } from '../../types';
 
 export default function LoginPage() {
+    const { user, role, loading: authLoading } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+
+    useEffect(() => {
+        // Se está na página de login sem estar autenticado, 
+        // limpar qualquer sessão local corrompida que possa causar loops
+        if (!authLoading && !user) {
+            console.log('[Login] Nenhum usuário autenticado. Tela de login pronta.');
+        }
+        
+        // Só redireciona se não estiver carregando, se houver usuário E se o role já tiver sido resolvido
+        if (!authLoading && user && role) {
+            console.log('[Login] Sessão ativa detectada, redirecionando conforme cargo:', role, '- Email:', user.email);
+            if (role === 'admin') {
+                navigate('/admin', { replace: true });
+            } else {
+                navigate('/inscricao', { replace: true });
+            }
+        }
+    }, [user, role, authLoading, navigate]);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -31,38 +52,39 @@ export default function LoginPage() {
         setError('');
 
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            console.log('[Login] Tentando login para:', email);
+            const { data, error: signInError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
-            if (error) throw error; // Lança para o catch
+            if (signInError) throw signInError;
 
-            if (data.session) {
-                // Forçar refresh do usuário para garantir roles atualizadas
-                const { data: { user } } = await supabase.auth.getUser();
+            console.log('[Login] Login realizado com sucesso. User ID:', data.user?.id, 'Role:', data.user?.user_metadata?.role);
+            // O redirecionamento será feito pelo useEffect ao detectar o user no AuthContext
 
-                if (user) {
-                    const role = user.user_metadata?.role;
-                    if (role === 'admin') {
-                        navigate('/admin');
-                    } else {
-                        navigate('/inscricao');
-                    }
-                }
-            }
-        } catch (error: any) {
-            console.error('Erro detalhado:', error);
+        } catch (err: any) {
+            console.error('[Login] Erro detalhado no login:', err);
 
             // Tratamento humanizado de erros
             let errorMsg = 'Falha ao entrar. Tente novamente mais tarde.';
 
-            if (error.message?.includes('Email not confirmed')) {
-                errorMsg = 'Sua conta ainda não foi ativada. Por favor, verifique sua caixa de entrada (e spam) e clique no link de confirmação enviado.';
-            } else if (error.message?.includes('Invalid login credentials')) {
-                errorMsg = 'Email ou senha incorretos. Verifique seus dados.';
-            } else if (error.message) {
-                errorMsg = error.message; // Erros menos comuns (rate limit, etc)
+            if (!err) {
+                errorMsg = 'Erro desconhecido ao tentar logar.';
+            } else if (err.message?.includes('Email not confirmed')) {
+                errorMsg = 'Sua conta ainda não foi ativada. Verifique seu e-mail.';
+            } else if (err.message?.includes('Invalid login credentials') || err.message?.includes('invalid_credentials')) {
+                errorMsg = 'E-mail ou senha incorretos. Verifique seus dados.';
+            } else if (err.message?.includes('missing email or phone')) {
+                errorMsg = 'Por favor, preencha o e-mail e a senha.';
+            } else if (err.message?.includes('Refresh Token') || err.message?.includes('refresh_token')) {
+                errorMsg = 'Sessão anterior expirada. Tente fazer login novamente.';
+                // Limpar sessão local corrompida
+                supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+            } else if (err.message?.includes('fetch') || err.message?.includes('network') || err.name === 'TypeError') {
+                errorMsg = 'Erro de conexão. Verifique sua internet e tente novamente.';
+            } else if (typeof err.message === 'string') {
+                errorMsg = err.message;
             }
 
             setError(errorMsg);
@@ -85,83 +107,89 @@ export default function LoginPage() {
             <Paper
                 elevation={3}
                 sx={{
-                    maxWidth: 400,
+                    maxWidth: 380,
                     width: '100%',
-                    p: 4,
-                    borderRadius: 4,
+                    p: 3,
+                    borderRadius: 3,
                     textAlign: 'center'
                 }}
             >
-                {/* Logo Placeholder (Simulando o Design enviado) */}
-                <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    {/* Aqui entraria a imagem real: <img src="/logo.png" width={120} /> */}
+                {/* Logo Compacto */}
+                <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Box
                         component="img"
                         src="/img/logo.png"
                         alt="Logo Bom Pastor"
                         sx={{
-                            width: 120,
-                            height: 120,
+                            width: 80,
+                            height: 80,
                             objectFit: 'contain',
-                            mb: 2
+                            mb: 1
                         }}
                     />
-                    <Typography variant="h5" color="primary" sx={{ fontFamily: '"Playfair Display", serif', fontWeight: 700 }}>
+                    <Typography variant="h6" color="primary" sx={{ 
+                        fontFamily: '"Playfair Display", serif', 
+                        fontWeight: 700,
+                        lineHeight: 1.2
+                    }}>
                         BOM PASTOR DIGITAL
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary">
                         Gestão de Eventos Pastorais
                     </Typography>
                 </Box>
 
-                {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+                {error && <Alert severity="error" sx={{ mb: 2, py: 0 }}>{error}</Alert>}
 
                 <form onSubmit={handleLogin}>
                     <TextField
                         fullWidth
+                        size="small"
                         label="Email"
                         variant="outlined"
-                        margin="normal"
+                        margin="dense"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
-                                    <Email color="action" />
+                                    <Email fontSize="small" color="action" />
                                 </InputAdornment>
                             ),
                         }}
                     />
                     <TextField
                         fullWidth
+                        size="small"
                         label="Senha"
                         type={showPassword ? 'text' : 'password'}
                         variant="outlined"
-                        margin="normal"
+                        margin="dense"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
-                                    <Lock color="action" />
+                                    <Lock fontSize="small" color="action" />
                                 </InputAdornment>
                             ),
                             endAdornment: (
                                 <InputAdornment position="end">
                                     <IconButton
+                                        size="small"
                                         onClick={() => setShowPassword(!showPassword)}
                                         edge="end"
                                     >
-                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                                     </IconButton>
                                 </InputAdornment>
                             ),
                         }}
                     />
 
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 0.5 }}>
                         <Typography
-                            variant="body2"
+                            variant="caption"
                             color="primary"
                             sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
                             onClick={() => setForgotPasswordOpen(true)}
@@ -174,30 +202,33 @@ export default function LoginPage() {
                         fullWidth
                         type="submit"
                         variant="contained"
-                        size="large"
+                        size="medium"
                         disabled={loading}
-                        sx={{ mt: 3, py: 1.5, fontSize: '1rem' }}
+                        sx={{ mt: 2, py: 1, fontWeight: 'bold' }}
                     >
                         {loading ? <CircularProgress size={24} color="inherit" /> : 'ENTRAR'}
                     </Button>
 
-                    <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid #eee' }}>
-                        <Typography variant="body2" color="text.secondary">
+                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #eee' }}>
+                        <Typography variant="caption" color="text.secondary">
                             Ainda não tem uma conta?
                         </Typography>
-                        <Button
-                            color="secondary"
-                            sx={{ mt: 0.5, fontWeight: 'bold' }}
-                            onClick={() => navigate('/register')}
-                        >
-                            CRIAR NOVA CONTA
-                        </Button>
+                        <Box>
+                            <Button
+                                size="small"
+                                color="secondary"
+                                sx={{ mt: 0, fontWeight: 'bold' }}
+                                onClick={() => navigate('/register')}
+                            >
+                                CRIAR NOVA CONTA
+                            </Button>
+                        </Box>
                     </Box>
                 </form>
 
-                <Box sx={{ mt: 4 }}>
-                    <Typography variant="caption" color="text.secondary">
-                        © 2026 Bom Pastor Digital - Versão 2.0
+                <Box sx={{ mt: 3 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+                        <strong>© 2026 Bom Pastor Digital</strong> • <span style={{ color: '#ff9800', fontWeight: 'bold' }}>Versão {APP_VERSION}</span>
                     </Typography>
                 </Box>
             </Paper>

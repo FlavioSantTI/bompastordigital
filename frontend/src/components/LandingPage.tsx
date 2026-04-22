@@ -1,5 +1,6 @@
 import { Box, Button, Typography, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { APP_VERSION } from '../types';
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -55,8 +56,8 @@ export default function LandingPage() {
             </Paper>
 
             <Box sx={{ mt: 4, textAlign: 'center' }}>
-                <Typography variant="caption" color="text.secondary">
-                    © 2026 Bom Pastor Digital - Versão 2.0
+                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                    <strong>© 2026 Bom Pastor Digital</strong> • <span style={{ color: '#ff9800', fontWeight: 'bold' }}>Versão {APP_VERSION}</span>
                 </Typography>
             </Box>
         </Box>

@@ -64,10 +64,12 @@ export default function EventSelectionStep() {
     }, []);
 
     const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('pt-BR', {
+        if (!dateStr) return '';
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return date.toLocaleDateString('pt-BR', {
             day: '2-digit',
-            month: 'long',
-            year: 'numeric'
+            month: 'long'
         });
     };
 
@@ -102,9 +104,19 @@ export default function EventSelectionStep() {
                                 key={evento.id}
                                 variant="outlined"
                                 sx={{
-                                    borderColor: selectedEventId === evento.id ? 'primary.main' : 'grey.300',
-                                    borderWidth: selectedEventId === evento.id ? 2 : 1,
-                                    bgcolor: selectedEventId === evento.id ? 'primary.50' : 'background.paper',
+                                    borderColor: selectedEventId === evento.id ? 'warning.main' : 'grey.300',
+                                    borderWidth: selectedEventId === evento.id ? 3 : 1,
+                                    bgcolor: selectedEventId === evento.id ? 'warning.50' : 'background.paper',
+                                    boxShadow: selectedEventId === evento.id ? '0 0 15px rgba(237, 108, 2, 0.3)' : 'none',
+                                    transition: 'all 0.2s',
+                                    ...(selectedEventId === evento.id && {
+                                        animation: 'pulseGlow 2s infinite',
+                                        '@keyframes pulseGlow': {
+                                            '0%': { boxShadow: '0 0 0 0 rgba(237, 108, 2, 0.4)' },
+                                            '70%': { boxShadow: '0 0 0 12px rgba(237, 108, 2, 0)' },
+                                            '100%': { boxShadow: '0 0 0 0 rgba(237, 108, 2, 0)' }
+                                        }
+                                    }),
                                 }}
                             >
                                 <CardActionArea

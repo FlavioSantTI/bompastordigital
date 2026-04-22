@@ -1,9 +1,44 @@
 import { supabase } from '../lib/supabase';
-import type { RegistrationData } from '../types';
+import type { RegistrationData, IndividualRegistrationData, TipoInscricao } from '../types';
 
 export interface RegistrationPayload extends RegistrationData {
     evento_id: number;
     user_id?: string;
+}
+
+export interface IndividualRegistrationPayload extends IndividualRegistrationData {
+    evento_id: number;
+    user_id?: string;
+}
+
+export interface AdminRegistrationPayload {
+    tipo: TipoInscricao;
+    evento_id?: number;
+    diocese_id?: number;
+    pessoa1: {
+        nome: string;
+        cpf: string;
+        nascimento: string;
+        email?: string;
+        telefone?: string;
+    };
+    pessoa2?: {
+        nome: string;
+        cpf: string;
+        nascimento: string;
+        email?: string;
+        telefone?: string;
+    };
+    dados_conjuntos?: Record<string, any>;
+    status?: string;
+}
+
+interface RpcResponse {
+    success: boolean;
+    message: string;
+    inscricaoId?: string;
+    tipo?: string;
+    evento?: { nome: string; data_inicio: string; data_fim: string };
 }
 
 /**
@@ -16,7 +51,6 @@ function isValidCPF(cpf: string): boolean {
 
 /**
  * Valida se os CPFs do casal estão disponíveis para o evento
- * VALIDAÇÃO NO FRONTEND - não depende de função do banco
  */
 export async function validateCoupleAvailability(
     eventoId: number,
@@ -24,7 +58,6 @@ export async function validateCoupleAvailability(
     cpfEsposa: string
 ): Promise<{ available: boolean; message?: string }> {
     try {
-        // 1. Validar formato dos CPFs
         if (!isValidCPF(cpfEsposo)) {
             return { available: false, message: 'CPF do esposo está inválido.' };
         }
@@ -32,7 +65,6 @@ export async function validateCoupleAvailability(
             return { available: false, message: 'CPF da esposa está inválido.' };
         }
 
-        // 2. Verificar se CPFs são diferentes
         const cpfEsposoClean = cpfEsposo.replace(/\D/g, '');
         const cpfEsposaClean = cpfEsposa.replace(/\D/g, '');
 
@@ -40,18 +72,15 @@ export async function validateCoupleAvailability(
             return { available: false, message: 'Os CPFs do esposo e esposa devem ser diferentes.' };
         }
 
-        // 3. Buscar IDs das pessoas com esses CPFs
         const { data: pessoasData } = await supabase
             .from('pessoas')
             .select('id, cpf')
             .in('cpf', [cpfEsposo, cpfEsposa]);
 
         if (!pessoasData || pessoasData.length === 0) {
-            // CPFs não existem no banco = disponíveis
             return { available: true };
         }
 
-        // 4. Verificar se algum dos CPFs já está inscrito neste evento
         const pessoaIds = pessoasData.map(p => p.id);
 
         const { data: inscricoesExistentes } = await supabase
@@ -78,7 +107,6 @@ export async function validateCoupleAvailability(
  * Converte data de DD/MM/YYYY para YYYY-MM-DD
  */
 function convertDateToISO(dateStr: string): string {
-    // Se já estiver em formato ISO, retorna direto
     if (dateStr.includes('-')) {
         return dateStr;
     }
@@ -110,7 +138,6 @@ export async function registerCouple(payload: RegistrationPayload): Promise<{
     try {
         console.log('Iniciando registro do casal via RPC atômica...', payload);
 
-        // 1. Chamar a procedure RPC no Supabase
         const rpcPayload = {
             ...payload,
             esposo: {
@@ -134,25 +161,11 @@ export async function registerCouple(payload: RegistrationPayload): Promise<{
             throw error;
         }
 
-        console.log('Resultado da RPC:', data);
-
-        // A RPC retorna um JSON com { success, message, inscricaoId, evento }
-        // Precisamos fazer um cast para o tipo correto pois o TypeScript vê como Json genérico
-        interface RpcResponse {
-            success: boolean;
-            message: string;
-            inscricaoId?: string;
-            evento?: { nome: string; data_inicio: string; data_fim: string };
-        }
-
         const rpcResult = data as unknown as RpcResponse;
 
-        // A procedure retorna exatamente o formato do objeto de resultado esperado
         if (!rpcResult?.success) {
             return { success: false, message: rpcResult?.message || 'Erro desconhecido' };
         }
-
-        console.log('Inscrição criada atômicamente:', rpcResult);
 
         return {
             success: true,
@@ -163,6 +176,118 @@ export async function registerCouple(payload: RegistrationPayload): Promise<{
 
     } catch (error: any) {
         console.error('Erro inesperado no registro:', error);
+        return { success: false, message: 'Erro inesperado: ' + (error?.message || 'Tente novamente.') };
+    }
+}
+
+/**
+ * Registra uma inscrição individual
+ */
+export async function registerIndividual(payload: IndividualRegistrationPayload): Promise<{
+    success: boolean;
+    message: string;
+    inscricaoId?: string;
+    evento?: {
+        nome: string;
+        data_inicio: string;
+        data_fim: string;
+    };
+}> {
+    try {
+        console.log('Iniciando registro individual via RPC...', payload);
+
+        const rpcPayload = {
+            ...payload,
+            participante: {
+                ...payload.participante,
+                nascimento: convertDateToISO(payload.participante.nascimento),
+                telefone: cleanPhone(payload.participante.telefone)
+            }
+        };
+
+        const { data, error } = await supabase.rpc('registrar_individual_ecc' as any, {
+            payload: rpcPayload as unknown as Record<string, any>
+        });
+
+        if (error) {
+            console.error('Erro na RPC registrar_individual_ecc:', error);
+            throw error;
+        }
+
+        const rpcResult = data as unknown as RpcResponse;
+
+        if (!rpcResult?.success) {
+            return { success: false, message: rpcResult?.message || 'Erro desconhecido' };
+        }
+
+        return {
+            success: true,
+            message: rpcResult.message,
+            inscricaoId: rpcResult.inscricaoId,
+            evento: rpcResult.evento,
+        };
+
+    } catch (error: any) {
+        console.error('Erro inesperado no registro individual:', error);
+        return { success: false, message: 'Erro inesperado: ' + (error?.message || 'Tente novamente.') };
+    }
+}
+
+/**
+ * Registra inscrição via admin (campos mínimos obrigatórios)
+ */
+export async function registerByAdmin(payload: AdminRegistrationPayload): Promise<{
+    success: boolean;
+    message: string;
+    inscricaoId?: string;
+}> {
+    try {
+        console.log('Registro admin via RPC...', payload);
+
+        const rpcPayload: Record<string, any> = {
+            tipo: payload.tipo,
+            evento_id: payload.evento_id,
+            diocese_id: payload.diocese_id,
+            dados_conjuntos: payload.dados_conjuntos || {},
+            status: payload.status || 'pendente',
+            pessoa1: {
+                ...payload.pessoa1,
+                nascimento: convertDateToISO(payload.pessoa1.nascimento),
+                telefone: payload.pessoa1.telefone ? cleanPhone(payload.pessoa1.telefone) : undefined,
+            },
+        };
+
+        if (payload.tipo === 'casal' && payload.pessoa2) {
+            rpcPayload.pessoa2 = {
+                ...payload.pessoa2,
+                nascimento: convertDateToISO(payload.pessoa2.nascimento),
+                telefone: payload.pessoa2.telefone ? cleanPhone(payload.pessoa2.telefone) : undefined,
+            };
+        }
+
+        const { data, error } = await supabase.rpc('registrar_inscricao_admin' as any, {
+            payload: rpcPayload as unknown as Record<string, any>
+        });
+
+        if (error) {
+            console.error('Erro na RPC registrar_inscricao_admin:', error);
+            throw error;
+        }
+
+        const rpcResult = data as unknown as RpcResponse;
+
+        if (!rpcResult?.success) {
+            return { success: false, message: rpcResult?.message || 'Erro desconhecido' };
+        }
+
+        return {
+            success: true,
+            message: rpcResult.message,
+            inscricaoId: rpcResult.inscricaoId,
+        };
+
+    } catch (error: any) {
+        console.error('Erro no registro admin:', error);
         return { success: false, message: 'Erro inesperado: ' + (error?.message || 'Tente novamente.') };
     }
 }

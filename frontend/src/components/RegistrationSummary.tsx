@@ -43,7 +43,9 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
 
     const formatDate = (dateStr: string) => {
         if (!dateStr) return '--/--/----';
-        return new Date(dateStr).toLocaleDateString('pt-BR');
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return date.toLocaleDateString('pt-BR');
     };
 
     return (

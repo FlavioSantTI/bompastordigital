@@ -23,9 +23,10 @@ import {
     Divider,
     Tooltip,
 } from '@mui/material';
-import { Visibility, Delete, FilterList, EditNote, AttachMoney } from '@mui/icons-material';
+import { Visibility, Delete, FilterList, EditNote, AttachMoney, Add } from '@mui/icons-material';
 import EditInscricaoDialog from './EditInscricaoDialog';
 import PagamentoDialog from './PagamentoDialog';
+import AdminInscricaoDialog from './AdminInscricaoDialog';
 import { supabase } from '../../lib/supabase';
 
 interface Pessoa {
@@ -38,12 +39,13 @@ interface Pessoa {
 }
 
 interface Inscricao {
-    id: string; // no banco o id e UUID (string)
+    id: string;
     evento_id: number | null;
     esposo_id: string | null;
     esposa_id: string | null;
     diocese_id?: number | null;
     status?: string | null;
+    tipo?: string | null;
     dados_conjuntos?: any;
     created_at: string;
     evento?: {
@@ -73,8 +75,40 @@ export default function InscricoesPage() {
     const [success, setSuccess] = useState('');
     const [filtroEvento, setFiltroEvento] = useState<number>(0);
 
+    // Busca e ordenação
+    const [termoBusca, setTermoBusca] = useState('');
+    const [filtroStatus, setFiltroStatus] = useState('');
+    const [ordenacao, setOrdenacao] = useState('recentes');
+
     // Estado para o Dialog de Pagamento
     const [openPagamentoDialog, setOpenPagamentoDialog] = useState(false);
+
+    // Estado para o Dialog de Nova Inscrição (Admin)
+    const [openAdminDialog, setOpenAdminDialog] = useState(false);
+
+    // Estado para o Dialog de Confirmação de Exclusão
+    const [deleteTarget, setDeleteTarget] = useState<Inscricao | null>(null);
+    const [loadingDelete, setLoadingDelete] = useState(false);
+
+    // Lista filtrada e ordenada (calculada em memória)
+    const inscricoesFiltradas = inscricoes
+        .filter((insc) => {
+            const termo = termoBusca.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const nome1 = (insc.esposo?.nome || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const nome2 = (insc.esposa?.nome || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const cidade = (insc.dados_conjuntos?.cidade || insc.dados_conjuntos?.endereco || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const bateBusca = !termo || nome1.includes(termo) || nome2.includes(termo) || cidade.includes(termo);
+            const bateStatus = !filtroStatus || insc.status === filtroStatus;
+            return bateBusca && bateStatus;
+        })
+        .sort((a, b) => {
+            if (ordenacao === 'recentes') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            if (ordenacao === 'antigos') return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+            if (ordenacao === 'nome_az') return (a.esposo?.nome || '').localeCompare(b.esposo?.nome || '', 'pt-BR');
+            if (ordenacao === 'nome_za') return (b.esposo?.nome || '').localeCompare(a.esposo?.nome || '', 'pt-BR');
+            if (ordenacao === 'status') return (a.status || '').localeCompare(b.status || '', 'pt-BR');
+            return 0;
+        });
 
     useEffect(() => {
         fetchEventos();
@@ -122,19 +156,27 @@ export default function InscricoesPage() {
                         .eq('id', inscricao.evento_id || 0)
                         .single();
 
-                    // Buscar esposo
-                    const { data: esposo } = await supabase
-                        .from('pessoas')
-                        .select('*')
-                        .eq('id', inscricao.esposo_id || '')
-                        .single();
+                    // Buscar esposo (se existir)
+                    let esposo = null;
+                    if (inscricao.esposo_id) {
+                        const { data } = await supabase
+                            .from('pessoas')
+                            .select('*')
+                            .eq('id', inscricao.esposo_id)
+                            .single();
+                        esposo = data;
+                    }
 
-                    // Buscar esposa
-                    const { data: esposa } = await supabase
-                        .from('pessoas')
-                        .select('*')
-                        .eq('id', inscricao.esposa_id || '')
-                        .single();
+                    // Buscar esposa (se existir - comum em casais, ausente em individuais)
+                    let esposa = null;
+                    if (inscricao.esposa_id) {
+                        const { data } = await supabase
+                            .from('pessoas')
+                            .select('*')
+                            .eq('id', inscricao.esposa_id)
+                            .single();
+                        esposa = data;
+                    }
 
                     // Buscar diocese
                     let diocese = null;
@@ -209,15 +251,17 @@ export default function InscricoesPage() {
         setOpenPagamentoDialog(true);
     };
 
-    const handleDelete = async (id: string, nomeEsposo: string) => {
-        if (!confirm(`Tem certeza que deseja excluir a inscrição do casal ${nomeEsposo}?`)) {
-            return;
-        }
+    const handleDeleteRequest = (inscricao: Inscricao) => {
+        setDeleteTarget(inscricao);
+    };
 
+    const handleDeleteConfirm = async () => {
+        if (!deleteTarget) return;
+        setLoadingDelete(true);
         const { error } = await supabase
             .from('inscricoes')
             .delete()
-            .eq('id', id);
+            .eq('id', deleteTarget.id);
 
         if (error) {
             setError('Erro ao excluir: ' + error.message);
@@ -225,10 +269,17 @@ export default function InscricoesPage() {
             setSuccess('Inscrição excluída com sucesso!');
             fetchInscricoes();
         }
+        setLoadingDelete(false);
+        setDeleteTarget(null);
     };
 
     const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('pt-BR');
+        if (!dateStr) return '--/--/----';
+        // Extract only the date part YYYY-MM-DD
+        const datePart = dateStr.substring(0, 10);
+        const [year, month, day] = datePart.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return date.toLocaleDateString('pt-BR');
     };
 
     const formatCPF = (cpf: string) => {
@@ -248,9 +299,9 @@ export default function InscricoesPage() {
 
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h4" fontWeight="bold">
-                    Inscrições de Casais
+                    Inscrições
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                     <TextField
@@ -259,7 +310,7 @@ export default function InscricoesPage() {
                         label="Filtrar por Evento"
                         value={filtroEvento}
                         onChange={(e) => setFiltroEvento(Number(e.target.value))}
-                        sx={{ minWidth: 250 }}
+                        sx={{ minWidth: 220 }}
                         InputProps={{
                             startAdornment: <FilterList sx={{ mr: 1 }} />
                         }}
@@ -271,12 +322,52 @@ export default function InscricoesPage() {
                             </MenuItem>
                         ))}
                     </TextField>
-                    <Chip
-                        label={`${inscricoes.length} inscrições`}
-                        color="primary"
-                        variant="outlined"
-                    />
+                    <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={() => setOpenAdminDialog(true)}
+                        sx={{ whiteSpace: 'nowrap', px: 3 }}
+                    >
+                        Nova Inscrição
+                    </Button>
                 </Box>
+            </Box>
+
+            {/* Barra de busca e ordenação */}
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 3, flexWrap: 'wrap' }}>
+                <TextField
+                    size="small"
+                    placeholder="Buscar por nome ou cidade..."
+                    value={termoBusca}
+                    onChange={(e) => setTermoBusca(e.target.value)}
+                    sx={{ flexGrow: 1, minWidth: 220 }}
+                />
+                <TextField
+                    select
+                    size="small"
+                    label="Status"
+                    value={filtroStatus}
+                    onChange={(e) => setFiltroStatus(e.target.value)}
+                    sx={{ minWidth: 150 }}
+                >
+                    <MenuItem value="">Todos</MenuItem>
+                    <MenuItem value="pendente">Pendente</MenuItem>
+                    <MenuItem value="confirmada">Confirmada</MenuItem>
+                </TextField>
+                <TextField
+                    select
+                    size="small"
+                    label="Ordenar por"
+                    value={ordenacao}
+                    onChange={(e) => setOrdenacao(e.target.value)}
+                    sx={{ minWidth: 180 }}
+                >
+                    <MenuItem value="recentes">Mais recentes</MenuItem>
+                    <MenuItem value="antigos">Mais antigos</MenuItem>
+                    <MenuItem value="nome_az">Nome (A → Z)</MenuItem>
+                    <MenuItem value="nome_za">Nome (Z → A)</MenuItem>
+                    <MenuItem value="status">Status</MenuItem>
+                </TextField>
             </Box>
 
             {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
@@ -291,40 +382,59 @@ export default function InscricoesPage() {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell><strong>Esposo</strong></TableCell>
-                                <TableCell><strong>Esposa</strong></TableCell>
+                                <TableCell><strong>Tipo</strong></TableCell>
+                                <TableCell><strong>Pessoa 1</strong></TableCell>
+                                <TableCell><strong>Pessoa 2</strong></TableCell>
                                 <TableCell><strong>Contato</strong></TableCell>
                                 <TableCell><strong>Localização</strong></TableCell>
                                 <TableCell><strong>Status</strong></TableCell>
-                                <TableCell><strong>Data Inscrição</strong></TableCell>
+                                <TableCell sx={{ whiteSpace: 'nowrap' }}><strong>Data Inscr.</strong></TableCell>
                                 <TableCell align="right"><strong>Ações</strong></TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {inscricoes.length === 0 ? (
+                            {inscricoesFiltradas.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} align="center">
-                                        Nenhuma inscrição encontrada
+                                    <TableCell colSpan={8} align="center">
+                                        {termoBusca || filtroStatus ? 'Nenhum resultado para os filtros aplicados.' : 'Nenhuma inscrição encontrada.'}
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                inscricoes.map((inscricao) => (
+                                inscricoesFiltradas.map((inscricao) => (
                                     <TableRow key={inscricao.id}>
                                         <TableCell>
-                                            <Typography variant="body2">
-                                                {inscricao.esposo?.nome || '-'}
-                                            </Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                {inscricao.esposo?.cpf ? formatCPF(inscricao.esposo.cpf) : '-'}
-                                            </Typography>
+                                            <Chip
+                                                label={inscricao.tipo === 'individual' ? 'Individual' : 'Casal'}
+                                                color={inscricao.tipo === 'individual' ? 'info' : 'default'}
+                                                size="small"
+                                                variant="outlined"
+                                            />
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant="body2">
-                                                {inscricao.esposa?.nome || '-'}
+                                            <Typography variant="body2" fontWeight={inscricao.tipo === 'individual' ? 'bold' : 'normal'}>
+                                                {inscricao.esposo?.nome || (inscricao.tipo === 'individual' ? 'Não informado' : '-')}
                                             </Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                {inscricao.esposa?.cpf ? formatCPF(inscricao.esposa.cpf) : '-'}
-                                            </Typography>
+                                            {inscricao.esposo?.cpf && (
+                                                <Typography variant="caption" color="text.secondary">
+                                                    {formatCPF(inscricao.esposo.cpf)}
+                                                </Typography>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            {inscricao.tipo === 'individual' ? (
+                                                <Typography variant="caption" color="text.secondary">---</Typography>
+                                            ) : (
+                                                <>
+                                                    <Typography variant="body2">
+                                                        {inscricao.esposa?.nome || '-'}
+                                                    </Typography>
+                                                    {inscricao.esposa?.cpf && (
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            {formatCPF(inscricao.esposa.cpf)}
+                                                        </Typography>
+                                                    )}
+                                                </>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             {inscricao.esposo?.email && (
@@ -393,7 +503,7 @@ export default function InscricoesPage() {
                                             </IconButton>
                                             <IconButton
                                                 color="error"
-                                                onClick={() => handleDelete(inscricao.id, inscricao.esposo?.nome || 'casal')}
+                                                onClick={() => handleDeleteRequest(inscricao)}
                                                 title="Excluir inscrição"
                                             >
                                                 <Delete />
@@ -406,6 +516,38 @@ export default function InscricoesPage() {
                     </Table>
                 </TableContainer>
             )}
+
+            {/* Dialog de Confirmação de Exclusão */}
+            <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth>
+                <DialogTitle sx={{ fontWeight: 'bold', color: 'error.main' }}>
+                    ⚠️ Confirmar Exclusão
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Tem certeza que deseja excluir a inscrição de{' '}
+                        <strong>
+                            {deleteTarget?.tipo === 'individual'
+                                ? deleteTarget?.esposo?.nome
+                                : `${deleteTarget?.esposo?.nome || ''} & ${deleteTarget?.esposa?.nome || ''}`}
+                        </strong>?
+                        Esta ação não pode ser desfeita.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteTarget(null)} disabled={loadingDelete}>
+                        Cancelar
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleDeleteConfirm}
+                        disabled={loadingDelete}
+                        startIcon={loadingDelete ? <CircularProgress size={16} /> : <Delete />}
+                    >
+                        {loadingDelete ? 'Excluindo...' : 'Excluir'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Dialog de Detalhes */}
             <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
@@ -548,6 +690,16 @@ export default function InscricoesPage() {
                 }}
                 onStatusChange={() => {
                     fetchInscricoes(); // Atualiza a lista em tempo real se o status mudar
+                }}
+            />
+
+            {/* Dialog de Nova Inscrição Admin */}
+            <AdminInscricaoDialog
+                open={openAdminDialog}
+                onClose={() => setOpenAdminDialog(false)}
+                onSave={() => {
+                    setSuccess('Inscrição criada com sucesso!');
+                    fetchInscricoes();
                 }}
             />
         </Box>

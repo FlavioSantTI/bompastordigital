@@ -129,7 +129,7 @@ export default function CrachasPage() {
                     >
                         {eventos.map((ev) => (
                             <MenuItem key={ev.id} value={ev.id}>
-                                {ev.nome} — {new Date(ev.data_inicio).toLocaleDateString('pt-BR')}
+                                {ev.nome} — {ev.data_inicio.split('-').reverse().join('/')}
                             </MenuItem>
                         ))}
                     </Select>

@@ -17,6 +17,8 @@ export default function ParticipantDashboard() {
             if (!user) return;
 
             try {
+                console.log('[Dashboard] Buscando inscrições para user:', user.id);
+                
                 // Busca TODAS as inscrições do usuário
                 const { data, error } = await supabase
                     .from('inscricoes')
@@ -30,13 +32,27 @@ export default function ParticipantDashboard() {
                     .eq('user_id', user.id)
                     .order('created_at', { ascending: false }); // Mais recentes primeiro
 
-                if (error) throw error;
+                if (error) {
+                    console.error('[Dashboard] Erro na query de inscrições:', error.code, error.message);
+                    
+                    // Se for erro de autenticação (JWT expirado), não mostrar erro genérico
+                    // O AuthContext vai lidar com isso
+                    if (error.code === 'PGRST301' || error.message?.includes('JWT')) {
+                        console.warn('[Dashboard] Token JWT expirado ou inválido. Aguardando refresh...');
+                        setError('Sua sessão expirou. Aguarde ou faça login novamente.');
+                        setLoading(false);
+                        return;
+                    }
+                    
+                    throw error;
+                }
 
+                console.log('[Dashboard] Inscrições encontradas:', data?.length || 0);
                 if (data) {
                     setInscricoes(data);
                 }
             } catch (err: any) {
-                console.error('Erro ao buscar inscrições:', err);
+                console.error('[Dashboard] Erro ao buscar inscrições:', err);
                 setError('Falha ao carregar seus dados. Tente recarregar a página.');
             } finally {
                 setLoading(false);
@@ -91,7 +107,10 @@ export default function ParticipantDashboard() {
                     </Typography>
                 </Box>
 
-                <RegistrationStepper onSuccess={() => window.location.reload()} />
+                <RegistrationStepper 
+                    onSuccess={() => window.location.reload()} 
+                    onCancel={() => setShowForm(false)}
+                />
             </Container>
         );
     }
@@ -153,15 +172,12 @@ export default function ParticipantDashboard() {
             <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
                 <Box>
                     <Typography variant="h4" component="h1" fontWeight="bold" color="primary">
-                        Minhas Inscrições
+                        Minha Inscrição
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                        Você possui {inscricoes.length} inscrição(ões) ativa(s).
+                        Aqui está a sua inscrição ativa.
                     </Typography>
                 </Box>
-                <Button variant="contained" onClick={() => setShowForm(true)}>
-                    + Nova Inscrição
-                </Button>
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

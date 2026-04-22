@@ -43,6 +43,7 @@ interface Inscricao {
     esposa_id: string | null;
     diocese_id?: number | null;
     status?: string | null;
+    tipo?: string | null;
     dados_conjuntos?: any;
     esposo?: Pessoa | null;
     esposa?: Pessoa | null;
@@ -198,31 +199,35 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
             setSaving(true);
             setError('');
 
-            // 1. Atualizar dados do esposo
-            const { error: esposoError } = await supabase
-                .from('pessoas')
-                .update({
-                    nome: esposoNome,
-                    nascimento: esposoNascimento,
-                    email: esposoEmail,
-                    telefone: esposoTelefone.replace(/\D/g, ''),
-                })
-                .eq('id', inscricao?.esposo_id || '');
+            // 1. Atualizar dados do esposo (só se existir)
+            if (inscricao.esposo_id) {
+                const { error: esposoError } = await supabase
+                    .from('pessoas')
+                    .update({
+                        nome: esposoNome,
+                        nascimento: esposoNascimento,
+                        email: esposoEmail,
+                        telefone: esposoTelefone.replace(/\D/g, ''),
+                    })
+                    .eq('id', inscricao.esposo_id);
 
-            if (esposoError) throw esposoError;
+                if (esposoError) throw esposoError;
+            }
 
-            // 2. Atualizar dados da esposa
-            const { error: esposaError } = await supabase
-                .from('pessoas')
-                .update({
-                    nome: esposaNome,
-                    nascimento: esposaNascimento,
-                    email: esposaEmail,
-                    telefone: esposaTelefone.replace(/\D/g, ''),
-                })
-                .eq('id', inscricao?.esposa_id || '');
+            // 2. Atualizar dados da esposa (só se existir — inscrições individuais não têm esposa)
+            if (inscricao.esposa_id) {
+                const { error: esposaError } = await supabase
+                    .from('pessoas')
+                    .update({
+                        nome: esposaNome,
+                        nascimento: esposaNascimento,
+                        email: esposaEmail,
+                        telefone: esposaTelefone.replace(/\D/g, ''),
+                    })
+                    .eq('id', inscricao.esposa_id);
 
-            if (esposaError) throw esposaError;
+                if (esposaError) throw esposaError;
+            }
 
             // 3. Atualizar dados da inscrição com TODOS os campos
             const { error: inscricaoError } = await supabase
@@ -290,10 +295,10 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
 
                     <Divider />
 
-                    {/* Dados do Esposo */}
+                    {/* Dados do Esposo / Participante */}
                     <Box>
                         <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="primary">
-                            👨 Dados do Esposo
+                            {inscricao.tipo === 'individual' ? '👤 Dados do Participante' : '👨 Dados do Esposo'}
                         </Typography>
                         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                             <TextField
@@ -336,49 +341,51 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
 
                     <Divider />
 
-                    {/* Dados da Esposa */}
-                    <Box>
-                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="primary">
-                            👩 Dados da Esposa
-                        </Typography>
-                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                            <TextField
-                                fullWidth
-                                label="Nome Completo"
-                                value={esposaNome}
-                                onChange={(e) => setEsposaNome(e.target.value)}
-                            />
-                            <TextField
-                                fullWidth
-                                label="CPF"
-                                value={esposaCpf}
-                                disabled
-                                helperText="CPF não pode ser alterado"
-                            />
-                            <TextField
-                                fullWidth
-                                type="date"
-                                label="Data de Nascimento"
-                                value={esposaNascimento}
-                                onChange={(e) => setEsposaNascimento(e.target.value)}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                            <TextField
-                                fullWidth
-                                type="email"
-                                label="E-mail"
-                                value={esposaEmail}
-                                onChange={(e) => setEsposaEmail(e.target.value)}
-                            />
-                            <TextField
-                                fullWidth
-                                label="Telefone"
-                                value={esposaTelefone}
-                                onChange={(e) => setEsposaTelefone(e.target.value)}
-                                placeholder="(00) 00000-0000"
-                            />
+                    {/* Dados da Esposa — oculto em inscrições individuais */}
+                    {inscricao.tipo !== 'individual' && (
+                        <Box>
+                            <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="primary">
+                                👩 Dados da Esposa
+                            </Typography>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                                <TextField
+                                    fullWidth
+                                    label="Nome Completo"
+                                    value={esposaNome}
+                                    onChange={(e) => setEsposaNome(e.target.value)}
+                                />
+                                <TextField
+                                    fullWidth
+                                    label="CPF"
+                                    value={esposaCpf}
+                                    disabled
+                                    helperText="CPF não pode ser alterado"
+                                />
+                                <TextField
+                                    fullWidth
+                                    type="date"
+                                    label="Data de Nascimento"
+                                    value={esposaNascimento}
+                                    onChange={(e) => setEsposaNascimento(e.target.value)}
+                                    InputLabelProps={{ shrink: true }}
+                                />
+                                <TextField
+                                    fullWidth
+                                    type="email"
+                                    label="E-mail"
+                                    value={esposaEmail}
+                                    onChange={(e) => setEsposaEmail(e.target.value)}
+                                />
+                                <TextField
+                                    fullWidth
+                                    label="Telefone"
+                                    value={esposaTelefone}
+                                    onChange={(e) => setEsposaTelefone(e.target.value)}
+                                    placeholder="(00) 00000-0000"
+                                />
+                            </Box>
                         </Box>
-                    </Box>
+                    )}
 
                     <Divider />
 

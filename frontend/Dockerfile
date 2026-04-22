@@ -7,14 +7,13 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-# Argumentos de build para injetar variáveis de ambiente do Vite
-# Em SPAs (Vite/React), as variáveis precisam existir no momento do BUILD
+# Argumentos de build obrigatórios para o Vite
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
 
-# Disponibiliza as variáveis para o processo de build do Node
-ENV VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
-ENV VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+# Disponibiliza as variáveis para o build
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
 
 # Copia o código fonte e executa o build
 COPY . .

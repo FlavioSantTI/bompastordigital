@@ -1,6 +1,7 @@
 import { Box, Container, Typography, Button, Grid, Paper, Divider } from '@mui/material';
 import { CalendarMonth, LocationOn, Favorite } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { APP_VERSION } from '../types';
 
 export default function NewLandingPage() {
     const navigate = useNavigate();
@@ -368,7 +369,7 @@ export default function NewLandingPage() {
                         }}
                     />
                     <Typography variant="caption" sx={{ opacity: 0.5 }}>
-                        © 2026 Bom Pastor Digital - Versão 2.0. Todos os direitos reservados.
+                        <strong>© 2026 Bom Pastor Digital</strong> • <span style={{ color: '#ff9800', fontWeight: 'bold' }}>Versão {APP_VERSION}</span>. Todos os direitos reservados.
                     </Typography>
                 </Container>
             </Box>

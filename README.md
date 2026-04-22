@@ -44,6 +44,10 @@ bom-pastor-digital/
 │   │   │   │   ├── DiocesesPage.tsx
 │   │   │   │   ├── EventosPage.tsx
 │   │   │   │   ├── InscricoesPage.tsx
+│   │   │   │   ├── SalasDialog.tsx
+│   │   │   │   ├── CategoriasDialog.tsx
+│   │   │   │   ├── AtividadeDialog.tsx
+│   │   │   │   ├── CronogramaPage.tsx
 │   │   │   │   ├── ReportsPage.tsx
 │   │   │   │   ├── UsuariosPage.tsx       # v2.0
 │   │   │   │   ├── ManageUserDialog.tsx   # v2.0
@@ -160,6 +164,17 @@ Acesse: `http://localhost:5173`
 | 1.4 | 09/02/2026 | Nova landing page, PDF de confirmação, PIX no dashboard, botão Sair visível, seleção de evento |
 | **2.0** | **02/03/2026** | **Gerenciamento de Usuários (CRUD via Edge Function Deno), Módulo de Crachás (PDF A4 casal com @react-pdf/renderer), exibição de nome do usuário logado, versionamento v2.0 global** |
 | **2.1** | **17/03/2026** | **Refatoração de Localização (Diocese e Cidade independentes), salvamento da Cidade no banco, nova Coluna de Localização unificada no Admin (Inscrições e Crachás), Melhoria nos Relatórios Excel/PDF com dados estruturados e Redirecionamento Automático pós-inscrição.** |
+| **3.0** | **03/04/2026** | **Suporte completo a inscrições individuais, correção de exclusão de registros dinâmicos no admin, autocomplete de cidades no formulário do admin, correção atômica de estados de login prevenindo "tela branca", proteção contra quebras de DOM por tradutores automáticos, estilos "pulse glow" atraentes e layout consolidado para a versão 3.0.** |
+| **3.1** | **03/04/2026** | **Busca e ordenação na página de Inscrições (nome, cidade, status, data), exibição do tipo de inscrição (Casal/Individual) no Dashboard, coluna Participante atualizada para suportar inscrições individuais.** |
+| **3.2** | **03/04/2026** | **Correção crítica na edição de inscrições individuais (erro UUID ao salvar), seção Esposa oculta e rótulo adaptado para "Participante" em inscrições individuais, nomes completos exibidos no Dashboard.** |
+| **3.3** | **03/04/2026** | **Refinamento do UI de Login (mais compacto e proporcional) e remoção de erros de console em buscas de cônjuges inexistentes.** |
+| **3.4** | **04/04/2026** | **Nova Central de Relatórios unificada (Crachás, Listas e Fichas), motor de geração de PDF premium com `@react-pdf/renderer` para todos os documentos e layout administrativo ultra-compacto.** |
+| **3.5** | **04/04/2026** | **Correção crítica de fuso horário em todas as datas de eventos e nascimentos (off-by-one bug), sistema de versionamento centralizado (`APP_VERSION`), robustez no parsing de datas/timestamps e melhoria visual no Dashboard Administrativo.** |
+| **3.6** | **11/04/2026** | **Correção crítica de loop infinito de login (race condition no refresh token do Supabase Auth), tratamento inteligente de eventos `TOKEN_REFRESHED` no AuthContext, proteção contra sessões corrompidas, logging estruturado em todo o fluxo de autenticação (`[Auth]`, `[Login]`, `[Dashboard]`, `[ProtectedRoute]`), tratamento gracioso de erros JWT no ParticipantDashboard e mensagens de erro humanizadas para falhas de rede e sessão expirada.** |
+| **3.7** | **12/04/2026** | **Dashboard Analítico com gráficos Recharts (Pizza: status e tipo, Barras: inscrições por evento com gradientes), Tabela Pivot Diocese × Tipo (Casal/Individual) com heatmap visual, correção crítica de dados faltantes em relatórios (inscrições individuais excluídas por INNER JOIN do Supabase), paginação automática em todos os relatórios PDF (Lista de Presença, Lista Geral, Fichas), Lista de Presença com uma pessoa por linha em ordem alfabética, e Lista Geral enriquecida com colunas de Contato e Tipo.** |
+| **4.0** | **21/04/2026** | **Módulo de Cronograma do Evento: Gestão dinâmica de Salas e Atividades, Categorias Dinâmicas no banco (com nomes, cores e ícones customizados), Suporte a ícones de imagem (PNG) da pasta pública, Grid de Horários administrativo com "Ajuste Magnético" de continuidade, Timeline Pública para participantes, e Exportação do Cronograma (PDF/Excel).** |
+| **4.1** | **21/04/2026** | **Novo Relatório: Lista de Presença por Diocese (Individualizado com quebra de página automática no PDF e XLS), inclusão de campo para Assinatura, exportação XLS com colunas simplificadas (#, Diocese, Nome, Tipo, Assinatura) e feedback visual de carregamento (Backdrop com Circular Progress).** |
+| **4.2** | **21/04/2026** | **Estabilização Crítica: Implementação de Seletores Nativos (native: true) para máxima confiabilidade em Drawers, design "Premium" para cards de atividade (Labels de Categoria, Preview de Descrição e visual de Rascunho pontilhado), correção de contraste nos botões de download e remoção da restrição de categorias no banco de dados.** |
 
 ---
 
@@ -186,44 +201,57 @@ Acesse: `http://localhost:5173`
 - [x] Persistência no Supabase
 
 ### ✅ Módulo de Autenticação
-- [x] Login com email/senha
+- [x] Login com email/senha (Layout compacto v3.4)
 - [x] Recuperação de senha via email (Magic Link)
 - [x] Proteção de rotas (Admin vs Participante)
 - [x] Botão de Logout visível no header
+- [x] Gerenciamento inteligente de sessão — proteção contra refresh token inválido (v3.6)
+- [x] Logging estruturado de autenticação com prefixos `[Auth]`, `[Login]`, `[ProtectedRoute]` (v3.6)
+- [x] Tratamento gracioso de sessões corrompidas sem loop de redirecionamento (v3.6)
 
-### ✅ Painel Administrativo
-- [x] Dashboard com métricas
-- [x] CRUD de Dioceses
-- [x] CRUD de Eventos
-- [x] Lista de Inscrições com filtros
-- [x] Visualização de comprovantes
-- [x] Alteração de status (Pendente/Confirmada)
+### ✅ Painel Administrativo (v3.7)
+- [x] Dashboard analítico com gráficos Recharts (v3.7)
+- [x] Gráfico de pizza: Confirmadas vs Pendentes (v3.7)
+- [x] Gráfico de pizza: Casais vs Individuais (v3.7)
+- [x] Gráfico de barras: Inscrições por evento com gradientes (v3.7)
+- [x] Tabela Pivot: Diocese × Tipo (Casal/Individual) com heatmap (v3.7)
+- [x] CRUD de Dioceses e Eventos
+- [x] Lista de Inscrições com filtros, busca e ordenação
+- [x] Visualização de comprovantes e alteração de status
+- [x] **Relatórios & Fichas**: Central unificada para geração de documentos
 
-### ✅ Gerenciamento de Usuários (v2.0)
+### ✅ Central de Relatórios & Crachás (v3.7)
+- [x] **Crachás**: Geração automatizada (2 por folha A4) integrada
+- [x] **Lista Geral**: Por Diocese/Paróquia com colunas Contato e Tipo (v3.7)
+- [x] **Lista de Check-in**: Uma pessoa por linha, ordem alfabética (v3.7)
+- [x] **Fichas Individuais**: Suporte a casais e individuais (v3.7)
+- [x] **Paginação automática**: Todos os relatórios quebram páginas corretamente (v3.7)
+- [x] **Preview Real-time**: Visualização direta no modal antes de baixar
+- [x] **Motor @react-pdf/renderer**: Máxima fidelidade visual e compatibilidade
+- [x] **Cronograma do Evento (v4.0)**: Gestão de agenda completa
+    - [x] CRUD de Salas/Espaços por evento
+    - [x] Categorias Dinâmicas (Manageable UI + Icon Selector)
+    - [x] Suporte a Ícones PNG personalizados
+    - [x] Grid administrativo de alta densidade
+    - [x] Lógica de continuidade automática (Magnet snap)
+    - [x] Timeline pública elegante para participantes
+    - [x] Exportação de Agenda em PDF e Excel
+    - [x] **Relatório de Presença por Diocese (v4.1)**: Individualizado e com campo para assinatura
+    - [x] **Seletores Nativos (v4.2)**: Maior robustez na edição de atividades
+    - [x] **Visual de Rascunho (v4.2)**: Sinalização clara de conteúdo privado no cronograma
+
+### ✅ Gerenciamento de Usuários
 - [x] CRUD completo de usuários via Edge Function (Deno)
 - [x] Atribuição de roles (Admin / Usuário Padrão)
-- [x] Criação segura server-side com `SERVICE_ROLE_KEY` invisível ao frontend
-- [x] Deleção com confirmação e cascata em `public.pessoas`
 - [x] Exibição do nome do usuário logado na barra superior
-
-### ✅ Módulo de Crachás (v2.0)
-- [x] Seleção de evento e listagem de inscritos com checkbox
-- [x] Busca por nome, paróquia ou diocese
-- [x] Geração de PDF A4 com 2 crachás por folha (esposo + esposa)
-- [x] Marcas de corte para impressão profissional
-- [x] Logo da organização, nome do evento e rodapé personalizados
-- [x] Download e impressão direta pelo navegador
-
-### ✅ Módulo de Relatórios
-- [x] Exportação para Excel (.xlsx) com colunas de Localização, Diocese e Observações
-- [x] Fichas de inscrição em PDF atualizadas com dados pastorais e endereço completo
-- [x] Lista de presença simplificada (PDF)
 
 ### ✅ Segurança
 - [x] Row Level Security (RLS) em todas as tabelas
 - [x] Políticas baseadas em JWT metadata
 - [x] Bucket privado para comprovantes
-- [x] Edge Functions com validação de token e role admin (v2.0)
+- [x] Verificação de existência de IDs de cônjuges antes de requisições (v3.4)
+- [x] Proteção contra loop de redirecionamento por token de sessão expirado (v3.6)
+- [x] Limpeza automática de sessões locais corrompidas (v3.6)
 
 ### ✅ Área do Participante
 - [x] Dashboard com resumo da inscrição
@@ -243,7 +271,7 @@ Acesse: `http://localhost:5173`
 | Alta | Deploy online (Vercel + domínio customizado) |
 | Média | Área do Participante — edição de dados cadastrais |
 | Média | Check-in no dia do evento (validação via QR Code do crachá) |
-| Baixa | Dashboard com gráficos (Chart.js) |
+| ~~Baixa~~ | ~~Dashboard com gráficos~~ ✅ Implementado na v3.7 (Recharts) |
 | Baixa | Multi-idioma (i18n) |
 
 ---

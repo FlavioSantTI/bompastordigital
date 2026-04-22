@@ -1,18 +1,19 @@
 import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
-import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment, BadgeOutlined } from '@mui/icons-material';
+import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment, CalendarMonth } from '@mui/icons-material';
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { APP_VERSION } from '../../types';
 
 const drawerWidth = 240;
 
 const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/admin' },
-    { text: 'Dioceses', icon: <Church />, path: '/admin/dioceses' },
-    { text: 'Eventos', icon: <Event />, path: '/admin/eventos' },
     { text: 'Inscrições', icon: <People />, path: '/admin/inscricoes' },
     { text: 'Relatórios & Fichas', icon: <Assessment />, path: '/admin/relatorios' },
-    { text: 'Crachás', icon: <BadgeOutlined />, path: '/admin/crachas' },
+    { text: 'Eventos', icon: <Event />, path: '/admin/eventos' },
+    { text: 'Cronograma', icon: <CalendarMonth />, path: '/admin/cronograma' },
+    { text: 'Dioceses', icon: <Church />, path: '/admin/dioceses' },
     { text: 'Usuários', icon: <AccountCircle />, path: '/admin/usuarios' },
 ];
 
@@ -46,8 +47,8 @@ export default function AdminLayout() {
                 <Toolbar>
                     <Typography variant="h6" noWrap component="div" sx={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, flexGrow: 1 }}>
                         BOM PASTOR DIGITAL - Administração
-                        <Typography component="span" sx={{ ml: 1.5, fontSize: '0.7rem', fontWeight: 'bold', color: '#FF1744', verticalAlign: 'super' }}>
-                            v2.0
+                        <Typography component="span" sx={{ ml: 1.5, fontSize: '0.7rem', fontWeight: 'bold', color: '#ff9800', verticalAlign: 'super' }}>
+                            v{APP_VERSION}
                         </Typography>
                     </Typography>
 
@@ -140,10 +141,18 @@ export default function AdminLayout() {
             {/* Conteúdo principal */}
             <Box
                 component="main"
-                sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}
+                sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
             >
                 <Toolbar />
-                <Outlet />
+                <Box sx={{ flexGrow: 1 }}>
+                    <Outlet />
+                </Box>
+                {/* Footer Admin */}
+                <Box sx={{ mt: 4, pt: 2, textAlign: 'center', borderTop: '1px solid', borderColor: 'grey.300', opacity: 0.8 }}>
+                    <Typography variant="caption" color="text.secondary">
+                        <strong>© 2026 Bom Pastor Digital</strong> • <span style={{ color: '#ff9800', fontWeight: 'bold' }}>Versão {APP_VERSION}</span>
+                    </Typography>
+                </Box>
             </Box>
         </Box>
     );

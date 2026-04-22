@@ -1,10 +1,11 @@
 import { Box, Typography, Divider, Paper, Chip } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
-import type { RegistrationData } from '../../types';
+import type { TipoInscricao } from '../../types';
 
 export default function ReviewStep() {
-    const { getValues } = useFormContext<RegistrationData>();
+    const { getValues } = useFormContext();
     const data = getValues();
+    const tipo: TipoInscricao = data.tipo || 'casal';
 
     return (
         <Box>
@@ -15,38 +16,55 @@ export default function ReviewStep() {
                 Confira as informações antes de finalizar sua inscrição.
             </Typography>
 
-            {/* Seção: Dados do Casal */}
+            {/* Seção: Dados do Participante / Casal */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
                 <Typography variant="subtitle1" fontWeight="bold" color="primary.dark">
-                    👫 Dados do Casal
+                    {tipo === 'casal' ? '👫 Dados do Casal' : '👤 Dados do Participante'}
                 </Typography>
 
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                    {/* Esposo */}
-                    <Paper variant="outlined" sx={{ p: 2, flex: '1 1 45%', minWidth: '250px' }}>
-                        <Typography variant="subtitle2" color="primary" fontWeight="bold" gutterBottom>
-                            Marido (Esposo)
-                        </Typography>
-                        <Typography variant="body1" fontWeight="bold">{data.esposo.nome}</Typography>
-                        <Typography variant="body2" color="text.secondary">CPF: {data.esposo.cpf}</Typography>
-                        <Typography variant="body2" color="text.secondary">Nascimento: {data.esposo.nascimento}</Typography>
-                        <Divider sx={{ my: 1 }} />
-                        <Typography variant="body2">📧 {data.esposo.email}</Typography>
-                        <Typography variant="body2">📱 {data.esposo.telefone}</Typography>
-                    </Paper>
+                    {tipo === 'casal' ? (
+                        <>
+                            {/* Esposo */}
+                            <Paper variant="outlined" sx={{ p: 2, flex: '1 1 45%', minWidth: '250px' }}>
+                                <Typography variant="subtitle2" color="primary" fontWeight="bold" gutterBottom>
+                                    Marido (Esposo)
+                                </Typography>
+                                <Typography variant="body1" fontWeight="bold">{data.esposo?.nome}</Typography>
+                                <Typography variant="body2" color="text.secondary">CPF: {data.esposo?.cpf}</Typography>
+                                <Typography variant="body2" color="text.secondary">Nascimento: {data.esposo?.nascimento}</Typography>
+                                <Divider sx={{ my: 1 }} />
+                                <Typography variant="body2">📧 {data.esposo?.email}</Typography>
+                                <Typography variant="body2">📱 {data.esposo?.telefone}</Typography>
+                            </Paper>
 
-                    {/* Esposa */}
-                    <Paper variant="outlined" sx={{ p: 2, flex: '1 1 45%', minWidth: '250px' }}>
-                        <Typography variant="subtitle2" color="primary" fontWeight="bold" gutterBottom>
-                            Mulher (Esposa)
-                        </Typography>
-                        <Typography variant="body1" fontWeight="bold">{data.esposa.nome}</Typography>
-                        <Typography variant="body2" color="text.secondary">CPF: {data.esposa.cpf}</Typography>
-                        <Typography variant="body2" color="text.secondary">Nascimento: {data.esposa.nascimento}</Typography>
-                        <Divider sx={{ my: 1 }} />
-                        <Typography variant="body2">📧 {data.esposa.email}</Typography>
-                        <Typography variant="body2">📱 {data.esposa.telefone}</Typography>
-                    </Paper>
+                            {/* Esposa */}
+                            <Paper variant="outlined" sx={{ p: 2, flex: '1 1 45%', minWidth: '250px' }}>
+                                <Typography variant="subtitle2" color="primary" fontWeight="bold" gutterBottom>
+                                    Mulher (Esposa)
+                                </Typography>
+                                <Typography variant="body1" fontWeight="bold">{data.esposa?.nome}</Typography>
+                                <Typography variant="body2" color="text.secondary">CPF: {data.esposa?.cpf}</Typography>
+                                <Typography variant="body2" color="text.secondary">Nascimento: {data.esposa?.nascimento}</Typography>
+                                <Divider sx={{ my: 1 }} />
+                                <Typography variant="body2">📧 {data.esposa?.email}</Typography>
+                                <Typography variant="body2">📱 {data.esposa?.telefone}</Typography>
+                            </Paper>
+                        </>
+                    ) : (
+                        /* Participante Individual */
+                        <Paper variant="outlined" sx={{ p: 2, flex: '1 1 100%' }}>
+                            <Typography variant="subtitle2" color="primary" fontWeight="bold" gutterBottom>
+                                Participante
+                            </Typography>
+                            <Typography variant="body1" fontWeight="bold">{data.participante?.nome}</Typography>
+                            <Typography variant="body2" color="text.secondary">CPF: {data.participante?.cpf}</Typography>
+                            <Typography variant="body2" color="text.secondary">Nascimento: {data.participante?.nascimento}</Typography>
+                            <Divider sx={{ my: 1 }} />
+                            <Typography variant="body2">📧 {data.participante?.email}</Typography>
+                            <Typography variant="body2">📱 {data.participante?.telefone}</Typography>
+                        </Paper>
+                    )}
                 </Box>
             </Box>
 
@@ -60,11 +78,11 @@ export default function ReviewStep() {
                         <Box>
                             <Typography variant="body2" color="text.secondary">Diocese</Typography>
                             <Typography variant="body1" fontWeight="bold" sx={{ mb: 1 }}>
-                                {(data.contato as any).diocese_nome || 'Não selecionada'}
+                                {data.contato?.diocese_nome || 'Não selecionada'}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">Município</Typography>
                             <Typography variant="body1" fontWeight="bold">
-                                {(data.contato as any).municipio_nome || 'Não selecionado'}
+                                {data.contato?.municipio_nome || 'Não selecionado'}
                             </Typography>
                         </Box>
 
@@ -72,7 +90,7 @@ export default function ReviewStep() {
 
                         <Box>
                             <Typography variant="body2" color="text.secondary">Endereço Completo</Typography>
-                            <Typography variant="body1">{data.dados_conjuntos.endereco}</Typography>
+                            <Typography variant="body1">{data.dados_conjuntos?.endereco}</Typography>
                         </Box>
                     </Box>
                 </Paper>
@@ -87,35 +105,35 @@ export default function ReviewStep() {
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                         <Box>
                             <Typography variant="body2" color="text.secondary">Paróquia / Comunidade</Typography>
-                            <Typography variant="body1" fontWeight="bold">{data.dados_conjuntos.paroquia}</Typography>
+                            <Typography variant="body1" fontWeight="bold">{data.dados_conjuntos?.paroquia}</Typography>
                         </Box>
 
                         <Box>
                             <Typography variant="body2" color="text.secondary">Pároco</Typography>
-                            <Typography variant="body1">{data.dados_conjuntos.paroco}</Typography>
+                            <Typography variant="body1">{data.dados_conjuntos?.paroco}</Typography>
                         </Box>
 
                         <Divider />
 
                         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                            {data.dados_conjuntos.nova_uniao && (
+                            {data.dados_conjuntos?.nova_uniao && (
                                 <Chip label="Segunda União" color="info" size="small" />
                             )}
-                            {data.dados_conjuntos.membro_pasfam && (
+                            {data.dados_conjuntos?.membro_pasfam && (
                                 <Chip label="Membro Pasfam" color="primary" size="small" />
                             )}
-                            {data.dados_conjuntos.necessita_hospedagem && (
+                            {data.dados_conjuntos?.necessita_hospedagem && (
                                 <Chip label="Necessita Hospedagem" color="secondary" size="small" />
                             )}
                         </Box>
 
-                        {data.dados_conjuntos.membro_pasfam && data.dados_conjuntos.pastorais && data.dados_conjuntos.pastorais.length > 0 && (
+                        {data.dados_conjuntos?.membro_pasfam && data.dados_conjuntos?.pastorais && data.dados_conjuntos.pastorais.length > 0 && (
                             <Box>
                                 <Typography variant="body2" color="text.secondary" gutterBottom>
                                     Pastorais em que atua:
                                 </Typography>
                                 <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                                    {data.dados_conjuntos.pastorais.map((pastoral) => (
+                                    {data.dados_conjuntos.pastorais.map((pastoral: string) => (
                                         <Chip key={pastoral} label={pastoral} variant="outlined" size="small" />
                                     ))}
                                 </Box>
@@ -126,14 +144,14 @@ export default function ReviewStep() {
             </Box>
 
             {/* Seção: Observações */}
-            {(data.dados_conjuntos.restricoes_alimentares || data.dados_conjuntos.observacoes) && (
+            {(data.dados_conjuntos?.restricoes_alimentares || data.dados_conjuntos?.observacoes) && (
                 <Box>
                     <Typography variant="subtitle1" fontWeight="bold" color="primary.dark" gutterBottom>
                         📝 Observações
                     </Typography>
                     <Paper variant="outlined" sx={{ p: 2 }}>
-                        {data.dados_conjuntos.restricoes_alimentares && (
-                            <Box sx={{ mb: data.dados_conjuntos.observacoes ? 2 : 0 }}>
+                        {data.dados_conjuntos?.restricoes_alimentares && (
+                            <Box sx={{ mb: data.dados_conjuntos?.observacoes ? 2 : 0 }}>
                                 <Typography variant="body2" color="text.secondary" gutterBottom>
                                     Restrições Alimentares:
                                 </Typography>
@@ -141,7 +159,7 @@ export default function ReviewStep() {
                             </Box>
                         )}
 
-                        {data.dados_conjuntos.observacoes && (
+                        {data.dados_conjuntos?.observacoes && (
                             <Box>
                                 <Typography variant="body2" color="text.secondary" gutterBottom>
                                     Observações Gerais:
