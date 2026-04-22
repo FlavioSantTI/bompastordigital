@@ -25,7 +25,7 @@ export default function CrachaPreviewDialog({
 }: CrachaPreviewDialogProps) {
     const eventoNome = participantes[0]?.evento ?? 'crachas';
     const nomeArquivo = `crachas_${eventoNome.replace(/\s+/g, '_').toLowerCase()}.pdf`;
-
+    const exportToExcel = () => {
         const rows = participantes.map(p => ({
             'Nome': p.nome,
             'Paróquia': p.paroquia || '-',
