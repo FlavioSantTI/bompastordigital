@@ -10,7 +10,7 @@ import {
 import { type DadosExportacao } from '../../services/exportService';
 import { APP_VERSION } from '../../types';
 
-// Registro de fonte para garantir consistência
+// Registro de fontes para garantir consistência
 Font.register({
     family: 'Helvetica',
     fonts: [
@@ -18,6 +18,20 @@ Font.register({
         { src: 'https://cdn.jsdelivr.net/npm/@canvas-fonts/helvetica@1.0.4/Helvetica-Bold.ttf', fontWeight: 'bold' }
     ]
 });
+
+Font.register({
+    family: 'Lato',
+    src: 'https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHvxk6XweuBcY.ttf'
+});
+
+Font.register({
+    family: 'Playfair Display',
+    fonts: [
+        { src: 'https://fonts.gstatic.com/s/playfairdisplay/v37/nuFfPreRv9w4nHLy94HkyK9iaC85qcPZfmPSDRG3ic6X.ttf', fontStyle: 'italic' },
+        { src: 'https://fonts.gstatic.com/s/playfairdisplay/v37/nuFfPreRv9w4nHLy94HkyK9iaC85qcPZfmPSDRG3ic6X.ttf' }
+    ]
+});
+
 
 const PRIMARY = '#1E3A5F';
 const TEXT_DARK = '#212121';
@@ -448,6 +462,116 @@ export const CrachasEmBrancoTemplate = () => {
             <Page size="A4" style={s.page}>
                 <View style={s.half}><Badge /><View style={s.separator} /></View>
                 <View style={s.half}><Badge /></View>
+            </Page>
+        </Document>
+    );
+};
+
+// 6. Template do QR Code de Presença - Versão Minimalista (Preto e Branco)
+export const PresenceQRCodeTemplate = ({ 
+    codigoGerado, 
+    turno, 
+    data, 
+    qrCodeUrl 
+}: { 
+    codigoGerado: string, 
+    turno: string, 
+    data: string, 
+    qrCodeUrl: string 
+}) => {
+    const styles = StyleSheet.create({
+        page: {
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center', // Centraliza o card na página
+            padding: 20,
+        },
+        card: {
+            backgroundColor: '#FFFFFF',
+            width: '100%',
+            border: '2pt solid #000000',
+            padding: 30,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        headerLabel: {
+            color: '#000000',
+            fontSize: 14,
+            fontWeight: 'bold',
+            textTransform: 'uppercase',
+            letterSpacing: 2,
+            marginBottom: 5,
+            fontFamily: 'Helvetica',
+        },
+        mainTitle: {
+            color: '#000000',
+            fontSize: 28,
+            fontWeight: 'bold',
+            marginBottom: 8,
+            fontFamily: 'Helvetica',
+            textAlign: 'center',
+        },
+        instruction: {
+            color: '#333333',
+            fontSize: 12,
+            fontFamily: 'Helvetica',
+            marginBottom: 15,
+        },
+        qrCodeContainer: {
+            backgroundColor: '#FFFFFF',
+            padding: 12,
+            border: '1pt solid #000000',
+            marginBottom: 20, // Espaço fixo e pequeno abaixo do QR
+        },
+        qrImage: {
+            width: 280,
+            height: 280,
+        },
+        sessionText: {
+            color: '#000000',
+            fontSize: 12,
+            fontWeight: 'bold',
+            letterSpacing: 1,
+            fontFamily: 'Helvetica',
+            marginBottom: 2,
+        },
+        footerText: {
+            color: '#333333',
+            fontSize: 8,
+            fontFamily: 'Helvetica',
+        },
+        branding: {
+            position: 'absolute',
+            bottom: 10,
+            color: '#666666',
+            fontSize: 8,
+            fontWeight: 'bold',
+            textTransform: 'uppercase',
+            fontFamily: 'Helvetica',
+        }
+    });
+
+    return (
+        <Document title={`QR Code Presenca - ${codigoGerado}`}>
+            <Page size="A4" style={styles.page}>
+                <View style={styles.card}>
+                    <Text style={styles.headerLabel}>Registro de Presença</Text>
+                    <Text style={styles.mainTitle}>Bom Pastor</Text>
+                    <Text style={styles.instruction}>Escaneie com a câmera do seu celular</Text>
+                    
+                    <View style={styles.qrCodeContainer}>
+                        <Image src={qrCodeUrl} style={styles.qrImage} />
+                    </View>
+
+                    <Text style={styles.sessionText}>{codigoGerado}</Text>
+                    <Text style={styles.footerText}>Turno: {turno} • {data}</Text>
+                </View>
+                <Text style={styles.branding}>Sistema Bom Pastor Digital • © 2026</Text>
             </Page>
         </Document>
     );

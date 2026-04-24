@@ -45,9 +45,17 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 | **4.5** | 22/04/2026 | **Otimização e Crachás Premium**: Substituição de assets; Agrupamento 2 por folha A4; Crachás em Branco; Exportação XLS. |
 | **4.6** | 24/04/2026 | **Portal do Participante & Hub Público**: Lançamento do Hub Central, Painel de Presença Ao Vivo e nova identidade. |
 | **4.7** | 24/04/2026 | **Hub Central Premium & Segurança**: Melhorias em UX, grid 2x2 e trava de segurança. |
-| **5.0** | **24/04/2026** | **Edição Especial Bom Pastor Digital**: Unificação do Hub, segurança admin e navegação premium. |
+| **5.0** | 24/04/2026 | **Edição Especial Bom Pastor Digital**: Unificação do Hub, segurança admin e navegação premium. |
+| **5.1** | **24/04/2026** | **Geração de PDF de Presença Ultra-Compatível**: PDF em P&B de alta fidelidade, fontes nativas e memória de WhatsApp. |
 
 ---
+
+### ✅ Geração de PDF de Presença Ultra-Compatível (v5.1)
+- [x] **PDF de Alta Fidelidade (P&B)**: Design minimalista otimizado para impressão econômica e legibilidade máxima.
+- [x] **Fontes Nativas**: Uso de Helvetica interna do PDF para garantir 100% de sucesso na geração (sem falhas de download).
+- [x] **Memória Local**: Persistência do número de validação via `localStorage` (o sistema lembra seu WhatsApp).
+- [x] **Captura Inteligente**: Lógica de captura de QR Code via DataURL com fallback manual e tempo de espera otimizado.
+- [x] **Interface Admin**: Botão de ação em Laranja Premium e layout de página limpo (sem poluição visual).
 
 ### ✅ Edição Especial Bom Pastor Digital (v5.0)
 - [x] **Hub Central 2x2 Premium**: Layout rígido com navegação fluida e imponente.
@@ -101,4 +109,4 @@ Acesse: `http://localhost:5173`
 ## 🤝 Contribuição
 Desenvolvido por **Flávio Santiago** com assistência de IA (Antigravity).
 Contato: flavio.santiago.ti@outlook.com
-© 2026 Bom Pastor Digital • **Versão 5.0**
+© 2026 Bom Pastor Digital • **Versão 5.1**

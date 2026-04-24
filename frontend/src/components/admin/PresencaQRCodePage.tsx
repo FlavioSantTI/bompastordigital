@@ -1,19 +1,31 @@
-import React, { useState } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
-import { Printer, QrCode, ArrowLeft } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Printer, QrCode, ArrowLeft, Wifi, Download, FileText } from 'lucide-react';
+import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
+import { pdf } from '@react-pdf/renderer';
+import { PresenceQRCodeTemplate } from './ReportTemplates';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
 export function PresencaQRCodePage() {
   const [data, setData] = useState(new Date().toISOString().split('T')[0]);
   const [turno, setTurno] = useState('MANHA'); // Use MANHA, TARDE, NOITE
-  const [whatsapp, setWhatsapp] = useState(import.meta.env.VITE_DEFAULT_WHATSAPP_NUMBER || '');
+  const [whatsapp, setWhatsapp] = useState(() => {
+    return localStorage.getItem('presenca_whatsapp') || import.meta.env.VITE_DEFAULT_WHATSAPP_NUMBER || '';
+  });
   const [lockWhatsapp, setLockWhatsapp] = useState(true);
   const [codigoGerado, setCodigoGerado] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const navigate = useNavigate();
+  const qrRef = useRef<HTMLDivElement>(null);
+
+  // Salvar WhatsApp no localStorage sempre que mudar
+  React.useEffect(() => {
+    localStorage.setItem('presenca_whatsapp', whatsapp);
+  }, [whatsapp]);
 
   const isWhatsappValid = whatsapp.replace(/\D/g, '').length >= 10;
 
@@ -36,6 +48,22 @@ export function PresencaQRCodePage() {
       const dataSemHifen = data.replace(/-/g, ''); // 2026-04-25 -> 20260425
       const codigo = `PRESENCA_${dataSemHifen}_${turno}`;
       setCodigoGerado(codigo);
+
+      // Gerar Data URL do QR Code (usando um canvas temporário ou o que já está na tela)
+      setTimeout(() => {
+        try {
+          const canvas = qrRef.current?.querySelector('canvas');
+          if (canvas) {
+            const dataUrl = canvas.toDataURL('image/png');
+            console.log('QR Code capturado com sucesso');
+            setQrCodeDataUrl(dataUrl);
+          } else {
+            console.warn('Canvas do QR Code não encontrado no ref');
+          }
+        } catch (err) {
+          console.error('Erro ao capturar canvas:', err);
+        }
+      }, 800);
 
       // Log no Supabase
       const { error: dbError } = await supabase
@@ -62,11 +90,61 @@ export function PresencaQRCodePage() {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    let currentQrUrl = qrCodeDataUrl;
+
+    // Fallback: Tenta capturar o QR Code agora se ainda não tiver
+    if (!currentQrUrl) {
+      const canvas = qrRef.current?.querySelector('canvas');
+      if (canvas) {
+        currentQrUrl = canvas.toDataURL('image/png');
+        setQrCodeDataUrl(currentQrUrl);
+      }
+    }
+
+    if (!codigoGerado || !currentQrUrl) {
+      setError('O QR Code ainda não está pronto.');
+      return;
+    }
+
+    setIsGeneratingPDF(true);
+    try {
+      const doc = (
+        <PresenceQRCodeTemplate 
+          codigoGerado={codigoGerado}
+          turno={turno}
+          data={formatarData(data)}
+          qrCodeUrl={currentQrUrl}
+        />
+      );
+
+      const blob = await pdf(doc).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `QR_CODE_${codigoGerado}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error('Erro ao gerar PDF:', err);
+      setError('Falha ao gerar o arquivo PDF: ' + err.message);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
   const handleImprimir = () => {
     window.print();
   };
 
   const urlWhatsapp = `https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${codigoGerado}`;
+
+  const formatarData = (dataStr: string) => {
+    const [year, month, day] = dataStr.split('-');
+    return `${day}/${month}/${year}`;
+  };
 
   return (
     <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-5xl print:p-0 print:max-w-none print:m-0">
@@ -146,7 +224,8 @@ export function PresencaQRCodePage() {
             <button 
               type="submit" 
               disabled={isGenerating || !isWhatsappValid}
-              className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:grayscale disabled:transform-none"
+              style={{ backgroundColor: '#f39c12' }}
+              className="mt-6 w-full hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:grayscale disabled:transform-none"
             >
               {isGenerating ? 'Gerando...' : 'Gerar QR Code'}
             </button>
@@ -158,41 +237,42 @@ export function PresencaQRCodePage() {
 
         {/* Área de Visualização e Impressão */}
         {codigoGerado ? (
-          <div className="flex-1 bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center justify-center print:shadow-none print:border-none print:w-full print:h-[90vh] print:p-0 print:m-0">
+          <div className="flex-1 flex flex-col items-center">
             
-            <div className="text-center mb-8">
-              <h2 className="text-4xl font-extrabold text-blue-900 tracking-tight mb-2">Registro de Presença</h2>
-              <p className="text-gray-500 text-xl font-medium">Aponte a câmera do seu celular para validar</p>
+            {/* Visualização na Tela (Preview) */}
+            <div className="print:hidden w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center justify-center">
+              <div className="text-center mb-8">
+                <h2 className="text-4xl font-extrabold text-blue-900 tracking-tight mb-2">Registro de Presença</h2>
+                <p className="text-gray-500 text-xl font-medium">Aponte a câmera do seu celular para validar</p>
+              </div>
+
+              <div ref={qrRef} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                <QRCodeCanvas 
+                  value={urlWhatsapp} 
+                  size={300}
+                  level="H"
+                  includeMargin={true}
+                  className="mx-auto"
+                />
+              </div>
+              
+              <div className="mt-8 text-center bg-gray-50 px-10 py-5 rounded-2xl border border-gray-200 w-full max-w-md">
+                <p className="text-sm text-gray-500 uppercase tracking-widest mb-1 font-semibold">Código da Sessão</p>
+                <p className="text-2xl font-black text-gray-900 tracking-wider font-mono">{codigoGerado}</p>
+              </div>
+
+              <div className="mt-8 w-full max-w-sm">
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={!qrCodeDataUrl || isGeneratingPDF}
+                  className="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 text-white font-bold py-4 rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
+                >
+                  <Printer className="w-5 h-5" />
+                  {isGeneratingPDF ? 'Gerando PDF...' : !qrCodeDataUrl ? 'Processando QR...' : 'Gerar PDF / Imprimir'}
+                </button>
+              </div>
             </div>
 
-            <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm print:border-none print:shadow-none print:p-0">
-              <QRCodeSVG 
-                value={urlWhatsapp} 
-                size={380}
-                level="Q"
-                includeMargin={true}
-                className="mx-auto"
-              />
-            </div>
-            
-            <div className="mt-10 text-center bg-gray-50 px-10 py-5 rounded-2xl border border-gray-200 print:bg-white print:border-none">
-              <p className="text-sm text-gray-500 uppercase tracking-widest mb-1 font-semibold">Código da Sessão</p>
-              <p className="text-2xl md:text-3xl font-black text-gray-900 tracking-wider font-mono">{codigoGerado}</p>
-            </div>
-
-            <div className="print:hidden mt-8 w-full max-w-sm">
-              <button 
-                onClick={handleImprimir}
-                className="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 text-white font-bold py-4 rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0"
-              >
-                <Printer className="w-5 h-5" />
-                Gerar PDF / Imprimir
-              </button>
-            </div>
-            
-            <div className="hidden print:block text-center text-sm text-gray-400 mt-12">
-              Gerado em {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR')}
-            </div>
 
           </div>
         ) : (
