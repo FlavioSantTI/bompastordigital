@@ -24,6 +24,12 @@ import CrachasPage from './components/admin/CrachasPage';
 import CronogramaPage from './components/admin/CronogramaPage';
 import CronogramaPublico from './components/CronogramaPublico';
 import { PresencaQRCodePage } from './components/admin/PresencaQRCodePage';
+import PresencaPublica from './components/PresencaPublica';
+import PresencaRedirect from './components/PresencaRedirect';
+import EventoPublicoHome from './components/EventoPublicoHome';
+import LocalEvento from './components/LocalEvento';
+import CentralRedirect from './components/CentralRedirect';
+import PresencaExibicao from './components/PresencaExibicao';
 
 // Fallback de Loading para as rotas Lazy
 const LazyLoader = () => (
@@ -60,6 +66,11 @@ function App() {
             <Route path="/landing" element={<NewLandingPage />} />
             <Route path="/cronograma/:eventoId" element={<CronogramaPublico />} />
             <Route path="/agenda" element={<AgendaRedirect />} />
+            <Route path="/presenca-publica/:eventoId" element={<PresencaPublica />} />
+            <Route path="/p/:eventoId" element={<EventoPublicoHome />} />
+            <Route path="/local/:eventoId" element={<LocalEvento />} />
+            <Route path="/central" element={<CentralRedirect />} />
+            <Route path="/presenca-viva" element={<PresencaExibicao />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/update-password" element={<UpdatePasswordPage />} />

@@ -8,14 +8,23 @@ export function PresencaQRCodePage() {
   const [data, setData] = useState(new Date().toISOString().split('T')[0]);
   const [turno, setTurno] = useState('MANHA'); // Use MANHA, TARDE, NOITE
   const [whatsapp, setWhatsapp] = useState(import.meta.env.VITE_DEFAULT_WHATSAPP_NUMBER || '');
+  const [lockWhatsapp, setLockWhatsapp] = useState(true);
   const [codigoGerado, setCodigoGerado] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
+  const isWhatsappValid = whatsapp.replace(/\D/g, '').length >= 10;
+
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isWhatsappValid) {
+      setError('Por favor, insira um número de WhatsApp válido para o n8n.');
+      return;
+    }
+
     setIsGenerating(true);
     setError('');
     setSuccess('');
@@ -41,7 +50,7 @@ export function PresencaQRCodePage() {
 
       if (dbError) {
         console.error('Erro ao salvar log no banco:', dbError);
-        setError('QR Code gerado, mas falha ao salvar no histórico (). ' + dbError.message);
+        setError('QR Code gerado, mas falha ao salvar no histórico. ' + dbError.message);
       } else {
         setSuccess('QR Code gerado e registrado no histórico com sucesso!');
       }
@@ -83,14 +92,29 @@ export function PresencaQRCodePage() {
           <form onSubmit={handleGenerate} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp de Validação (n8n)</label>
-              <input 
-                type="text" 
-                value={whatsapp}
-                onChange={(e) => setWhatsapp(e.target.value)}
-                placeholder="Ex: 5563999999999"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                required
-              />
+              <div className="relative">
+                <input 
+                  type="text" 
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  disabled={lockWhatsapp}
+                  placeholder="Ex: 5563999999999"
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${lockWhatsapp ? 'bg-gray-50 text-gray-500 border-gray-200 cursor-not-allowed' : 'border-gray-300'}`}
+                  required
+                />
+              </div>
+              <label className="flex items-center gap-2 mt-2 cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  checked={lockWhatsapp} 
+                  onChange={(e) => setLockWhatsapp(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <span className="text-xs text-gray-500 font-medium">Bloquear edição do WhatsApp</span>
+              </label>
+              {!isWhatsappValid && !lockWhatsapp && (
+                <p className="text-red-500 text-[10px] mt-1 font-bold">Número inválido para o n8n.</p>
+              )}
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -121,8 +145,8 @@ export function PresencaQRCodePage() {
 
             <button 
               type="submit" 
-              disabled={isGenerating}
-              className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:transform-none"
+              disabled={isGenerating || !isWhatsappValid}
+              className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:grayscale disabled:transform-none"
             >
               {isGenerating ? 'Gerando...' : 'Gerar QR Code'}
             </button>

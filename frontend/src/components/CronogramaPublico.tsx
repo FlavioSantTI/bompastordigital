@@ -4,7 +4,7 @@
  * Módulo Cronograma v4.0
  */
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
     Box,
     Typography,
@@ -17,11 +17,15 @@ import {
     Container,
     alpha,
     useTheme,
+    Button,
 } from '@mui/material';
 import {
     Schedule,
     LocationOn,
     Person,
+    CalendarToday,
+    QrCode,
+    GridView
 } from '@mui/icons-material';
 import { supabase } from '../lib/supabase';
 import type { Atividade, CategoriaAtividade } from '../types';
@@ -42,6 +46,7 @@ interface EventoInfo {
 
 export default function CronogramaPublico() {
     const { eventoId } = useParams<{ eventoId: string }>();
+    const navigate = useNavigate();
     const theme = useTheme();
 
     const [evento, setEvento] = useState<EventoInfo | null>(null);
@@ -151,14 +156,13 @@ export default function CronogramaPublico() {
         <Box
             sx={{
                 minHeight: '100vh',
-                bgcolor: 'background.default',
+                bgcolor: '#fcf9f9',
                 pb: 4,
             }}
         >
-            {/* Header do evento */}
             <Box
                 sx={{
-                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.light} 100%)`,
+                    background: 'linear-gradient(135deg, #FF921C 0%, #ECA427 100%)',
                     color: 'white',
                     py: 4,
                     px: 2,
@@ -166,15 +170,26 @@ export default function CronogramaPublico() {
                     mb: 2,
                 }}
             >
+                <Box 
+                    component="img" 
+                    src="/img/logo.jpg" 
+                    alt="Logo Bom Pastor" 
+                    sx={{ 
+                        height: 70, 
+                        mb: 2, 
+                        borderRadius: '50%', 
+                        border: '3px solid rgba(255,255,255,0.2)' 
+                    }} 
+                />
                 <Typography
                     variant="h4"
                     fontWeight="bold"
                     sx={{ fontFamily: '"Playfair Display", serif' }}
                 >
-                    📅 {evento.nome}
+                    {evento.nome}
                 </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.85, mt: 1 }}>
-                    Agenda do Evento
+                <Typography variant="body2" sx={{ opacity: 0.85, mt: 0.5, letterSpacing: 2, fontWeight: 'bold' }}>
+                    PROGRAMAÇÃO OFICIAL
                 </Typography>
             </Box>
 
@@ -207,7 +222,7 @@ export default function CronogramaPublico() {
                     <Typography
                         variant="h6"
                         fontWeight="bold"
-                        sx={{ mb: 2, color: 'primary.dark' }}
+                        sx={{ mb: 2, color: '#FF921C' }}
                     >
                         {formatDataCompleta(dataSelecionada)}
                     </Typography>
@@ -263,7 +278,7 @@ export default function CronogramaPublico() {
                                 top: 0,
                                 bottom: 0,
                                 width: 3,
-                                bgcolor: alpha(theme.palette.primary.main, 0.15),
+                                bgcolor: 'rgba(255, 146, 28, 0.15)',
                                 borderRadius: 2,
                             }}
                         />
@@ -411,9 +426,22 @@ export default function CronogramaPublico() {
 
                 {/* Footer */}
                 <Box sx={{ mt: 6, pt: 3, textAlign: 'center', borderTop: '1px solid', borderColor: 'divider' }}>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
                         <strong>© 2026 Bom Pastor Digital</strong> • Agenda atualizada em tempo real
                     </Typography>
+                    <Button 
+                        startIcon={<GridView sx={{ color: '#FF921C' }} />} 
+                        onClick={() => navigate('/central')}
+                        sx={{ 
+                            color: '#FF921C', 
+                            textTransform: 'none', 
+                            fontWeight: 'bold',
+                            fontSize: '1.1rem',
+                            '&:hover': { bgcolor: 'rgba(255, 146, 28, 0.05)' }
+                        }}
+                    >
+                        Voltar ao Hub
+                    </Button>
                 </Box>
             </Container>
         </Box>

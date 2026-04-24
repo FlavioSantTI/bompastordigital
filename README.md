@@ -42,18 +42,32 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 | **4.2** | 21/04/2026 | **Estabilização Crítica**: Seletores Nativos e visual de rascunho para atividades não publicadas. |
 | **4.3** | 21/04/2026 | **Link Amigável /agenda**: Redirecionamento inteligente para o cronograma ativo. |
 | **4.4** | 22/04/2026 | **Módulo de QR Code de Presença**: Geração de códigos diários por turno via Admin com log no Supabase. Integração com WhatsApp/n8n. |
-| **4.5** | **22/04/2026** | **Otimização e Crachás Premium**: Substituição de assets (Logo 1.4MB -> 61KB) para geração ultra-rápida de PDFs; Agrupamento otimizado de crachás (2 por folha A4 para casais e individuais); Crachás em Branco para preenchimento manual; Exportação de Crachás para Excel (Nome, Paróquia, Diocese, Cidade); Fluxo de impressão direta otimizado. |
+| **4.5** | 22/04/2026 | **Otimização e Crachás Premium**: Substituição de assets; Agrupamento 2 por folha A4; Crachás em Branco; Exportação XLS. |
+| **4.6** | 24/04/2026 | **Portal do Participante & Hub Público**: Lançamento do Hub Central, Painel de Presença Ao Vivo e nova identidade. |
+| **4.7** | 24/04/2026 | **Hub Central Premium & Segurança**: Melhorias em UX, grid 2x2 e trava de segurança. |
+| **5.0** | **24/04/2026** | **Edição Especial Bom Pastor Digital**: Unificação do Hub, segurança admin e navegação premium. |
 
 ---
 
-## 📋 Funcionalidades Implementadas (Destaques v4.5)
+### ✅ Edição Especial Bom Pastor Digital (v5.0)
+- [x] **Hub Central 2x2 Premium**: Layout rígido com navegação fluida e imponente.
+- [x] **Segurança Admin Máxima**: Travas de edição no WhatsApp n8n e validação de QR Code.
+- [x] **Identidade Visual v5.0**: Efeitos de hover premium e tipografia ampliada para alta visibilidade.
+- [x] **Navegação Unificada**: Experiência circular completa com o Hub como espinha dorsal.
 
-### ✅ Gestão de Crachás & Documentos
-- [x] **Crachás Automáticos**: Agrupamento inteligente (2 por A4) suportando casais e indivíduos simultaneamente.
-- [x] **Crachás em Branco**: Opção de gerar crachás apenas com as etiquetas para inscrições de última hora.
-- [x] **Relatório de Crachás (XLS)**: Exportação simplificada para etiquetas ou conferência (Nome, Paróquia, Diocese, Cidade).
-- [x] **Otimização de Asset**: Transição para `.jpg` otimizado (redução de 95% no peso da logo), agilizando a renderização de PDF.
-- [x] **Correção de Dados**: Lógica de suporte para dados já normalizados e opção de impressão direta via browser.
+### ✅ Hub Central Premium & Segurança (v4.7)
+- [x] **Grid 2x2**: Organização em "tabela" para fácil acesso mobile.
+- [x] **Segurança**: Validação de telefone no gerador.
+
+### ✅ Portal do Participante (Hub Público - v4.6)
+- [x] **Hub Central (`/central`)**: Ponto de entrada único para o participante acessar Agenda, Status de Presença e Painel de Exibição.
+- [x] **Painel de Presença Ao Vivo (`/presenca-viva`)**: Interface otimizada para telões com atualização automática via **Supabase Realtime**.
+- [x] **Nova Identidade Visual**: Rebranding completo com paleta **Laranja Sol (#FF921C)** e **Amarelo Ouro (#ECA427)**.
+- [x] **Relatório de Presença Dinâmico**: Visualização de status com filtragem por abas de data.
+
+### ✅ Gestão de Crachás & Documentos (v4.5)
+- [x] **Crachás Automáticos**: Agrupamento inteligente (2 por A4) suportando casais e indivíduos.
+- [x] **Otimização de Asset**: Transição para `.jpg` otimizado (redução de 95% no peso).
 
 ### ✅ Cronograma & Agenda (v4.0 - v4.3)
 - [x] Gestão de Salas e Espaços
@@ -85,6 +99,6 @@ Acesse: `http://localhost:5173`
 ---
 
 ## 🤝 Contribuição
-Desenvolvido por **Flávio Santiago** com assistência de IA.
+Desenvolvido por **Flávio Santiago** com assistência de IA (Antigravity).
 Contato: flavio.santiago.ti@outlook.com
-© 2026 Bom Pastor Digital • Versão 4.5
+© 2026 Bom Pastor Digital • **Versão 5.0**

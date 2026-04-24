@@ -21,7 +21,8 @@ import {
     Assignment,
     ListAlt,
     PictureAsPdf,
-    Badge as BadgeIcon
+    Badge as BadgeIcon,
+    Launch
 } from '@mui/icons-material';
 import { supabase } from '../../lib/supabase';
 import { type DadosExportacao } from '../../services/exportService';
@@ -41,8 +42,8 @@ export default function ReportsPage() {
 
     // Estados para o Preview de PDF
     const [previewOpen, setPreviewOpen] = useState(false);
-    const [previewTipo, setPreviewTipo] = useState<'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco'>('lista');
-    const [previewDados, setPreviewDados] = useState<DadosExportacao[]>([]);
+    const [previewTipo, setPreviewTipo] = useState<'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial'>('lista');
+    const [previewDados, setPreviewDados] = useState<any[]>([]);
     const [previewTitulo, setPreviewTitulo] = useState('');
 
     useEffect(() => {
@@ -63,7 +64,7 @@ export default function ReportsPage() {
         }
     };
 
-    const handleExport = async (tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco') => {
+    const handleExport = async (tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial') => {
         if (tipo === 'crachas_branco') {
             setPreviewDados([]);
             setPreviewTitulo('Regional Norte 3');
@@ -81,6 +82,24 @@ export default function ReportsPage() {
         setError('');
 
         try {
+            if (tipo === 'presenca_gerencial') {
+                const { data, error: fetchError } = await supabase
+                    .from('view_presenca_gerencial')
+                    .select('*')
+                    .eq('evento_id', selectedEvento);
+
+                if (fetchError) throw fetchError;
+
+                const infoEvento = eventos.find(e => e.id === selectedEvento);
+                const nomeEvento = infoEvento?.nome || 'Evento';
+
+                setPreviewDados(data || []);
+                setPreviewTitulo(nomeEvento);
+                setPreviewTipo(tipo);
+                setPreviewOpen(true);
+                return;
+            }
+
             // Buscar inscrições sem joins embedded (evita INNER JOIN que exclui individuais sem esposa_id)
             const { data: rawInscricoes, error: fetchError } = await supabase
                 .from('inscricoes')
@@ -328,6 +347,24 @@ export default function ReportsPage() {
                                             <Typography variant="body2" fontWeight="bold">Crachás Branco</Typography>
                                             <Typography variant="caption" color="text.secondary" display="block">
                                                 Para preenchimento
+                                            </Typography>
+                                        </CardContent>
+                                    </CardActionArea>
+                                </Card>
+                            </Grid>
+
+                            {/* Link Público de Presença (NOVO) */}
+                            <Grid size={{ xs: 12, sm: 3 }}>
+                                <Card variant="outlined" sx={{ borderRadius: 3, border: '1px dashed #1e3a5f' }}>
+                                    <CardActionArea 
+                                        disabled={!selectedEvento}
+                                        onClick={() => window.open(`/presenca-publica/${selectedEvento}`, '_blank')}
+                                    >
+                                        <CardContent sx={{ textAlign: 'center', py: 1.5 }}>
+                                            <Launch sx={{ fontSize: 32, mb: 0.5, color: '#1e3a5f' }} />
+                                            <Typography variant="body2" fontWeight="bold">Link Público</Typography>
+                                            <Typography variant="caption" color="text.secondary" display="block">
+                                                Abrir Relatório Externo
                                             </Typography>
                                         </CardContent>
                                     </CardActionArea>

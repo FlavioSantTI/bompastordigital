@@ -42,6 +42,15 @@ export interface DadosExportacao {
     data_inscricao: string;
 }
 
+export interface DadosPresenca {
+    participante: string;
+    turno: string;
+    data_evento: string;
+    hora_chegada: string;
+    diocese: string;
+    cidade_inscricao: string;
+}
+
 const sanitizarNomeArquivo = (nome: string) => {
     return nome.normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '') // remove acentos
@@ -293,6 +302,28 @@ export const exportService = {
             console.log('Download PDF Lista disparado');
         } catch (error) {
             console.error('Erro PDF Lista:', error);
+            throw error;
+        }
+    },
+
+    // 4. Exportar Presença para Excel
+    exportarPresencaExcel: (dados: DadosPresenca[], nomeArquivo: string = 'Relatorio_Presenca') => {
+        try {
+            const linhas = dados.map(item => ({
+                'Participante': item.participante,
+                'Turno': item.turno,
+                'Data do Evento': new Date(item.data_evento).toLocaleDateString('pt-BR'),
+                'Hora de Chegada': item.hora_chegada ? new Date(item.hora_chegada).toLocaleTimeString('pt-BR') : '-',
+                'Diocese': item.diocese,
+                'Cidade': item.cidade_inscricao
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(linhas);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Presença");
+            XLSX.writeFile(workbook, `${sanitizarNomeArquivo(nomeArquivo)}.xlsx`);
+        } catch (error) {
+            console.error('Erro Excel Presença:', error);
             throw error;
         }
     }

@@ -2,6 +2,7 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, Box, Typography,
     CircularProgress,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Paper
 } from '@mui/material';
 import { useState } from 'react';
 import { Download, Close, CloudUpload } from '@mui/icons-material';
@@ -13,8 +14,8 @@ import { type DadosExportacao, exportService } from '../../services/exportServic
 
 interface ReportPreviewDialogProps {
     open: boolean;
-    tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco';
-    dados: DadosExportacao[];
+    tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial';
+    dados: any[];
     tituloEvento: string;
     onClose: () => void;
 }
@@ -27,6 +28,8 @@ export default function ReportPreviewDialog({
     onClose,
 }: ReportPreviewDialogProps) {
     const [isExportingXLS, setIsExportingXLS] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     
     // Nome do arquivo padrão
     const prefixo = tipo === 'lista_presenca_diocese' ? 'Lista_de_Presenca' : tipo.replace('_', ' ');
@@ -84,6 +87,7 @@ export default function ReportPreviewDialog({
             case 'crachas': return 'Pré-visualização: Crachás do Evento';
             case 'lista_presenca_diocese': return 'Pré-visualização: Lista de Presença por Diocese';
             case 'crachas_branco': return 'Pré-visualização: Crachás em Branco';
+            case 'presenca_gerencial': return 'Relatório de Presença Gerencial';
             default: return 'Pré-visualização';
         }
     };
@@ -105,6 +109,54 @@ export default function ReportPreviewDialog({
                 {dados.length === 0 ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                         <Typography color="text.secondary">Nenhum dado para exibir.</Typography>
+                    </Box>
+                ) : tipo === 'presenca_gerencial' ? (
+                    <Box sx={{ p: 3, bgcolor: '#fff', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="h6" gutterBottom color="primary" sx={{ fontWeight: 'bold' }}>
+                            {tituloEvento}
+                        </Typography>
+                        <TableContainer component={Paper} variant="outlined" sx={{ flexGrow: 1, overflow: 'auto' }}>
+                            <Table stickyHeader size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell sx={{ backgroundColor: '#1e3a5f', color: '#fff', fontWeight: 'bold' }}>Participante</TableCell>
+                                        <TableCell sx={{ backgroundColor: '#1e3a5f', color: '#fff', fontWeight: 'bold' }}>Turno</TableCell>
+                                        <TableCell sx={{ backgroundColor: '#1e3a5f', color: '#fff', fontWeight: 'bold' }}>Data</TableCell>
+                                        <TableCell sx={{ backgroundColor: '#1e3a5f', color: '#fff', fontWeight: 'bold' }}>Chegada</TableCell>
+                                        <TableCell sx={{ backgroundColor: '#1e3a5f', color: '#fff', fontWeight: 'bold' }}>Diocese</TableCell>
+                                        <TableCell sx={{ backgroundColor: '#1e3a5f', color: '#fff', fontWeight: 'bold' }}>Cidade</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {dados
+                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                        .map((row, idx) => (
+                                        <TableRow key={idx} hover>
+                                            <TableCell>{row.participante}</TableCell>
+                                            <TableCell>{row.turno}</TableCell>
+                                            <TableCell>{new Date(row.data_evento).toLocaleDateString('pt-BR')}</TableCell>
+                                            <TableCell>{row.hora_chegada ? new Date(row.hora_chegada).toLocaleTimeString('pt-BR') : '-'}</TableCell>
+                                            <TableCell>{row.diocese}</TableCell>
+                                            <TableCell>{row.cidade_inscricao}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <TablePagination
+                            rowsPerPageOptions={[10, 25, 50]}
+                            component="div"
+                            count={dados.length}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            onPageChange={(_, newPage) => setPage(newPage)}
+                            onRowsPerPageChange={(e) => {
+                                setRowsPerPage(parseInt(e.target.value, 10));
+                                setPage(0);
+                            }}
+                            labelRowsPerPage="Linhas por página:"
+                            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+                        />
                     </Box>
                 ) : (
                     <PDFViewer width="100%" height="100%" style={{ border: 'none' }}>
@@ -135,9 +187,13 @@ export default function ReportPreviewDialog({
                         setIsExportingXLS(true);
                         setTimeout(() => {
                             try {
-                                const individualizar = tipo === 'lista_presenca_diocese' || tipo === 'lista';
-                                const fileTitle = tipo === 'lista_presenca_diocese' ? 'Lista de Presença' : getTitle();
-                                exportService.exportarExcel(dados, fileTitle, individualizar);
+                                if (tipo === 'presenca_gerencial') {
+                                    exportService.exportarPresencaExcel(dados, `Presenca_${tituloEvento}`);
+                                } else {
+                                    const individualizar = tipo === 'lista_presenca_diocese' || tipo === 'lista';
+                                    const fileTitle = tipo === 'lista_presenca_diocese' ? 'Lista de Presença' : getTitle();
+                                    exportService.exportarExcel(dados, fileTitle, individualizar);
+                                }
                             } finally {
                                 setIsExportingXLS(false);
                             }
@@ -147,30 +203,32 @@ export default function ReportPreviewDialog({
                     {isExportingXLS ? 'Gerando XLS...' : 'Baixar XLS'}
                 </Button>
 
-                <PDFDownloadLink
-                    document={getDocument()}
-                    fileName={nomeArquivo}
-                    style={{ textDecoration: 'none' }}
-                >
-                    {({ loading }) => (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            sx={{ 
-                                color: '#fff !important',
-                                '&.Mui-disabled': { 
-                                    color: 'rgba(255, 255, 255, 0.8) !important',
-                                    bgcolor: '#0d47a1 !important',
-                                    opacity: 0.7
-                                } 
-                            }}
-                            startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <Download />}
-                            disabled={loading || dados.length === 0}
-                        >
-                            {loading ? 'Preparando PDF...' : 'Baixar PDF'}
-                        </Button>
-                    )}
-                </PDFDownloadLink>
+                {tipo !== 'presenca_gerencial' && (
+                    <PDFDownloadLink
+                        document={getDocument()}
+                        fileName={nomeArquivo}
+                        style={{ textDecoration: 'none' }}
+                    >
+                        {({ loading }) => (
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                sx={{ 
+                                    color: '#fff !important',
+                                    '&.Mui-disabled': { 
+                                        color: 'rgba(255, 255, 255, 0.8) !important',
+                                        bgcolor: '#0d47a1 !important',
+                                        opacity: 0.7
+                                    } 
+                                }}
+                                startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <Download />}
+                                disabled={loading || dados.length === 0}
+                            >
+                                {loading ? 'Preparando PDF...' : 'Baixar PDF'}
+                            </Button>
+                        )}
+                    </PDFDownloadLink>
+                )}
             </DialogActions>
 
             {/* Overlay de Processamento Circular */}
