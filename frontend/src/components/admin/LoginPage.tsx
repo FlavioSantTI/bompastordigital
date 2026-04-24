@@ -214,11 +214,29 @@ export default function LoginPage() {
                         variant="outlined"
                         size="small"
                         color="primary"
-                        startIcon={<CalendarToday fontSize="small" />}
-                        onClick={() => navigate('/agenda')}
-                        sx={{ mt: 1.5, py: 0.8, textTransform: 'none', borderStyle: 'dashed' }}
+                        onClick={() => navigate('/central')}
+                        sx={{ 
+                            mt: 1.5, 
+                            py: 0.8, 
+                            textTransform: 'none', 
+                            borderStyle: 'dashed',
+                            fontWeight: 'bold',
+                            color: '#FF921C',
+                            borderColor: '#FF921C',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '&:hover': {
+                                transform: 'translateY(-2px)',
+                                boxShadow: '0 4px 12px rgba(255, 146, 28, 0.2)',
+                                borderColor: '#ECA427',
+                                bgcolor: 'rgba(255, 146, 28, 0.05)',
+                                color: '#ECA427'
+                            },
+                            '&:active': {
+                                transform: 'scale(0.98)'
+                            }
+                        }}
                     >
-                        Ver Programação do Evento
+                        Portal do Participante
                     </Button>
 
                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #eee' }}>
