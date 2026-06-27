@@ -299,16 +299,24 @@ export async function fetchAvailableEvents() {
     try {
         const { data, error } = await supabase
             .from('eventos')
-            .select('id, nome, data_inicio, data_fim, vagas')
-            .eq('status', 'aberto')
-            .order('data_inicio', { ascending: true });
+            .select('id, nome, inscricao_inicio, inscricao_fim, realizacao_inicio, realizacao_fim, data_inicio, data_fim, vagas, publicado, status_manual')
+            .eq('publicado', true)
+            .order('realizacao_inicio', { ascending: true });
 
         if (error) {
             console.error('Erro ao buscar eventos:', error);
             return { data: null, error: 'Erro ao carregar eventos disponíveis.' };
         }
 
-        return { data, error: null };
+        // Filtrar no frontend os eventos cujo período de encerramento já passou e não cancelados
+        const now = new Date();
+        const availableData = data.filter((evt: any) => {
+             if (evt.status_manual === 'cancelado') return false;
+             const realFim = new Date(evt.realizacao_fim);
+             return now < realFim;
+        });
+
+        return { data: availableData, error: null };
     } catch (error) {
         console.error('Erro inesperado:', error);
         return { data: null, error: 'Erro inesperado ao carregar eventos.' };

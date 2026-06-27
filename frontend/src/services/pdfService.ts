@@ -1,6 +1,5 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { PIX_CONFIG } from '../types';
 
 interface CoupleData {
     esposo: {
@@ -18,6 +17,12 @@ interface EventData {
     data_inicio: string;
     data_fim: string;
     local: string;
+    is_paid?: boolean;
+    event_price?: number | null;
+    pix_key_type?: string | null;
+    pix_key?: string | null;
+    merchant_name?: string | null;
+    merchant_city?: string | null;
 }
 
 interface ConfirmationData {
@@ -107,65 +112,99 @@ export const pdfService = {
 
         yPos += 15;
 
-        // Instruções de Pagamento
-        doc.setFillColor(255, 243, 224); // Background amarelo suave
-        doc.rect(margin, yPos - 5, pageWidth - 2 * margin, 65, 'F');
+        // Se for pago, gerar e renderizar informações do PIX dinâmico
+        if (data.event.is_paid) {
+            const { getPaymentStrategy } = await import('./paymentStrategies');
+            const txId = `BPD${data.inscricaoId}`;
+            const paymentStrategy = getPaymentStrategy('pix');
+            const paymentPayload = paymentStrategy.generatePayload({
+                pixKey: data.event.pix_key || '',
+                pixKeyType: data.event.pix_key_type || '',
+                merchantName: data.event.merchant_name || 'PAROQUIA BOM PASTOR',
+                merchantCity: data.event.merchant_city || 'PALMAS',
+                amount: data.event.event_price || 0,
+                txId,
+            });
 
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(44, 62, 80);
-        doc.text('💰 Informações de Pagamento', margin + 5, yPos);
+            // Instruções de Pagamento
+            doc.setFillColor(255, 243, 224); // Background amarelo suave
+            doc.rect(margin, yPos - 5, pageWidth - 2 * margin, 65, 'F');
 
-        yPos += 10;
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(211, 47, 47); // Vermelho
-        doc.text('Valor: R$ 100,00', margin + 5, yPos);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(44, 62, 80);
+            doc.text('💰 Informações de Pagamento', margin + 5, yPos);
 
-        yPos += 10;
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(60, 60, 60);
-        doc.text(`Chave PIX (${PIX_CONFIG.chaveTipo}): ${PIX_CONFIG.chave}`, margin + 5, yPos);
-        yPos += 6;
-        doc.text(`Beneficiário: ${PIX_CONFIG.beneficiario}`, margin + 5, yPos);
+            yPos += 10;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(211, 47, 47); // Vermelho
+            doc.text(`Valor: R$ ${paymentPayload.displayData.valor}`, margin + 5, yPos);
 
-        yPos += 10;
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(255, 87, 34); // Laranja
-        doc.text('📸 IMPORTANTE: Envie o comprovante via WhatsApp:', margin + 5, yPos);
-        yPos += 6;
-        doc.setFontSize(14);
-        doc.setTextColor(211, 47, 47); // Vermelho
-        doc.text(PIX_CONFIG.whatsappContato, margin + 5, yPos);
+            yPos += 10;
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(60, 60, 60);
+            doc.text(`Chave PIX (${paymentPayload.displayData.chaveTipo}): ${paymentPayload.displayData.chave}`, margin + 5, yPos);
+            yPos += 6;
+            doc.text(`Beneficiário: ${paymentPayload.displayData.beneficiario}`, margin + 5, yPos);
 
-        yPos += 15;
+            yPos += 10;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(255, 87, 34); // Laranja
+            doc.text('📸 IMPORTANTE: Envie o comprovante via WhatsApp:', margin + 5, yPos);
+            yPos += 6;
+            doc.setFontSize(14);
+            doc.setTextColor(211, 47, 47); // Vermelho
+            doc.text('(63) 98405-5758', margin + 5, yPos);
 
-        // Código Pix Copia e Cola
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(44, 62, 80);
-        doc.text('PIX Copia e Cola:', margin, yPos);
-        yPos += 6;
+            yPos += 15;
 
-        doc.setFontSize(8);
-        doc.setFont('courier', 'normal');
-        doc.setTextColor(80, 80, 80);
+            // Código Pix Copia e Cola
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(44, 62, 80);
+            doc.text('PIX Copia e Cola:', margin, yPos);
+            yPos += 6;
 
-        // Quebrar o código em múltiplas linhas
-        const pixCode = PIX_CONFIG.pixCopiaCola;
-        const maxWidth = pageWidth - 2 * margin - 10;
-        const lines = doc.splitTextToSize(pixCode, maxWidth);
-        doc.text(lines, margin + 5, yPos);
+            doc.setFontSize(8);
+            doc.setFont('courier', 'normal');
+            doc.setTextColor(80, 80, 80);
 
-        yPos += lines.length * 4 + 10;
+            // Quebrar o código em múltiplas linhas
+            const pixCode = paymentPayload.copiaECola;
+            const maxWidth = pageWidth - 2 * margin - 10;
+            const lines = doc.splitTextToSize(pixCode, maxWidth);
+            doc.text(lines, margin + 5, yPos);
+
+            yPos += lines.length * 4 + 10;
+        } else {
+            // Se for gratuito, só uma mensagem de sucesso
+            doc.setFillColor(232, 245, 233); // Background verde suave
+            doc.rect(margin, yPos - 5, pageWidth - 2 * margin, 25, 'F');
+
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(46, 125, 50); // Verde escuro
+            doc.text('🎟️ Inscrição Gratuita Confirmada!', margin + 5, yPos);
+
+            yPos += 10;
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(60, 60, 60);
+            doc.text('Esta inscrição foi confirmada automaticamente. Não há valor a ser pago.', margin + 5, yPos);
+
+            yPos += 20;
+        }
 
         // Footer
         doc.setFontSize(9);
         doc.setFont('helvetica', 'italic');
         doc.setTextColor(120, 120, 120);
-        const footerText = 'Sua inscrição será confirmada após a verificação do pagamento.';
+        const footerText = data.event.is_paid 
+            ? 'Sua inscrição será confirmada após a verificação do pagamento.' 
+            : 'Sua inscrição está confirmada com sucesso.';
         doc.text(footerText, pageWidth / 2, yPos, { align: 'center' });
 
         yPos += 6;

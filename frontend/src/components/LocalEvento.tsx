@@ -45,7 +45,7 @@ export default function LocalEvento() {
                 }}
             >
                 <IconButton 
-                    onClick={() => navigate('/central')}
+                    onClick={() => navigate(`/p/${eventoId}`)}
                     sx={{ position: 'absolute', left: 16, top: 12, color: 'white' }}
                 >
                     <ArrowBack />
@@ -129,7 +129,7 @@ export default function LocalEvento() {
                 <Box sx={{ mt: 4, textAlign: 'center' }}>
                     <Button 
                         startIcon={<GridView sx={{ color: '#FF921C' }} />}
-                        onClick={() => navigate('/central')}
+                        onClick={() => navigate(`/p/${eventoId}`)}
                         sx={{ 
                             color: '#FF921C', 
                             textTransform: 'none', 
@@ -138,7 +138,7 @@ export default function LocalEvento() {
                             '&:hover': { bgcolor: 'rgba(255, 146, 28, 0.05)' }
                         }}
                     >
-                        Voltar ao Hub
+                        Voltar ao Início
                     </Button>
                 </Box>
             </Container>

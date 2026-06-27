@@ -46,9 +46,30 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 | **4.6** | 24/04/2026 | **Portal do Participante & Hub Público**: Lançamento do Hub Central, Painel de Presença Ao Vivo e nova identidade. |
 | **4.7** | 24/04/2026 | **Hub Central Premium & Segurança**: Melhorias em UX, grid 2x2 e trava de segurança. |
 | **5.0** | 24/04/2026 | **Edição Especial Bom Pastor Digital**: Unificação do Hub, segurança admin e navegação premium. |
-| **5.1** | **24/04/2026** | **Geração de PDF de Presença Ultra-Compatível**: PDF em P&B de alta fidelidade, fontes nativas e memória de WhatsApp. |
+| **5.1** | 24/04/2026 | **Geração de PDF de Presença Ultra-Compatível**: PDF em P&B de alta fidelidade, fontes nativas e memória de WhatsApp. |
+| **5.2** | 27/06/2026 | **Períodos de Inscrição e Realização**: Separação das datas do evento das datas de inscrição, com controle de status automatizado e RPC. |
+| **5.3** | 27/06/2026 | **Módulo de Gestão de Palestrantes**: Cadastro global, upload de foto no Storage, redes sociais, associação N:N no cronograma e exibição na timeline pública. |
+| **5.4** | **27/06/2026** | **Segurança Fortalecida & Otimização de Performance**: Regras de Senha Forte (10+ carac, letras, núm, símbolos), visualizador de senha 👁️ e Code Splitting (bundle 78% mais leve para conexões móveis). |
 
 ---
+
+### ✅ Segurança Fortalecida & Otimização de Performance (v5.4)
+- [x] **Segurança de Autenticação (Senha Forte)**: Validação obrigatória de 10+ caracteres combinando letras, números e símbolos especiais em todos os formulários.
+- [x] **UX de Formulários**: Botão de alternância de visibilidade de senha (ícone de olho 👁️) nos campos de entrada.
+- [x] **Otimização de Carregamento (Code Splitting)**: Divisão de pacotes de bibliotecas pesadas via `manualChunks` no Vite, reduzindo o arquivo inicial de 4MB para 883KB.
+- [x] **Compatibilidade de Rede**: Navegação ultra-rápida testada e otimizada para conexões móveis e provedores regionais de baixa largura de banda.
+
+### ✅ Módulo de Gestão de Palestrantes (v5.3)
+- [x] **Banco de Dados (Supabase)**: Novas tabelas `palestrantes`, `atividade_palestrantes` (N:N), RLS e bucket público `palestrantes` no Storage.
+- [x] **Painel Admin**: Nova tela de gestão de palestrantes (`/admin/palestrantes`) com upload de foto e links de redes sociais.
+- [x] **Modal de Atalho Rápido**: Botão "+ Novo Rápido" no formulário de atividades para criar e vincular palestrantes instantaneamente.
+- [x] **Timeline pública & Relatórios**: Exibição de avatares e minibios na agenda pública dos participantes e inclusão em PDFs/Excel.
+
+### ✅ Períodos de Inscrição e Realização (v5.2)
+- [x] **Banco de Dados (Supabase)**: Migração com novos campos de datas (inscrição e realização) independentes.
+- [x] **Segurança RPC**: Validação inteligente de período no momento do registro.
+- [x] **UI Dinâmica (Admin)**: Atualização automática de status (Em Breve, Inscrições Abertas, Encerradas, Em Andamento) baseada no horário atual.
+- [x] **Hub Público**: Exibição aprimorada de datas em chips no Portal do Participante.
 
 ### ✅ Geração de PDF de Presença Ultra-Compatível (v5.1)
 - [x] **PDF de Alta Fidelidade (P&B)**: Design minimalista otimizado para impressão econômica e legibilidade máxima.
@@ -109,4 +130,4 @@ Acesse: `http://localhost:5173`
 ## 🤝 Contribuição
 Desenvolvido por **Flávio Santiago** com assistência de IA (Antigravity).
 Contato: flavio.santiago.ti@outlook.com
-© 2026 Bom Pastor Digital • **Versão 5.1**
+© 2026 Bom Pastor Digital • **Versão 5.2**

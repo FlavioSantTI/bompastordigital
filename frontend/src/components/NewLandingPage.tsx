@@ -141,88 +141,118 @@ export default function NewLandingPage() {
                 </Typography>
 
                 {/* Cards de Informações */}
-                <Grid container spacing={4} sx={{ mt: 4 }}>
-                    <Grid size={{ xs: 12, md: 4 }}>
+                <Grid container spacing={4} sx={{ mt: 4, justifyContent: 'center' }}>
+                    <Grid size={{ xs: 12, md: 3 }}>
                         <Paper
                             elevation={0}
                             sx={{
-                                p: 4,
+                                p: 3,
                                 textAlign: 'center',
                                 bgcolor: 'white',
                                 borderRadius: 3,
                                 border: '1px solid #E8E5DE',
                                 transition: 'all 0.3s ease',
+                                height: '100%',
                                 '&:hover': {
                                     boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
                                     transform: 'translateY(-4px)'
                                 }
                             }}
                         >
-                            <CalendarMonth sx={{ fontSize: 48, color: '#6B9AC4', mb: 2 }} />
-                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#2C3E50', mb: 1 }}>
-                                Quando
+                            <CalendarMonth sx={{ fontSize: 40, color: '#D4A373', mb: 2 }} />
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#2C3E50', mb: 1, fontSize: '1.1rem' }}>
+                                Inscrições
                             </Typography>
-                            <Typography variant="body1" color="text.secondary">
-                                24 a 26 de abril de 2026
+                            <Typography variant="body2" color="text.secondary">
+                                01 de março a <br /> 20 de abril de 2026
                             </Typography>
                         </Paper>
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid size={{ xs: 12, md: 3 }}>
                         <Paper
                             elevation={0}
                             sx={{
-                                p: 4,
+                                p: 3,
                                 textAlign: 'center',
                                 bgcolor: 'white',
                                 borderRadius: 3,
                                 border: '1px solid #E8E5DE',
                                 transition: 'all 0.3s ease',
+                                height: '100%',
                                 '&:hover': {
                                     boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
                                     transform: 'translateY(-4px)'
                                 }
                             }}
                         >
-                            <LocationOn sx={{ fontSize: 48, color: '#6B9AC4', mb: 2 }} />
-                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#2C3E50', mb: 1 }}>
+                            <CalendarMonth sx={{ fontSize: 40, color: '#6B9AC4', mb: 2 }} />
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#2C3E50', mb: 1, fontSize: '1.1rem' }}>
+                                Realização
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                24 a 26 de <br /> abril de 2026
+                            </Typography>
+                        </Paper>
+                    </Grid>
+
+                    <Grid size={{ xs: 12, md: 3 }}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 3,
+                                textAlign: 'center',
+                                bgcolor: 'white',
+                                borderRadius: 3,
+                                border: '1px solid #E8E5DE',
+                                transition: 'all 0.3s ease',
+                                height: '100%',
+                                '&:hover': {
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+                                    transform: 'translateY(-4px)'
+                                }
+                            }}
+                        >
+                            <LocationOn sx={{ fontSize: 40, color: '#6B9AC4', mb: 2 }} />
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#2C3E50', mb: 1, fontSize: '1.1rem' }}>
                                 Onde
                             </Typography>
-                            <Typography variant="body1" color="text.secondary">
-                                Catedral Metropolitana do Divino Espírito Santo
-                                <br />
+                            <Typography variant="body2" color="text.secondary">
+                                Catedral Metropolitana <br />
                                 Palmas - TO
                             </Typography>
                         </Paper>
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid size={{ xs: 12, md: 3 }}>
                         <Paper
                             elevation={0}
                             sx={{
-                                p: 4,
+                                p: 3,
                                 textAlign: 'center',
                                 bgcolor: 'white',
                                 borderRadius: 3,
                                 border: '1px solid #E8E5DE',
                                 transition: 'all 0.3s ease',
+                                height: '100%',
                                 '&:hover': {
                                     boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
                                     transform: 'translateY(-4px)'
                                 }
                             }}
                         >
-                            <Favorite sx={{ fontSize: 48, color: '#6B9AC4', mb: 2 }} />
-                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#2C3E50', mb: 1 }}>
+                            <Favorite sx={{ fontSize: 40, color: '#6B9AC4', mb: 2 }} />
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#2C3E50', mb: 1, fontSize: '1.1rem' }}>
                                 Formato
                             </Typography>
-                            <Typography variant="body1" color="text.secondary">
-                                Encontro presencial
-                                <br />
-                                com acolhimento pastoral
+                            <Typography variant="body2" color="text.secondary">
+                                Presencial <br />
+                                com acolhimento
                             </Typography>
                         </Paper>
                     </Grid>
+
+
                 </Grid>
             </Container>
 

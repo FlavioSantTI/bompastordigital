@@ -212,12 +212,20 @@ export default function DashboardPage() {
 
         try {
             // 1. Carregar estatísticas básicas
-            const [diocesesRes, eventosRes, inscricoesRes, abertosRes] = await Promise.all([
+            const [diocesesRes, eventosRes, inscricoesRes] = await Promise.all([
                 supabase.from('dioceses').select('*', { count: 'exact', head: true }),
                 supabase.from('eventos').select('*', { count: 'exact', head: true }),
                 supabase.from('inscricoes').select('*', { count: 'exact', head: true }),
-                supabase.from('eventos').select('*', { count: 'exact', head: true }).eq('status', 'aberto'),
             ]);
+
+            // Buscar todos os eventos para filtrar abertos/em_breve
+            const { data: allEventos } = await supabase.from('eventos').select('realizacao_fim, publicado, status_manual');
+            const now = new Date();
+            const eventosAbertosCount = (allEventos || []).filter(e => 
+                e.publicado && 
+                e.status_manual !== 'cancelado' && 
+                new Date(e.realizacao_fim) > now
+            ).length;
 
             // 2. Carregar TODAS as inscrições para métricas de gráficos
             const { data: allInscricoes } = await supabase
@@ -243,7 +251,7 @@ export default function DashboardPage() {
                 totalDioceses: diocesesRes.count || 0,
                 totalEventos: eventosRes.count || 0,
                 totalInscricoes: inscricoesRes.count || 0,
-                eventosAbertos: abertosRes.count || 0,
+                eventosAbertos: eventosAbertosCount,
                 totalPessoas,
                 confirmadas,
                 pendentes,
@@ -254,8 +262,8 @@ export default function DashboardPage() {
             // 3. Carregar lista de eventos
             const { data: eventos } = await supabase
                 .from('eventos')
-                .select('id, nome, data_inicio, status, vagas')
-                .order('data_inicio', { ascending: false });
+                .select('id, nome, realizacao_inicio, realizacao_fim, publicado, status_manual, vagas, inscricao_inicio, inscricao_fim')
+                .order('realizacao_inicio', { ascending: false });
 
             setEventosLista((eventos || []).map(e => ({ id: e.id, nome: e.nome })));
 
@@ -544,7 +552,7 @@ export default function DashboardPage() {
                                         {stats.eventosAbertos}
                                     </Typography>
                                     <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                        Eventos Abertos
+                                        Ativos / Em Breve
                                     </Typography>
                                 </Box>
                                 <CheckCircle sx={{ fontSize: 48, opacity: 0.3 }} />

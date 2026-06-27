@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, CircularProgress, Container, Alert, Button, Paper } from '@mui/material';
+import { Box, Typography, CircularProgress, Container, Alert, Button, Paper, IconButton, Tooltip } from '@mui/material';
+import { Logout, Home, Refresh } from '@mui/icons-material';
 import RegistrationStepper from './RegistrationStepper';
 import RegistrationSummary from './RegistrationSummary';
+import MinhaEquipeSection from './MinhaEquipeSection';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function ParticipantDashboard() {
-    const { user } = useAuth();
+    const { user, signOut } = useAuth();
     const [loading, setLoading] = useState(true);
     const [inscricoes, setInscricoes] = useState<any[]>([]); // Mudou para array
     const [error, setError] = useState<string | null>(null);
@@ -14,13 +16,26 @@ export default function ParticipantDashboard() {
 
     useEffect(() => {
         async function checkRegistration() {
-            if (!user) return;
+            if (!user || !user.email) return;
 
             try {
-                console.log('[Dashboard] Buscando inscrições para user:', user.id);
+                console.log('[Dashboard] Buscando inscrições para user:', user.id, 'e email:', user.email);
                 
-                // Busca TODAS as inscrições do usuário
-                const { data, error } = await supabase
+                // 1. Busca IDs de pessoa associados ao email do usuário (case-insensitive)
+                const { data: pessoas, error: pessoasError } = await supabase
+                    .from('pessoas')
+                    .select('id')
+                    .ilike('email', user.email.trim());
+
+                if (pessoasError) {
+                    console.error('[Dashboard] Erro ao buscar pessoa por email:', pessoasError);
+                }
+
+                const pessoaIds = pessoas?.map(p => p.id) || [];
+                console.log('[Dashboard] IDs de pessoas resolvidos:', pessoaIds);
+
+                // 2. Busca TODAS as inscrições do usuário (por user_id ou por vínculo de cônjuge)
+                let query = supabase
                     .from('inscricoes')
                     .select(`
                         *,
@@ -28,8 +43,15 @@ export default function ParticipantDashboard() {
                         esposa:esposa_id (*),
                         eventos:evento_id (*),
                         dioceses:diocese_id (*)
-                    `)
-                    .eq('user_id', user.id)
+                    `);
+
+                if (pessoaIds.length > 0) {
+                    query = query.or(`user_id.eq.${user.id},esposo_id.in.(${pessoaIds.join(',')}),esposa_id.in.(${pessoaIds.join(',')})`);
+                } else {
+                    query = query.eq('user_id', user.id);
+                }
+
+                const { data, error } = await query
                     .order('created_at', { ascending: false }); // Mais recentes primeiro
 
                 if (error) {
@@ -169,15 +191,68 @@ export default function ParticipantDashboard() {
     // MODO LISTA (Minhas Inscrições existenes)
     return (
         <Container maxWidth="md">
-            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-                <Box>
-                    <Typography variant="h4" component="h1" fontWeight="bold" color="primary">
-                        Minha Inscrição
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                        Aqui está a sua inscrição ativa.
+            {/* Header Simples para Participante */}
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                mb: 4, 
+                pb: 2, 
+                borderBottom: '1px solid', 
+                borderColor: 'divider' 
+            }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Home color="primary" />
+                    <Typography variant="h6" fontWeight="bold" color="primary">
+                        Bom Pastor Digital
                     </Typography>
                 </Box>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Tooltip title="Recarregar">
+                        <IconButton onClick={() => window.location.reload()} size="small">
+                            <Refresh fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                    <Button 
+                        size="small" 
+                        color="error" 
+                        startIcon={<Logout />} 
+                        onClick={() => signOut()}
+                    >
+                        Sair
+                    </Button>
+                </Box>
+            </Box>
+
+            <Box sx={{ 
+                mb: 4, 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                flexWrap: 'wrap', 
+                gap: 2 
+            }}>
+                <Box>
+                    <Typography variant="h4" component="h1" fontWeight="bold" color="primary" gutterBottom>
+                        Painel do Participante
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                        Bem-vindo, <strong>{user?.user_metadata?.nome || user?.email}</strong>. Gerencie sua participação no evento abaixo.
+                    </Typography>
+                </Box>
+                <Button
+                    variant="contained"
+                    onClick={() => setShowForm(true)}
+                    sx={{ fontWeight: 'bold', borderRadius: 2 }}
+                >
+                    Nova Inscrição
+                </Button>
+            </Box>
+
+            <Box sx={{ mb: 2 }}>
+                <Typography variant="h6" fontWeight="bold" color="primary.dark" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <Refresh fontSize="small" /> Dados da Minha Inscrição
+                </Typography>
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -186,9 +261,16 @@ export default function ParticipantDashboard() {
                         key={inscricao.id}
                         inscricao={inscricao}
                         onEdit={() => handleEdit(inscricao.id)}
+                        onBack={() => {
+                            setShowForm(false);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
                     />
                 ))}
             </Box>
+
+            {/* Seção Minhas Equipes */}
+            {user?.email && <MinhaEquipeSection userEmail={user.email} />}
         </Container>
     );
 }

@@ -3,7 +3,7 @@
  */
 
 /** Versão Global do Sistema */
-export const APP_VERSION = '5.1';
+export const APP_VERSION = '5.4';
 
 /**
  * Tipo de inscrição
@@ -83,16 +83,54 @@ export const PASTORAIS_DISPONIVEIS = [
 ] as const;
 
 /**
- * Informações de pagamento PIX
- * TODO: Buscar do banco ou arquivo de configuração
+ * Status computado do evento baseado nos períodos
  */
-export const PIX_CONFIG = {
-    chave: 'grayceperini@gmail.com',
-    chaveTipo: 'E-mail',
-    beneficiario: 'Grayce Kelly Perini Gomes',
-    whatsappContato: '(63) 98405-5758',
-    pixCopiaCola: '00020126440014BR.GOV.BCB.PIX0122grayceperini@gmail.com5204000053039865802BR5925Grayce Kelly Perini Gomes6009SAO PAULO621405103o0UGlysGH63049897',
-} as const;
+export type EventoStatus =
+  | 'DRAFT'
+  | 'REGISTRATION_UPCOMING'
+  | 'REGISTRATION_OPEN'
+  | 'REGISTRATION_CLOSED'
+  | 'IN_PROGRESS'
+  | 'FINISHED'
+  | 'CANCELLED';
+
+/**
+ * Interface centralizada para Eventos
+ * v5.2: Inclui campos de períodos (inscrição e realização)
+ */
+export interface Evento {
+    id: number;
+    nome: string;
+    // Períodos (v5.2)
+    inscricao_inicio: string;
+    inscricao_fim: string;
+    realizacao_inicio: string;
+    realizacao_fim: string;
+    // Campos legados (DEPRECATED v5.2 — usar campos de período)
+    data_inicio: string;
+    data_fim: string;
+    hora_inicio?: string | null;
+    hora_fim?: string | null;
+    // Localização
+    municipio_id: number | null;
+    vagas: number;
+    // Controle
+    publicado: boolean;
+    status_manual: string | null;
+    // Campos financeiros (PRD v1.2)
+    is_paid: boolean;
+    event_price?: number | null;
+    pix_key_type?: string | null;
+    pix_key?: string | null;
+    merchant_name?: string | null;
+    merchant_city?: string | null;
+    accepted_payment_methods?: string[] | null;
+    // Campos expandidos (joins)
+    municipio?: {
+        nome_ibge: string | null;
+        uf: string | null;
+    };
+}
 
 // =============================================
 // MÓDULO CRONOGRAMA (v4.0)
@@ -145,4 +183,94 @@ export interface Atividade {
     created_at?: string;
     // Campos expandidos (joins)
     sala?: Sala;
+    palestrantes_vinculados?: AtividadePalestrante[];
 }
+
+// ========================================
+// FASE 4.0: GERENCIAMENTO DE EQUIPES
+// ========================================
+
+/** Status possíveis de uma tarefa de equipe */
+export type StatusTarefa = 'pendente' | 'em_andamento' | 'concluida';
+
+/** Prioridade de uma tarefa de equipe */
+export type PrioridadeTarefa = 'baixa' | 'media' | 'alta';
+
+/** Cargo de membro em uma equipe (tabela auxiliar cargos_equipe) */
+export interface CargoEquipe {
+    id: number;
+    nome: string;         // "Chefe", "Subchefe", "Componente"
+    descricao?: string;
+    nivel: number;        // 1=Chefe, 2=Subchefe, 3=Componente
+}
+
+/** Equipe vinculada a um evento */
+export interface Equipe {
+    id: number;
+    evento_id: number;
+    nome: string;
+    descricao?: string;
+    cor?: string;
+    created_at: string;
+    membros?: EquipeMembro[];
+    tarefas?: EquipeTarefa[];
+}
+
+/** Membro de uma equipe (vínculo pessoa ↔ equipe ↔ cargo) */
+export interface EquipeMembro {
+    id: number;
+    equipe_id: number;
+    pessoa_id: string;
+    cargo_id: number;
+    observacao?: string;
+    created_at: string;
+    pessoa?: {
+        id: string;
+        nome: string;
+        cpf: string;
+        telefone?: string;
+        email?: string;
+    };
+    cargo?: CargoEquipe;
+}
+
+/** Tarefa atribuída a uma equipe */
+export interface EquipeTarefa {
+    id: number;
+    equipe_id: number;
+    titulo: string;
+    descricao?: string;
+    status: StatusTarefa;
+    prioridade: PrioridadeTarefa;
+    data_limite?: string;
+    created_at: string;
+}
+
+// ========================================
+// MÓDULO PALESTRANTES (v5.3)
+// ========================================
+
+export type TipoParticipacao = 'principal' | 'painelista' | 'mediador';
+
+export interface Palestrante {
+    id: number;
+    nome: string;
+    email?: string | null;
+    bio?: string | null;
+    foto_url?: string | null;
+    instagram?: string | null;
+    linkedin?: string | null;
+    twitter?: string | null;
+    website?: string | null;
+    created_at?: string;
+}
+
+export interface AtividadePalestrante {
+    id: number;
+    atividade_id: string;
+    palestrante_id: number;
+    tipo_participacao: TipoParticipacao;
+    created_at?: string;
+    palestrante?: Palestrante;
+}
+

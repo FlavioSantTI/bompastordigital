@@ -2,35 +2,54 @@ import { Box, Paper, Typography, Chip, Button, Divider, useTheme, Alert, IconBut
 import { Event, AccessTime, LocationOn, Person, WhatsApp, Edit, ContentCopy, Pix } from '@mui/icons-material';
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { PIX_CONFIG } from '../types';
+import { getPaymentStrategy } from '../services/paymentStrategies';
 
 interface RegistrationSummaryProps {
     inscricao: any;
     onEdit: () => void;
+    onBack?: () => void;
 }
 
-export default function RegistrationSummary({ inscricao, onEdit }: RegistrationSummaryProps) {
+export default function RegistrationSummary({ inscricao, onEdit, onBack }: RegistrationSummaryProps) {
     const theme = useTheme();
     const [copiedChave, setCopiedChave] = useState(false);
     const [copiedCola, setCopiedCola] = useState(false);
-
-    const handleCopyChave = () => {
-        navigator.clipboard.writeText(PIX_CONFIG.chave);
-        setCopiedChave(true);
-        setTimeout(() => setCopiedChave(false), 2000);
-    };
-
-    const handleCopyCola = () => {
-        navigator.clipboard.writeText(PIX_CONFIG.pixCopiaCola);
-        setCopiedCola(true);
-        setTimeout(() => setCopiedCola(false), 2000);
-    };
 
     if (!inscricao) return null;
 
     const evento = inscricao.eventos;
     const esposo = inscricao.esposo;
     const esposa = inscricao.esposa;
+
+    // Gerar payload PIX dinamicamente usando Strategy se for evento pago e estiver pendente
+    const paymentPayload = (evento?.is_paid && inscricao.status === 'pendente')
+        ? getPaymentStrategy('pix').generatePayload({
+            pixKey: evento.pix_key || '',
+            pixKeyType: evento.pix_key_type || '',
+            merchantName: evento.merchant_name || 'PAROQUIA BOM PASTOR',
+            merchantCity: evento.merchant_city || 'PALMAS',
+            amount: evento.event_price || 0,
+            txId: `BPD${inscricao.id}`
+        })
+        : null;
+
+    const handleCopyChave = () => {
+        if (evento?.pix_key) {
+            navigator.clipboard.writeText(evento.pix_key);
+            setCopiedChave(true);
+            setTimeout(() => setCopiedChave(false), 2000);
+        }
+    };
+
+    const handleCopyCola = () => {
+        if (paymentPayload?.copiaECola) {
+            navigator.clipboard.writeText(paymentPayload.copiaECola);
+            setCopiedCola(true);
+            setTimeout(() => setCopiedCola(false), 2000);
+        }
+    };
+
+
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -139,8 +158,8 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
 
                     <Divider sx={{ my: 2 }} />
 
-                    {/* Seção PIX — quando pendente */}
-                    {inscricao.status === 'pendente' && (
+                    {/* Seção PIX — quando pago e pendente */}
+                    {evento?.is_paid && inscricao.status === 'pendente' && paymentPayload && (
                         <Box sx={{ mb: 2 }}>
                             {/* Alerta com valor integrado */}
                             <Alert
@@ -160,7 +179,7 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
                                         Pagamento Pendente
                                     </Typography>
                                     <Typography variant="h6" fontWeight="bold" color="primary.main">
-                                        R$ 100,00
+                                        R$ {paymentPayload.displayData.valor}
                                     </Typography>
                                 </Box>
                             </Alert>
@@ -190,7 +209,7 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
                                         border: '1px solid',
                                         borderColor: 'primary.main'
                                     }}>
-                                        <QRCodeSVG value={PIX_CONFIG.pixCopiaCola} size={120} level="M" />
+                                        <QRCodeSVG value={paymentPayload.copiaECola} size={120} level="M" />
                                     </Box>
                                 </Box>
 
@@ -198,7 +217,7 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
                                 <Box sx={{ flex: 1, width: '100%', minWidth: 0 }}>
                                     {/* Chave PIX */}
                                     <Typography variant="caption" color="text.secondary">
-                                        Chave PIX ({PIX_CONFIG.chaveTipo})
+                                        Chave PIX ({paymentPayload.displayData.chaveTipo})
                                     </Typography>
                                     <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', mb: 1 }}>
                                         <Typography
@@ -218,7 +237,7 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
                                                 whiteSpace: 'nowrap'
                                             }}
                                         >
-                                            {PIX_CONFIG.chave}
+                                            {paymentPayload.displayData.chave}
                                         </Typography>
                                         <Tooltip title={copiedChave ? '✅ Copiado!' : 'Copiar chave'}>
                                             <IconButton
@@ -234,7 +253,7 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
                                     {/* Beneficiário */}
                                     <Typography variant="caption" color="text.secondary">Beneficiário</Typography>
                                     <Typography variant="body2" fontWeight="bold" sx={{ mb: 1, fontSize: '0.8rem' }}>
-                                        {PIX_CONFIG.beneficiario}
+                                        {paymentPayload.displayData.beneficiario}
                                     </Typography>
 
                                     {/* Copia e Cola */}
@@ -256,7 +275,7 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
                                                 whiteSpace: 'nowrap'
                                             }}
                                         >
-                                            {PIX_CONFIG.pixCopiaCola}
+                                            {paymentPayload.copiaECola}
                                         </Typography>
                                         <Tooltip title={copiedCola ? '✅ Copiado!' : 'Copiar código'}>
                                             <IconButton
@@ -276,7 +295,7 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
                                             Envie o comprovante:
                                         </Typography>
                                         <Typography variant="body2" fontWeight="bold" sx={{ color: '#D32F2F', fontFamily: 'monospace', fontSize: '0.85rem' }}>
-                                            {PIX_CONFIG.whatsappContato}
+                                            {'(63) 98405-5758'}
                                         </Typography>
                                     </Box>
                                 </Box>
@@ -285,7 +304,16 @@ export default function RegistrationSummary({ inscricao, onEdit }: RegistrationS
                     )}
 
                     {/* Botão Editar */}
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+                        {onBack && (
+                            <Button
+                                variant="text"
+                                size="small"
+                                onClick={onBack}
+                            >
+                                ← Voltar ao Início
+                            </Button>
+                        )}
                         <Button
                             variant="outlined"
                             size="small"

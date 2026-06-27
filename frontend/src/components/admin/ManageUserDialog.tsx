@@ -5,6 +5,7 @@ import {
     Box, CircularProgress, Alert
 } from '@mui/material';
 import { supabase } from '../../lib/supabase';
+import { validateStrongPassword } from '../../utils/passwordUtils';
 
 interface SafeUser {
     id: string;
@@ -56,6 +57,14 @@ export default function ManageUserDialog({ open, user, onClose, onSave }: Manage
         if (!isEditing && !password) {
             setError('A senha é obrigatória para criar um novo usuário.');
             return;
+        }
+
+        if (password) {
+            const passValidation = validateStrongPassword(password);
+            if (!passValidation.isValid) {
+                setError(passValidation.message || 'Senha inválida.');
+                return;
+            }
         }
 
         setLoading(true);
@@ -140,7 +149,7 @@ export default function ManageUserDialog({ open, user, onClose, onSave }: Manage
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            helperText={isEditing ? "Só preencha se quiser resetar a senha deste usuário." : "Mínimo 6 caracteres"}
+                            helperText={isEditing ? "Só preencha se quiser resetar a senha deste usuário (min 10 carac, letras, núm, símbolos)." : "Mínimo 10 caracteres (com letras, números e símbolos)"}
                         />
                     </Box>
                 </DialogContent>

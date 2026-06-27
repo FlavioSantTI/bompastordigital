@@ -21,7 +21,9 @@ import InscricoesPage from './components/admin/InscricoesPage';
 import ReportsPage from './components/admin/ReportsPage';
 import UsuariosPage from './components/admin/UsuariosPage';
 import CrachasPage from './components/admin/CrachasPage';
+import EquipesPage from './components/admin/EquipesPage';
 import CronogramaPage from './components/admin/CronogramaPage';
+import PalestrantesPage from './components/admin/PalestrantesPage';
 import CronogramaPublico from './components/CronogramaPublico';
 import { PresencaQRCodePage } from './components/admin/PresencaQRCodePage';
 import PresencaPublica from './components/PresencaPublica';
@@ -91,9 +93,11 @@ function App() {
                 <Route path="dioceses" element={<DiocesesPage />} />
                 <Route path="eventos" element={<EventosPage />} />
                 <Route path="inscricoes" element={<InscricoesPage />} />
+                <Route path="equipes" element={<EquipesPage />} />
                 <Route path="relatorios" element={<ReportsPage />} />
                 <Route path="crachas" element={<CrachasPage />} />
                 <Route path="cronograma" element={<CronogramaPage />} />
+                <Route path="palestrantes" element={<PalestrantesPage />} />
                 <Route path="usuarios" element={<UsuariosPage />} />
                 <Route path="presenca" element={<PresencaQRCodePage />} />
               </Route>

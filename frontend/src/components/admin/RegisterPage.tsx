@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import {
-    Box, Paper, Typography, TextField, Button, Alert, CircularProgress
+    Box, Paper, Typography, TextField, Button, Alert, CircularProgress, InputAdornment, IconButton
 } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { supabase } from '../../lib/supabase';
 import { Link } from 'react-router-dom';
+import { validateStrongPassword } from '../../utils/passwordUtils';
 
 export default function RegisterPage() {
 
@@ -13,6 +15,8 @@ export default function RegisterPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,8 +29,9 @@ export default function RegisterPage() {
             return;
         }
 
-        if (password.length < 6) {
-            setMsg({ type: 'error', text: 'A senha deve ter pelo menos 6 caracteres.' });
+        const passValidation = validateStrongPassword(password);
+        if (!passValidation.isValid) {
+            setMsg({ type: 'error', text: passValidation.message || 'Senha inválida.' });
             setLoading(false);
             return;
         }
@@ -46,14 +51,10 @@ export default function RegisterPage() {
             if (error) throw error;
 
             if (data.user) {
-                // Se a confirmação de email estiver ativa, o user é criado mas session é null (ou user.identities vazio)
-                // Vamos assumir o pior caso: precisa confirmar.
                 setMsg({
                     type: 'success',
-                    text: 'Cadastro realizado! Verifique sua caixa de entrada (e spam) para confirmar seu email antes de entrar.'
+                    text: 'Cadastro realizado com sucesso! Você já pode fazer login na plataforma.'
                 });
-
-                // Não redirecionamos imediatamente para dar tempo de ler o aviso
             }
         } catch (err: any) {
             console.error(err);
@@ -87,13 +88,56 @@ export default function RegisterPage() {
                             value={email} onChange={(e) => setEmail(e.target.value)} required
                         />
                         <TextField
-                            fullWidth label="Senha" type="password" variant="outlined" margin="normal"
+                            fullWidth label="Senha" type={showPassword ? 'text' : 'password'} variant="outlined" margin="normal"
                             value={password} onChange={(e) => setPassword(e.target.value)} required
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }
+                            }}
                         />
                         <TextField
-                            fullWidth label="Confirmar Senha" type="password" variant="outlined" margin="normal"
+                            fullWidth label="Confirmar Senha" type={showConfirmPassword ? 'text' : 'password'} variant="outlined" margin="normal"
                             value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                                                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }
+                            }}
                         />
+
+                        {/* Quadro de Regras de Senha harmonizado */}
+                        <Box sx={{ p: 2, my: 2, bgcolor: '#f0f4f8', textAlign: 'left', borderRadius: 3, border: '1px solid #d0dbe5' }}>
+                            <Typography variant="caption" fontWeight="bold" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1, fontSize: '0.8rem' }}>
+                                🔒 Requisitos obrigatórios da senha:
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                                    📏 <strong>Comprimento:</strong> Mínimo de 10 caracteres
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                                    🔤 <strong>Letras:</strong> Ao menos uma letra (maiúscula/minúscula)
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                                    🔢 <strong>Números:</strong> Ao menos um número (0-9)
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                                    🔣 <strong>Símbolos:</strong> Ao menos um caractere especial (@, #, $, !, *, &)
+                                </Typography>
+                            </Box>
+                        </Box>
 
                         <Button
                             fullWidth type="submit" variant="contained" size="large"

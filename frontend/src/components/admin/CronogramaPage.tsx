@@ -56,9 +56,9 @@ import CategoriasDialog from './CategoriasDialog';
 interface Evento {
     id: number;
     nome: string;
-    data_inicio: string;
-    data_fim: string;
-    status: string | null;
+    realizacao_inicio: string;
+    realizacao_fim: string;
+    status_manual: string | null;
 }
 
 export default function CronogramaPage() {
@@ -108,8 +108,8 @@ export default function CronogramaPage() {
         setLoading(true);
         const { data, error } = await supabase
             .from('eventos')
-            .select('id, nome, data_inicio, data_fim, status')
-            .order('data_inicio', { ascending: false });
+            .select('id, nome, realizacao_inicio, realizacao_fim, status_manual')
+            .order('realizacao_inicio', { ascending: false });
 
         if (error) {
             setError('Erro ao carregar eventos: ' + error.message);
@@ -131,7 +131,7 @@ export default function CronogramaPage() {
         setSelectedIds(new Set());
 
         if (evt) {
-            const d = gerarDatasEvento(evt.data_inicio, evt.data_fim);
+            const d = gerarDatasEvento(evt.realizacao_inicio, evt.realizacao_fim);
             setDatas(d);
             setTabIndex(0);
         }
@@ -360,21 +360,43 @@ export default function CronogramaPage() {
                     <span>{atividade.titulo}</span>
                 </Typography>
 
-                {/* Palestrante */}
-                {atividade.palestrante && (
-                    <Typography
-                        variant="caption"
-                        sx={{ 
-                            color: 'text.secondary', 
-                            fontSize: '0.7rem', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: 0.5,
-                            mb: 0.5
-                        }}
-                    >
-                        <strong>👤</strong> {atividade.palestrante}
-                    </Typography>
+                {/* Palestrante(s) */}
+                {((atividade.palestrantes_vinculados && atividade.palestrantes_vinculados.length > 0) || atividade.palestrante) && (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.2, mb: 0.5 }}>
+                        {atividade.palestrantes_vinculados && atividade.palestrantes_vinculados.length > 0 ? (
+                            atividade.palestrantes_vinculados.map((v) => (
+                                <Typography
+                                    key={v.id || v.palestrante_id}
+                                    variant="caption"
+                                    sx={{
+                                        color: 'text.secondary',
+                                        fontSize: '0.68rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 0.4,
+                                    }}
+                                >
+                                    <strong>👤</strong> {v.palestrante?.nome || 'Palestrante'}
+                                    {v.tipo_participacao !== 'principal' && (
+                                        <span style={{ opacity: 0.7, fontSize: '0.6rem' }}>({v.tipo_participacao})</span>
+                                    )}
+                                </Typography>
+                            ))
+                        ) : (
+                            <Typography
+                                variant="caption"
+                                sx={{
+                                    color: 'text.secondary',
+                                    fontSize: '0.7rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 0.5,
+                                }}
+                            >
+                                <strong>👤</strong> {atividade.palestrante}
+                            </Typography>
+                        )}
+                    </Box>
                 )}
 
                 {/* Descrição (Preview de 2 linhas) */}

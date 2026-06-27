@@ -104,6 +104,7 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
     const [activeStep, setActiveStep] = useState(0);
     const [loading, setLoading] = useState(false);
     const [tipo, setTipo] = useState<TipoInscricao>('casal');
+    const [savedRegistration, setSavedRegistration] = useState<any | null>(null);
 
     const defaultValues = {
         evento_id: 0,
@@ -149,8 +150,22 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
         const isValid = fieldsToValidate.length === 0 || await methods.trigger(fieldsToValidate as any);
 
         if (isValid) {
-            if (activeStep === steps.length - 1) {
-                onSubmit(methods.getValues());
+            if (activeStep === 5) {
+                // Transição do Step 5 (Revisão) para o Step 6 (Confirmação)
+                // Salvamos os dados no banco de dados primeiro!
+                const success = await handleSaveRegistration();
+                if (success) {
+                    setActiveStep((prev) => prev + 1);
+                }
+            } else if (activeStep === steps.length - 1) {
+                // Último passo (Confirmação), concluir
+                if (onSuccess) {
+                    onSuccess();
+                } else {
+                    methods.reset();
+                    setActiveStep(0);
+                    setSavedRegistration(null);
+                }
             } else {
                 setActiveStep((prev) => prev + 1);
             }
@@ -178,13 +193,12 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
         }
     };
 
-    const onSubmit = async (data: RegistrationData) => {
+    const handleSaveRegistration = async (): Promise<boolean> => {
         setLoading(true);
+        const data = methods.getValues();
         try {
             if (tipo === 'casal') {
                 const { registerCouple } = await import('../services/registrationService');
-                const { pdfService } = await import('../services/pdfService');
-
                 const casalData = data as CasalData;
                 const result = await registerCouple({
                     ...casalData,
@@ -197,42 +211,20 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
                 });
 
                 if (result.success && result.inscricaoId && result.evento) {
-                    const confirmationData = {
-                        couple: {
-                            esposo: { nome: casalData.esposo.nome, email: casalData.esposo.email },
-                            esposa: { nome: casalData.esposa.nome, email: casalData.esposa.email }
-                        },
-                        event: {
-                            nome: result.evento.nome,
-                            data_inicio: result.evento.data_inicio.split('-').reverse().join('/'),
-                            data_fim: result.evento.data_fim.split('-').reverse().join('/'),
-                            local: result.evento.local || 'A definir'
-                        },
-                        inscricaoId: result.inscricaoId
-                    };
-
-                    let pdfSuccess = false;
-                    try {
-                        await pdfService.downloadConfirmationPDF(confirmationData);
-                        pdfSuccess = true;
-                    } catch (pdfError) {
-                        console.error('Erro ao gerar PDF:', pdfError);
-                    }
-
-                    let message = `✅ ${result.message}\n\nNúmero da inscrição: ${result.inscricaoId}`;
-                    if (pdfSuccess) message += '\n\n📄 O comprovante PDF foi baixado!';
-                    else message += '\n\n⚠️ Não foi possível gerar o PDF. Anote o número da inscrição.';
-                    message += '\n\n💰 Veja as informações de pagamento em "Minhas Inscrições".';
-
-                    alert(message);
-                    if (onSuccess) { onSuccess(); } else { methods.reset(); setActiveStep(0); }
+                    setSavedRegistration({
+                        tipo: 'casal',
+                        inscricaoId: result.inscricaoId,
+                        evento: result.evento,
+                        esposo: casalData.esposo,
+                        esposa: casalData.esposa,
+                    });
+                    return true;
                 } else {
                     alert(`❌ ${result.message}`);
+                    return false;
                 }
             } else {
-                // Fluxo Individual
                 const { registerIndividual } = await import('../services/registrationService');
-
                 const individualData = data as IndividualData;
                 const result = await registerIndividual({
                     participante: individualData.participante!,
@@ -245,18 +237,23 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
                     user_id: user?.id,
                 });
 
-                if (result.success && result.inscricaoId) {
-                    let message = `✅ ${result.message}\n\nNúmero da inscrição: ${result.inscricaoId}`;
-                    message += '\n\n💰 Veja as informações de pagamento em "Minhas Inscrições".';
-                    alert(message);
-                    if (onSuccess) { onSuccess(); } else { methods.reset(); setActiveStep(0); }
+                if (result.success && result.inscricaoId && result.evento) {
+                    setSavedRegistration({
+                        tipo: 'individual',
+                        inscricaoId: result.inscricaoId,
+                        evento: result.evento,
+                        participante: individualData.participante,
+                    });
+                    return true;
                 } else {
                     alert(`❌ ${result.message}`);
+                    return false;
                 }
             }
         } catch (error) {
             console.error('Erro ao enviar inscrição:', error);
             alert('❌ Erro inesperado ao enviar inscrição. Verifique sua conexão e tente novamente.');
+            return false;
         } finally {
             setLoading(false);
         }
@@ -270,10 +267,12 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
             case 3: return <LocationStep />;
             case 4: return <JointStep />;
             case 5: return <ReviewStep />;
-            case 6: return <ConfirmationStep />;
+            case 6: return <ConfirmationStep registration={savedRegistration} />;
             default: return null;
         }
     };
+
+    const isFinalStep = activeStep === steps.length - 1;
 
     return (
         <FormProvider {...methods}>
@@ -291,20 +290,24 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
                 </Box>
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-                    <Button
-                        disabled={loading || (activeStep === 0 && !onCancel)}
-                        onClick={handleBack}
-                        variant="outlined"
-                    >
-                        Voltar
-                    </Button>
+                    {!isFinalStep ? (
+                        <Button
+                            disabled={loading || (activeStep === 0 && !onCancel)}
+                            onClick={handleBack}
+                            variant="outlined"
+                        >
+                            Voltar
+                        </Button>
+                    ) : (
+                        <Box />
+                    )}
                     <Button
                         variant="contained"
                         onClick={handleNext}
                         disabled={loading}
                     >
                         {loading ? <CircularProgress size={24} color="inherit" /> :
-                            activeStep === steps.length - 1 ? 'Finalizar' : 'Próximo'}
+                            isFinalStep ? 'Voltar ao Início' : 'Próximo'}
                     </Button>
                 </Box>
             </Box>

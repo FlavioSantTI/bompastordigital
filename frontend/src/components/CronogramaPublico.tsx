@@ -18,6 +18,8 @@ import {
     alpha,
     useTheme,
     Button,
+    IconButton,
+    Avatar,
 } from '@mui/material';
 import {
     Schedule,
@@ -25,7 +27,8 @@ import {
     Person,
     CalendarToday,
     QrCode,
-    GridView
+    GridView,
+    ArrowBack,
 } from '@mui/icons-material';
 import { supabase } from '../lib/supabase';
 import type { Atividade, CategoriaAtividade } from '../types';
@@ -168,8 +171,15 @@ export default function CronogramaPublico() {
                     px: 2,
                     textAlign: 'center',
                     mb: 2,
+                    position: 'relative',
                 }}
             >
+                <IconButton 
+                    onClick={() => navigate(`/p/${eventoId}`)}
+                    sx={{ position: 'absolute', left: 16, top: 16, color: 'white' }}
+                >
+                    <ArrowBack />
+                </IconButton>
                 <Box 
                     component="img" 
                     src="/img/logo.jpg" 
@@ -400,17 +410,47 @@ export default function CronogramaPublico() {
                                             </Typography>
                                         )}
 
-                                        {/* Info adicional */}
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3, mt: 0.8 }}>
-                                            {atividade.palestrante && (
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                                    <Person sx={{ fontSize: 16, color: 'text.secondary' }} />
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        {atividade.palestrante}
-                                                    </Typography>
+                                        {/* Info adicional: Palestrantes + Sala */}
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8, mt: 1 }}>
+                                            {((atividade.palestrantes_vinculados && atividade.palestrantes_vinculados.length > 0) || atividade.palestrante) && (
+                                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
+                                                    {atividade.palestrantes_vinculados && atividade.palestrantes_vinculados.length > 0 ? (
+                                                        atividade.palestrantes_vinculados.map((v) => (
+                                                            <Box key={v.id || v.palestrante_id} sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'rgba(255,255,255,0.6)', p: 0.8, borderRadius: 1.5 }}>
+                                                                <Avatar
+                                                                    src={v.palestrante?.foto_url || undefined}
+                                                                    sx={{ width: 28, height: 28, fontSize: '0.75rem', bgcolor: 'primary.main' }}
+                                                                >
+                                                                    {v.palestrante?.nome ? v.palestrante.nome.charAt(0) : 'P'}
+                                                                </Avatar>
+                                                                <Box>
+                                                                    <Typography variant="body2" fontWeight="bold" sx={{ fontSize: '0.8rem', lineHeight: 1.1 }}>
+                                                                        {v.palestrante?.nome || 'Palestrante'}
+                                                                        {v.tipo_participacao !== 'principal' && (
+                                                                            <Typography component="span" sx={{ fontSize: '0.7rem', color: 'text.secondary', ml: 0.5 }}>
+                                                                                ({v.tipo_participacao})
+                                                                            </Typography>
+                                                                        )}
+                                                                    </Typography>
+                                                                    {v.palestrante?.bio && (
+                                                                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', display: 'block' }}>
+                                                                            {v.palestrante.bio}
+                                                                        </Typography>
+                                                                    )}
+                                                                </Box>
+                                                            </Box>
+                                                        ))
+                                                    ) : (
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                            <Person sx={{ fontSize: 16, color: 'text.secondary' }} />
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {atividade.palestrante}
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
                                                 </Box>
                                             )}
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3 }}>
                                                 <LocationOn sx={{ fontSize: 16, color: 'text.secondary' }} />
                                                 <Typography variant="body2" color="text.secondary">
                                                     {salaNome}
@@ -431,7 +471,7 @@ export default function CronogramaPublico() {
                     </Typography>
                     <Button 
                         startIcon={<GridView sx={{ color: '#FF921C' }} />} 
-                        onClick={() => navigate('/central')}
+                        onClick={() => navigate(`/p/${eventoId}`)}
                         sx={{ 
                             color: '#FF921C', 
                             textTransform: 'none', 
@@ -440,7 +480,7 @@ export default function CronogramaPublico() {
                             '&:hover': { bgcolor: 'rgba(255, 146, 28, 0.05)' }
                         }}
                     >
-                        Voltar ao Hub
+                        Voltar ao Início
                     </Button>
                 </Box>
             </Container>

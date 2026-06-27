@@ -10,7 +10,8 @@ import {
     CardActionArea,
     CircularProgress,
     Button,
-    useTheme
+    useTheme,
+    Chip
 } from '@mui/material';
 import { 
     EventNote, 
@@ -20,6 +21,8 @@ import {
     GridView
 } from '@mui/icons-material';
 import { supabase } from '../lib/supabase';
+import { APP_VERSION } from '../types';
+import { formatDateOnly } from '../utils/eventStatusUtils';
 
 export default function EventoPublicoHome() {
     const { eventoId } = useParams<{ eventoId: string }>();
@@ -157,11 +160,33 @@ export default function EventoPublicoHome() {
                         textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                         maxWidth: '90%',
                         mx: 'auto',
-                        lineHeight: 1.2
+                        lineHeight: 1.2,
+                        mb: 1
                     }}
                 >
                     {evento.nome}
                 </Typography>
+
+                {/* Exibição dos períodos */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 1.5, opacity: 0.9 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
+                        📅 Evento: {formatDateOnly(evento.realizacao_inicio)} a {formatDateOnly(evento.realizacao_fim)}
+                    </Typography>
+                    <Typography variant="caption">
+                        ✍️ Inscrições: {formatDateOnly(evento.inscricao_inicio)} a {formatDateOnly(evento.inscricao_fim)}
+                    </Typography>
+                </Box>
+                
+                <Chip 
+                    label={evento.is_paid ? `Inscrição: R$ ${evento.event_price?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Entrada Gratuita'}
+                    sx={{ 
+                        bgcolor: 'rgba(255,255,255,0.2)', 
+                        color: 'white', 
+                        fontWeight: 'bold',
+                        border: '1px solid rgba(255,255,255,0.4)',
+                        fontSize: '0.85rem'
+                    }}
+                />
             </Box>
 
             <Container maxWidth="sm">
@@ -235,7 +260,7 @@ export default function EventoPublicoHome() {
                 {/* Footer */}
                 <Box sx={{ mt: 8, textAlign: 'center' }}>
                     <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.8, fontWeight: 700 }}>
-                        © 2026 Bom Pastor Digital • **Versão 5.0**
+                        © 2026 Bom Pastor Digital • Versão {APP_VERSION}
                     </Typography>
                 </Box>
             </Container>

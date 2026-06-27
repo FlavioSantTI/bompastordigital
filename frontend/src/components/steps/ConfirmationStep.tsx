@@ -1,39 +1,115 @@
-import { Box, Typography, Paper, Button, Alert, Divider } from '@mui/material';
+import { Box, Typography, Paper, Button, Alert, Divider, CircularProgress } from '@mui/material';
 import { ContentCopy, CheckCircle } from '@mui/icons-material';
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { PIX_CONFIG } from '../../types';
+import { getPaymentStrategy } from '../../services/paymentStrategies';
 
-export default function ConfirmationStep() {
+interface ConfirmationStepProps {
+    registration?: {
+        tipo: 'casal' | 'individual';
+        inscricaoId: number;
+        evento: {
+            id: number;
+            nome: string;
+            data_inicio: string;
+            data_fim: string;
+            is_paid: boolean;
+            event_price?: number | null;
+            pix_key_type?: string | null;
+            pix_key?: string | null;
+            merchant_name?: string | null;
+            merchant_city?: string | null;
+        };
+        esposo?: { nome: string; email: string };
+        esposa?: { nome: string; email: string };
+        participante?: { nome: string; email: string };
+    } | null;
+}
+
+export default function ConfirmationStep({ registration }: ConfirmationStepProps) {
     const [copied, setCopied] = useState(false);
     const [copiedCola, setCopiedCola] = useState(false);
 
+    if (!registration) {
+        return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4 }}>
+                <CircularProgress />
+                <Typography sx={{ mt: 2 }}>Carregando dados da inscrição...</Typography>
+            </Box>
+        );
+    }
+
+    const { evento, inscricaoId } = registration;
+
+    // Se o evento for GRATUITO, confirmação imediata sem PIX
+    if (!evento.is_paid) {
+        return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', textAlign: 'center' }}>
+                <CheckCircle sx={{ fontSize: 80, color: 'success.main', mb: 2 }} />
+                <Typography variant="h4" fontWeight="bold" color="primary" gutterBottom>
+                    Inscrição Realizada!
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                    Parabéns! Sua inscrição para o evento <strong>{evento.nome}</strong> foi enviada com sucesso!
+                </Typography>
+                <Paper variant="outlined" sx={{ p: 3, width: '100%', bgcolor: '#fbfbfb', mt: 2, borderRadius: 2 }}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                        Número da Inscrição:
+                    </Typography>
+                    <Typography variant="h5" fontWeight="bold" color="success.main" sx={{ mt: 0.5 }}>
+                        #{inscricaoId}
+                    </Typography>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="body2" color="text.secondary">
+                        Sua inscrição foi confirmada automaticamente. Nos vemos lá!
+                    </Typography>
+                </Paper>
+            </Box>
+        );
+    }
+
+    // Gerar payload PIX dinamicamente usando Strategy
+    const txId = `BPD${inscricaoId}`;
+    const paymentStrategy = getPaymentStrategy('pix');
+    const paymentPayload = paymentStrategy.generatePayload({
+        pixKey: evento.pix_key || '',
+        pixKeyType: evento.pix_key_type || '',
+        merchantName: evento.merchant_name || 'PAROQUIA BOM PASTOR',
+        merchantCity: evento.merchant_city || 'PALMAS',
+        amount: evento.event_price || 0,
+        txId,
+    });
+
     const handleCopyPix = () => {
-        navigator.clipboard.writeText(PIX_CONFIG.chave);
+        navigator.clipboard.writeText(evento.pix_key || '');
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
     const handleCopyPixCola = () => {
-        navigator.clipboard.writeText(PIX_CONFIG.pixCopiaCola);
+        navigator.clipboard.writeText(paymentPayload.copiaECola);
         setCopiedCola(true);
         setTimeout(() => setCopiedCola(false), 2000);
     };
 
-    // TODO: Buscar valor do evento selecionado
-    const valorEvento = 100.00;
+    const whatsappContato = '(63) 98405-5758';
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
             <Box sx={{ textAlign: 'center' }}>
                 <CheckCircle sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
                 <Typography variant="h5" fontWeight="bold" color="primary" gutterBottom>
-                    Inscrição Quase Concluída!
+                    Pré-inscrição Realizada!
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    Falta apenas confirmar o pagamento
+                    Para confirmar sua participação, efetue o pagamento do PIX abaixo.
                 </Typography>
             </Box>
+
+            {/* Número da Inscrição */}
+            <Typography variant="subtitle1" fontWeight="bold" color="text.secondary">
+                Inscrição Nº #{inscricaoId}
+            </Typography>
 
             {/* Valor da Inscrição */}
             <Paper
@@ -45,14 +121,14 @@ export default function ConfirmationStep() {
                     borderColor: 'primary.main',
                     borderRadius: 2,
                     textAlign: 'center',
-                    width: '100%'
+                    width: '100%',
                 }}
             >
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                     Valor da Inscrição
                 </Typography>
                 <Typography variant="h3" fontWeight="bold" color="primary.main">
-                    R$ {valorEvento.toFixed(2).replace('.', ',')}
+                    R$ {paymentPayload.displayData.valor}
                 </Typography>
             </Paper>
 
@@ -68,7 +144,7 @@ export default function ConfirmationStep() {
                             Tipo de Chave:
                         </Typography>
                         <Typography variant="body1" fontWeight="bold">
-                            {PIX_CONFIG.chaveTipo}
+                            {paymentPayload.displayData.chaveTipo}
                         </Typography>
                     </Box>
 
@@ -77,7 +153,7 @@ export default function ConfirmationStep() {
                             Beneficiário:
                         </Typography>
                         <Typography variant="body1" fontWeight="bold">
-                            {PIX_CONFIG.beneficiario}
+                            {paymentPayload.displayData.beneficiario}
                         </Typography>
                     </Box>
 
@@ -93,10 +169,12 @@ export default function ConfirmationStep() {
                                 py: 1,
                                 px: 2,
                                 bgcolor: 'grey.100',
-                                borderRadius: 1
+                                borderRadius: 1,
+                                overflowX: 'auto',
+                                whiteSpace: 'nowrap',
                             }}
                         >
-                            {PIX_CONFIG.chave}
+                            {paymentPayload.displayData.chave}
                         </Typography>
                         <Button
                             variant="contained"
@@ -116,7 +194,7 @@ export default function ConfirmationStep() {
                         p: 3,
                         mb: 2,
                         textAlign: 'center',
-                        bgcolor: 'white'
+                        bgcolor: 'white',
                     }}
                 >
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
@@ -132,11 +210,11 @@ export default function ConfirmationStep() {
                             bgcolor: 'white',
                             borderRadius: 2,
                             border: '2px solid',
-                            borderColor: 'primary.main'
+                            borderColor: 'primary.main',
                         }}
                     >
                         <QRCodeSVG
-                            value={PIX_CONFIG.pixCopiaCola}
+                            value={paymentPayload.copiaECola}
                             size={200}
                             level="M"
                             includeMargin={false}
@@ -166,10 +244,10 @@ export default function ConfirmationStep() {
                                 borderRadius: 1,
                                 wordBreak: 'break-all',
                                 maxHeight: '80px',
-                                overflow: 'auto'
+                                overflow: 'auto',
                             }}
                         >
-                            {PIX_CONFIG.pixCopiaCola}
+                            {paymentPayload.copiaECola}
                         </Typography>
                         <Button
                             variant="contained"
@@ -182,15 +260,14 @@ export default function ConfirmationStep() {
                     </Box>
                 </Paper>
 
-
                 {/* Envio de Comprovante */}
                 <Alert severity="warning" sx={{
                     border: '2px solid',
                     borderColor: 'warning.main',
-                    bgcolor: '#FFF3E0'
+                    bgcolor: '#FFF3E0',
                 }}>
                     <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                        � Importante: Enviar Comprovante
+                        ⚠️ Importante: Enviar Comprovante
                     </Typography>
                     <Typography variant="body2" paragraph sx={{ mb: 2 }}>
                         Após realizar o pagamento, envie o comprovante via WhatsApp para:
@@ -202,7 +279,7 @@ export default function ConfirmationStep() {
                             bgcolor: 'white',
                             borderRadius: 2,
                             border: '3px solid #FF5722',
-                            boxShadow: '0 0 0 4px rgba(255, 87, 34, 0.2)'
+                            boxShadow: '0 0 0 4px rgba(255, 87, 34, 0.2)',
                         }}
                     >
                         <Typography
@@ -210,22 +287,20 @@ export default function ConfirmationStep() {
                             fontWeight="bold"
                             sx={{
                                 color: '#D32F2F',
-                                fontFamily: 'monospace'
+                                fontFamily: 'monospace',
                             }}
                         >
-                            {PIX_CONFIG.whatsappContato}
+                            {whatsappContato}
                         </Typography>
                     </Box>
                     <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-                        Sua inscrição será confirmada após a verificação do pagamento.
+                        Sua inscrição será confirmada após a verificação do pagamento pela organização.
                     </Typography>
                 </Alert>
             </Box>
 
             <Typography variant="caption" color="text.secondary" textAlign="center" sx={{ mt: 2 }}>
-                Ao clicar em "Finalizar Inscrição" abaixo, seus dados serão salvos.
-                <br />
-                Não esqueça de realizar o pagamento e enviar o comprovante!
+                Guarde o número da sua inscrição e faça o envio do comprovante. Nos vemos no encontro!
             </Typography>
         </Box>
     );

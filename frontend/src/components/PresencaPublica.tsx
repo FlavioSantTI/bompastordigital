@@ -18,7 +18,8 @@ import {
     Stack,
     Chip,
     Tabs,
-    Tab
+    Tab,
+    IconButton
 } from '@mui/material';
 import { QrCode, ArrowBack, History, GridView } from '@mui/icons-material';
 import { supabase } from '../lib/supabase';
@@ -96,6 +97,12 @@ export default function PresencaPublica() {
                 <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, borderRadius: 4, mb: 3, bgcolor: '#FF921C', color: '#fff' }}>
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <IconButton 
+                                onClick={() => navigate(`/p/${eventoId}`)}
+                                sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)', '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' } }}
+                            >
+                                <ArrowBack />
+                            </IconButton>
                             <Box 
                                 component="img" 
                                 src="/img/logo.jpg" 
@@ -236,7 +243,7 @@ export default function PresencaPublica() {
                     </Typography>
                     <Button 
                         startIcon={<GridView sx={{ color: '#FF921C' }} />} 
-                        onClick={() => navigate('/central')}
+                        onClick={() => navigate(`/p/${eventoId}`)}
                         sx={{ 
                             color: '#FF921C', 
                             textTransform: 'none', 
@@ -245,7 +252,7 @@ export default function PresencaPublica() {
                             '&:hover': { bgcolor: 'rgba(255, 146, 28, 0.05)' }
                         }}
                     >
-                        Voltar ao Hub
+                        Voltar ao Início
                     </Button>
                 </Box>
             </Container>

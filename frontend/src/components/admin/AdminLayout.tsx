@@ -1,5 +1,5 @@
 import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
-import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment, CalendarMonth, QrCode } from '@mui/icons-material';
+import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment, CalendarMonth, QrCode, Groups, RecordVoiceOver } from '@mui/icons-material';
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -10,9 +10,11 @@ const drawerWidth = 240;
 const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/admin' },
     { text: 'Inscrições', icon: <People />, path: '/admin/inscricoes' },
+    { text: 'Equipes', icon: <Groups />, path: '/admin/equipes' },
     { text: 'Relatórios & Fichas', icon: <Assessment />, path: '/admin/relatorios' },
     { text: 'Eventos', icon: <Event />, path: '/admin/eventos' },
     { text: 'Cronograma', icon: <CalendarMonth />, path: '/admin/cronograma' },
+    { text: 'Palestrantes', icon: <RecordVoiceOver />, path: '/admin/palestrantes' },
     { text: 'QR Código Presença', icon: <QrCode />, path: '/admin/presenca' },
     { text: 'Dioceses', icon: <Church />, path: '/admin/dioceses' },
     { text: 'Usuários', icon: <AccountCircle />, path: '/admin/usuarios' },

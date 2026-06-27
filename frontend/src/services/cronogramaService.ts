@@ -114,7 +114,7 @@ export async function fetchAtividadesByEventoEData(
 ): Promise<Atividade[]> {
     let query = supabase
         .from('atividades')
-        .select('*, sala:salas(*)')
+        .select('*, sala:salas(*), palestrantes_vinculados:atividade_palestrantes(*, palestrante:palestrantes(*))')
         .eq('evento_id', eventoId)
         .order('hora_inicio', { ascending: true });
 
@@ -132,7 +132,7 @@ export async function fetchAtividadesByEventoEData(
 export async function fetchAtividadesPublicadas(eventoId: number): Promise<Atividade[]> {
     const { data, error } = await supabase
         .from('atividades')
-        .select('*, sala:salas(id, nome)')
+        .select('*, sala:salas(id, nome), palestrantes_vinculados:atividade_palestrantes(*, palestrante:palestrantes(*))')
         .eq('evento_id', eventoId)
         .eq('publicado', true)
         .order('data', { ascending: true })
@@ -216,6 +216,7 @@ export function validarConflitos(
     atividade: {
         sala_id: number;
         palestrante?: string | null;
+        palestrante_ids?: number[];
         hora_inicio: string;
         hora_fim: string;
     },
@@ -249,7 +250,22 @@ export function validarConflitos(
             };
         }
 
-        // Conflito de PALESTRANTE (apenas se ambos tiverem palestrante preenchido)
+        // Conflito de PALESTRANTE por ID (novos vínculos N:N)
+        if (atividade.palestrante_ids && atividade.palestrante_ids.length > 0) {
+            const idsExistentes = (existente.palestrantes_vinculados || []).map(p => p.palestrante_id);
+            for (const pId of atividade.palestrante_ids) {
+                if (idsExistentes.includes(pId)) {
+                    const palObj = existente.palestrantes_vinculados?.find(p => p.palestrante_id === pId)?.palestrante;
+                    const nomePalestrante = palObj ? palObj.nome : 'Um palestrante selecionado';
+                    return {
+                        valido: false,
+                        mensagem: `Conflito de palestrante: "${nomePalestrante}" já tem a atividade "${existente.titulo}" das ${formatTime(existente.hora_inicio)} às ${formatTime(existente.hora_fim)}.`,
+                    };
+                }
+            }
+        }
+
+        // Conflito de PALESTRANTE por texto livre (legado)
         const novoPalestrante = (atividade.palestrante || '').trim().toLowerCase();
         const existentePalestrante = (existente.palestrante || '').trim().toLowerCase();
 
@@ -281,9 +297,20 @@ export function formatTime(time: string): string {
 
 /** Gera lista de datas entre início e fim de um evento */
 export function gerarDatasEvento(dataInicio: string, dataFim: string): string[] {
+    if (!dataInicio || !dataFim) return [];
+
+    // Trata tanto ISO Timestamptz ("2026-07-01T08:00...") quanto Date simples ("2026-07-01")
+    const cleanInicio = dataInicio.split('T')[0].split(' ')[0];
+    const cleanFim = dataFim.split('T')[0].split(' ')[0];
+
     const datas: string[] = [];
-    const [anoI, mesI, diaI] = dataInicio.split('-').map(Number);
-    const [anoF, mesF, diaF] = dataFim.split('-').map(Number);
+    const [anoI, mesI, diaI] = cleanInicio.split('-').map(Number);
+    const [anoF, mesF, diaF] = cleanFim.split('-').map(Number);
+
+    if (isNaN(anoI) || isNaN(mesI) || isNaN(diaI) || isNaN(anoF) || isNaN(mesF) || isNaN(diaF)) {
+        return [];
+    }
+
     const inicio = new Date(anoI, mesI - 1, diaI);
     const fim = new Date(anoF, mesF - 1, diaF);
 
@@ -388,7 +415,11 @@ export function exportarCronogramaPDF(
                     if (atv) {
                         const cat = CATEGORIAS_CONFIG[atv.categoria as keyof typeof CATEGORIAS_CONFIG] || CATEGORIAS_CONFIG.outros;
                         let cell = `${cat.icone} ${atv.titulo}`;
-                        if (atv.palestrante) cell += `\n${atv.palestrante}`;
+                        const nomesPalestrantes = (atv.palestrantes_vinculados || [])
+                            .map(p => p.palestrante?.nome)
+                            .filter(Boolean)
+                            .join(', ') || atv.palestrante;
+                        if (nomesPalestrantes) cell += `\n${nomesPalestrantes}`;
                         cell += `\n${formatTime(atv.hora_inicio)}-${formatTime(atv.hora_fim)}`;
                         row.push(cell);
                     } else {
@@ -442,16 +473,22 @@ export function exportarCronogramaExcel(
 
     const linhas = todasAtividades
         .sort((a, b) => a.data.localeCompare(b.data) || a.hora_inicio.localeCompare(b.hora_inicio))
-        .map(a => ({
-            'Data': a.data.split('-').reverse().join('/'),
-            'Início': formatTime(a.hora_inicio),
-            'Término': formatTime(a.hora_fim),
-            'Sala': salasMap[a.sala_id] || `Sala ${a.sala_id}`,
-            'Título': a.titulo,
-            'Palestrante': a.palestrante || '-',
-            'Categoria': (CATEGORIAS_CONFIG[a.categoria as keyof typeof CATEGORIAS_CONFIG] || CATEGORIAS_CONFIG.outros).label,
-            'Publicado': a.publicado ? 'Sim' : 'Não',
-        }));
+        .map(a => {
+            const nomesPalestrantes = (a.palestrantes_vinculados || [])
+                .map(p => p.palestrante?.nome)
+                .filter(Boolean)
+                .join(', ') || a.palestrante || '-';
+            return {
+                'Data': a.data.split('-').reverse().join('/'),
+                'Início': formatTime(a.hora_inicio),
+                'Término': formatTime(a.hora_fim),
+                'Sala': salasMap[a.sala_id] || `Sala ${a.sala_id}`,
+                'Título': a.titulo,
+                'Palestrante(s)': nomesPalestrantes,
+                'Categoria': (CATEGORIAS_CONFIG[a.categoria as keyof typeof CATEGORIAS_CONFIG] || CATEGORIAS_CONFIG.outros).label,
+                'Publicado': a.publicado ? 'Sim' : 'Não',
+            };
+        });
 
     const ws = XLSX.utils.json_to_sheet(linhas);
     const wb = XLSX.utils.book_new();

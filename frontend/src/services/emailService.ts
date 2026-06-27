@@ -17,6 +17,12 @@ interface EventData {
     data_inicio: string;
     data_fim: string;
     local: string;
+    is_paid?: boolean;
+    event_price?: number | null;
+    pix_key_type?: string | null;
+    pix_key?: string | null;
+    merchant_name?: string | null;
+    merchant_city?: string | null;
 }
 
 interface EmailConfirmationData {
@@ -70,7 +76,33 @@ export const emailService = {
     /**
      * Cria o HTML do email de confirmação
      */
-    createConfirmationEmailHTML(data: EmailConfirmationData): string {
+        let paymentBoxHTML = '';
+        
+        if (data.event.is_paid) {
+            const priceFormatted = data.event.event_price?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0,00';
+            paymentBoxHTML = `
+        <div class="payment-box">
+            <div class="section-title">💰 Para Confirmar sua Participação</div>
+            <p><strong>1.</strong> Realize o pagamento de <span class="highlight">R$ ${priceFormatted}</span> via PIX:</p>
+            <div class="info-box">
+                <p><strong>Chave PIX (${data.event.pix_key_type || 'Chave'}):</strong> ${data.event.pix_key || ''}</p>
+                <p><strong>Beneficiário:</strong> ${data.event.merchant_name || 'PAROQUIA BOM PASTOR'}</p>
+            </div>
+            
+            <p><strong>2.</strong> Envie o comprovante via WhatsApp:</p>
+            <div class="whatsapp">
+                <span class="highlight">(63) 98405-5758</span>
+            </div>
+        </div>
+            `;
+        } else {
+            paymentBoxHTML = `
+        <div class="info-box" style="background-color: #E8F5E9; border: 1px solid #4CAF50; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p style="color: #2E7D32; font-weight: bold; margin: 0;">🎟️ Este é um evento gratuito! Sua inscrição está confirmada automaticamente.</p>
+        </div>
+            `;
+        }
+
         return `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -176,19 +208,7 @@ export const emailService = {
             </div>
         </div>
 
-        <div class="payment-box">
-            <div class="section-title">💰 Para Confirmar sua Participação</div>
-            <p><strong>1.</strong> Realize o pagamento de <span class="highlight">R$ 100,00</span> via PIX:</p>
-            <div class="info-box">
-                <p><strong>Chave PIX (E-mail):</strong> grayceperini@gmail.com</p>
-                <p><strong>Beneficiário:</strong> Grayce Kelly Perini Gomes</p>
-            </div>
-            
-            <p><strong>2.</strong> Envie o comprovante via WhatsApp:</p>
-            <div class="whatsapp">
-                <span class="highlight">(63) 98405-5758</span>
-            </div>
-        </div>
+        ${paymentBoxHTML}
 
         <div class="section">
             <p><strong>📎 Anexo:</strong> Comprovante de inscrição em PDF com todas as informações e QR Code do PIX.</p>

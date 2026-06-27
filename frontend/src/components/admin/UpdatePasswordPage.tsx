@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff, Lock } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { validateStrongPassword } from '../../utils/passwordUtils';
 
 export default function UpdatePasswordPage() {
     const navigate = useNavigate();
@@ -60,8 +61,9 @@ export default function UpdatePasswordPage() {
             return;
         }
 
-        if (password.length < 6) {
-            setMsg({ type: 'error', text: 'A senha deve ter pelo menos 6 caracteres.' });
+        const passValidation = validateStrongPassword(password);
+        if (!passValidation.isValid) {
+            setMsg({ type: 'error', text: passValidation.message || 'Senha inválida.' });
             setLoading(false);
             return;
         }
@@ -116,6 +118,7 @@ export default function UpdatePasswordPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        helperText="Mínimo 10 caracteres (com letras, números e símbolos)"
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">

@@ -13,6 +13,8 @@ DECLARE
     v_diocese_id INTEGER;
     v_inscricao_id UUID;
     v_evento RECORD;
+    v_status VARCHAR(20);
+    v_payment_method VARCHAR(50);
 BEGIN
     -- 1. Validar e inserir Participante
     INSERT INTO pessoas (cpf, nome, nascimento, email, telefone)
@@ -48,6 +50,14 @@ BEGIN
         RETURN jsonb_build_object('success', false, 'message', 'Este CPF já está inscrito neste evento.');
     END IF;
 
+    -- 3b. Determinar status e método de pagamento com base no tipo do evento
+    v_status := 'confirmada';
+    v_payment_method := NULL;
+    SELECT CASE WHEN is_paid THEN 'pendente' ELSE 'confirmada' END,
+           CASE WHEN is_paid THEN 'pix' ELSE NULL END
+    INTO v_status, v_payment_method
+    FROM eventos WHERE id = (payload->>'evento_id')::INTEGER;
+
     -- 4. Inserir a Inscrição Individual (usa esposo_id para a pessoa, esposa_id fica NULL)
     INSERT INTO inscricoes (
         evento_id, 
@@ -56,7 +66,9 @@ BEGIN
         diocese_id, 
         user_id, 
         dados_conjuntos,
-        tipo
+        tipo,
+        status,
+        payment_method_used
     ) VALUES (
         (payload->>'evento_id')::INTEGER,
         v_pessoa_id,
@@ -64,7 +76,9 @@ BEGIN
         v_diocese_id,
         NULLIF((payload->>'user_id'), '')::UUID,
         COALESCE(payload->'dados_conjuntos', '{}'::JSONB),
-        'individual'
+        'individual',
+        v_status,
+        v_payment_method
     ) RETURNING id INTO v_inscricao_id;
 
     -- 5. Carregar os dados do Evento para retorno
