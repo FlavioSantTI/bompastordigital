@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import type { RegistrationData, IndividualRegistrationData, TipoInscricao } from '../types';
+import type { RegistrationData, IndividualRegistrationData, TipoInscricao, StatusInscricao } from '../types';
 
 export interface RegistrationPayload extends RegistrationData {
     evento_id: number;
@@ -38,6 +38,7 @@ interface RpcResponse {
     message: string;
     inscricaoId?: string;
     tipo?: string;
+    status?: StatusInscricao;
     evento?: { nome: string; data_inicio: string; data_fim: string };
 }
 
@@ -128,6 +129,7 @@ export async function registerCouple(payload: RegistrationPayload): Promise<{
     success: boolean;
     message: string;
     inscricaoId?: string;
+    status?: StatusInscricao;
     evento?: {
         nome: string;
         data_inicio: string;
@@ -171,6 +173,7 @@ export async function registerCouple(payload: RegistrationPayload): Promise<{
             success: true,
             message: rpcResult.message,
             inscricaoId: rpcResult.inscricaoId,
+            status: rpcResult.status,
             evento: rpcResult.evento,
         };
 
@@ -187,6 +190,7 @@ export async function registerIndividual(payload: IndividualRegistrationPayload)
     success: boolean;
     message: string;
     inscricaoId?: string;
+    status?: StatusInscricao;
     evento?: {
         nome: string;
         data_inicio: string;
@@ -224,6 +228,7 @@ export async function registerIndividual(payload: IndividualRegistrationPayload)
             success: true,
             message: rpcResult.message,
             inscricaoId: rpcResult.inscricaoId,
+            status: rpcResult.status,
             evento: rpcResult.evento,
         };
 

@@ -8,6 +8,7 @@ interface ConfirmationStepProps {
     registration?: {
         tipo: 'casal' | 'individual';
         inscricaoId: number;
+        status?: string;
         evento: {
             id: number;
             nome: string;
@@ -39,7 +40,37 @@ export default function ConfirmationStep({ registration }: ConfirmationStepProps
         );
     }
 
-    const { evento, inscricaoId } = registration;
+    const { evento, inscricaoId, status } = registration;
+
+    // Se a inscrição estiver no CADASTRO DE RESERVA (Lista de Espera)
+    if (status === 'reserva') {
+        return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', textAlign: 'center' }}>
+                <CheckCircle sx={{ fontSize: 80, color: 'warning.main', mb: 2 }} />
+                <Typography variant="h4" fontWeight="bold" color="warning.dark" gutterBottom>
+                    Cadastro de Reserva Registrado!
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500 }}>
+                    As vagas principais para o evento <strong>{evento.nome}</strong> já foram preenchidas. Sua inscrição foi registrada com sucesso na <strong>Lista de Espera / Cadastro de Reserva</strong>.
+                </Typography>
+                <Paper variant="outlined" sx={{ p: 3, width: '100%', bgcolor: '#fff8e1', mt: 2, borderRadius: 3, borderColor: '#ffe082' }}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                        Número da sua Inscrição na Reserva:
+                    </Typography>
+                    <Typography variant="h4" fontWeight="bold" color="warning.dark" sx={{ mt: 0.5, mb: 1 }}>
+                        #{inscricaoId}
+                    </Typography>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="body2" color="text.primary" fontWeight="500">
+                        📋 Como funciona o Cadastro de Reserva?
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        Havendo alguma desistência ou abertura de novas vagas pela organização, a equipe entrará em contato para promover sua vaga e orientar sobre o pagamento (caso o evento seja pago).
+                    </Typography>
+                </Paper>
+            </Box>
+        );
+    }
 
     // Se o evento for GRATUITO, confirmação imediata sem PIX
     if (!evento.is_paid) {

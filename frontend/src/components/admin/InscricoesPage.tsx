@@ -226,7 +226,10 @@ export default function InscricoesPage() {
     };
 
     const handleConfirm = async (id: string, currentStatus: string) => {
-        const newStatus = currentStatus === 'confirmada' ? 'pendente' : 'confirmada';
+        let newStatus = 'confirmada';
+        if (currentStatus === 'confirmada') newStatus = 'pendente';
+        else if (currentStatus === 'pendente') newStatus = 'confirmada';
+        else if (currentStatus === 'reserva') newStatus = 'confirmada'; // Promover da reserva para vaga confirmada!
 
         const { error } = await supabase
             .from('inscricoes')
@@ -236,7 +239,7 @@ export default function InscricoesPage() {
         if (error) {
             setError('Erro ao atualizar status: ' + error.message);
         } else {
-            setSuccess(`Inscrição ${newStatus === 'confirmada' ? 'confirmada' : 'desmarcada'} com sucesso!`);
+            setSuccess(`Status alterado para ${newStatus.toUpperCase()} com sucesso!`);
             fetchInscricoes();
         }
     };
@@ -353,6 +356,7 @@ export default function InscricoesPage() {
                     <MenuItem value="">Todos</MenuItem>
                     <MenuItem value="pendente">Pendente</MenuItem>
                     <MenuItem value="confirmada">Confirmada</MenuItem>
+                    <MenuItem value="reserva">Cadastro de Reserva</MenuItem>
                 </TextField>
                 <TextField
                     select
@@ -460,10 +464,16 @@ export default function InscricoesPage() {
                                             </Typography>
                                         </TableCell>
                                         <TableCell>
-                                            <Tooltip title="Clique para alterar o status">
+                                            <Tooltip title={inscricao.status === 'reserva' ? "Clique para PROMOVER para vaga confirmada!" : "Clique para alterar o status"}>
                                                 <Chip
-                                                    label={inscricao.status === 'confirmada' ? 'Confirmada' : 'Pendente'}
-                                                    color={inscricao.status === 'confirmada' ? 'success' : 'warning'}
+                                                    label={
+                                                        inscricao.status === 'confirmada' ? 'Confirmada' :
+                                                        inscricao.status === 'reserva' ? '📋 Reserva' : 'Pendente'
+                                                    }
+                                                    color={
+                                                        inscricao.status === 'confirmada' ? 'success' :
+                                                        inscricao.status === 'reserva' ? 'secondary' : 'warning'
+                                                    }
                                                     size="small"
                                                     onClick={() => handleConfirm(inscricao.id.toString(), inscricao.status || 'pendente')}
                                                     sx={{

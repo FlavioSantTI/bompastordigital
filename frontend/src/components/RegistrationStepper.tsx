@@ -214,6 +214,7 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
                     setSavedRegistration({
                         tipo: 'casal',
                         inscricaoId: result.inscricaoId,
+                        status: result.status,
                         evento: result.evento,
                         esposo: casalData.esposo,
                         esposa: casalData.esposa,
@@ -241,6 +242,7 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
                     setSavedRegistration({
                         tipo: 'individual',
                         inscricaoId: result.inscricaoId,
+                        status: result.status,
                         evento: result.evento,
                         participante: individualData.participante,
                     });

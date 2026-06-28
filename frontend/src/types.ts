@@ -3,7 +3,7 @@
  */
 
 /** Versão Global do Sistema */
-export const APP_VERSION = '5.4';
+export const APP_VERSION = '5.5';
 
 /**
  * Tipo de inscrição
@@ -54,6 +54,9 @@ export interface RegistrationData {
     contato: Contato;
     dados_conjuntos: DadosConjuntos;
 }
+
+/** Status possíveis de uma inscrição (incluindo Cadastro de Reserva / Lista de Espera) */
+export type StatusInscricao = 'pendente' | 'confirmada' | 'cancelada' | 'reserva';
 
 /** Dados de inscrição individual */
 export interface IndividualRegistrationData {

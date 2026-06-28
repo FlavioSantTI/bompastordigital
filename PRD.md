@@ -1,7 +1,7 @@
 # Product Requirements Document (PRD)
 ## Bom Pastor Digital - Sistema de Gestão Pastoral
 
-**Versão**: 5.4  
+**Versão**: 5.5  
 **Data**: 27/06/2026  
 **Autor**: Flávio Santiago  
 **Status**: Estável / Evolução Ativa
@@ -288,6 +288,7 @@ Remetente: contato@bompastordigital.com.br
 | 5.2 | 27/06/2026 | Períodos de Inscrição independentes dos Períodos de Realização, Validação via RPC, Automação de Status |
 | 5.3 | 27/06/2026 | Módulo de Gestão de Palestrantes: cadastro global, foto no Storage, redes sociais, vínculos N:N no cronograma e avatares na agenda pública |
 | 5.4 | 27/06/2026 | Validação de Senha Forte (10+ carac, letras, núm, símbolos), visualizador de senha 👁️ e otimização Vite Code Splitting (bundle 78% menor) |
+| 5.5 | 27/06/2026 | Módulo de Cadastro de Reserva (Lista de Espera automatizada quando limite de vagas for atingido, suspensão de PIX e promoção pelo Admin) |
 
 ---
 

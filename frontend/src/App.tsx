@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 
 import NewLandingPage from './components/NewLandingPage';
+import RecadastramentoLandingPage from './components/RecadastramentoLandingPage';
 import LoginPage from './components/admin/LoginPage';
 import RegisterPage from './components/admin/RegisterPage';
 import ParticipantDashboard from './components/ParticipantDashboard';
@@ -65,7 +66,8 @@ function App() {
             <Route path="/" element={
               <AuthRedirect />
             } />
-            <Route path="/landing" element={<NewLandingPage />} />
+            <Route path="/landing" element={<RecadastramentoLandingPage />} />
+            <Route path="/recadastramento" element={<RecadastramentoLandingPage />} />
             <Route path="/cronograma/:eventoId" element={<CronogramaPublico />} />
             <Route path="/agenda" element={<AgendaRedirect />} />
             <Route path="/presenca-publica/:eventoId" element={<PresencaPublica />} />

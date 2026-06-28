@@ -49,9 +49,16 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 | **5.1** | 24/04/2026 | **Geração de PDF de Presença Ultra-Compatível**: PDF em P&B de alta fidelidade, fontes nativas e memória de WhatsApp. |
 | **5.2** | 27/06/2026 | **Períodos de Inscrição e Realização**: Separação das datas do evento das datas de inscrição, com controle de status automatizado e RPC. |
 | **5.3** | 27/06/2026 | **Módulo de Gestão de Palestrantes**: Cadastro global, upload de foto no Storage, redes sociais, associação N:N no cronograma e exibição na timeline pública. |
-| **5.4** | **27/06/2026** | **Segurança Fortalecida & Otimização de Performance**: Regras de Senha Forte (10+ carac, letras, núm, símbolos), visualizador de senha 👁️ e Code Splitting (bundle 78% mais leve para conexões móveis). |
+| **5.4** | 27/06/2026 | **Segurança Fortalecida & Otimização de Performance**: Regras de Senha Forte (10+ carac, letras, núm, símbolos), visualizador de senha 👁️ e Code Splitting (bundle 78% mais leve para conexões móveis). |
+| **5.5** | **27/06/2026** | **Cadastro de Reserva (Lista de Espera)**: Aceite automatizado de inscrições com status de reserva ao atingir o limite de vagas, suspensão de PIX na reserva e promoção manual pelo Admin. |
 
 ---
+
+### ✅ Cadastro de Reserva / Lista de Espera (v5.5)
+- [x] **Regra Automática no Banco (RPCs)**: Checagem dinâmica de vagas (`inscricoes_count >= vagas`) ativando o status `'reserva'`.
+- [x] **Suspensão de PIX na Reserva**: Pausa na geração do QR Code para inscritos em lista de espera (evitando cobranças indevidas).
+- [x] **Confirmação Pública Diferenciada**: Tela final informativa em tons dourados explicando o funcionamento da lista de espera.
+- [x] **Painel de Gestão Admin**: Filtro por "Cadastro de Reserva", etiqueta visual `📋 Reserva` e promoção em 1 clique para vaga confirmada.
 
 ### ✅ Segurança Fortalecida & Otimização de Performance (v5.4)
 - [x] **Segurança de Autenticação (Senha Forte)**: Validação obrigatória de 10+ caracteres combinando letras, números e símbolos especiais em todos os formulários.
