@@ -22,11 +22,16 @@ import {
     TextField,
     Divider,
     Tooltip,
+    ListSubheader,
 } from '@mui/material';
-import { Visibility, Delete, FilterList, EditNote, AttachMoney, Add } from '@mui/icons-material';
+import { Visibility, Delete, FilterList, EditNote, AttachMoney, Add, RocketLaunch, Warning } from '@mui/icons-material';
 import EditInscricaoDialog from './EditInscricaoDialog';
 import PagamentoDialog from './PagamentoDialog';
 import AdminInscricaoDialog from './AdminInscricaoDialog';
+import PromoverReservaDialog from './PromoverReservaDialog';
+import type { Promovido } from './PromoverReservaDialog';
+import { getResumoReservas, getFilaEspera, promoverReservasLote } from '../../services/reservaService';
+import type { ResumoReservas } from '../../services/reservaService';
 import { supabase } from '../../lib/supabase';
 
 interface Pessoa {
@@ -60,6 +65,14 @@ interface Inscricao {
 interface Evento {
     id: number;
     nome: string;
+    inscricao_inicio?: string;
+    inscricao_fim?: string;
+    realizacao_inicio?: string;
+    realizacao_fim?: string;
+    publicado?: boolean;
+    status_manual?: string | null;
+    vagas?: number;
+    is_paid?: boolean;
 }
 
 export default function InscricoesPage() {
@@ -73,7 +86,7 @@ export default function InscricoesPage() {
     const [editEventoId, setEditEventoId] = useState<number>(0);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [filtroEvento, setFiltroEvento] = useState<number>(0);
+    const [filtroEvento, setFiltroEvento] = useState<number>(-1);
 
     // Busca e ordenação
     const [termoBusca, setTermoBusca] = useState('');
@@ -85,6 +98,18 @@ export default function InscricoesPage() {
 
     // Estado para o Dialog de Nova Inscrição (Admin)
     const [openAdminDialog, setOpenAdminDialog] = useState(false);
+
+    // Módulo de Lista de Reserva (Frente 1)
+    const [resumoReservas, setResumoReservas] = useState<ResumoReservas | null>(null);
+    const [openLoteDialog, setOpenLoteDialog] = useState(false);
+    const [quantidadePromover, setQuantidadePromover] = useState<number>(0);
+    const [previewPromovidos, setPreviewPromovidos] = useState<any[]>([]);
+    const [promovidosResult, setPromovidosResult] = useState<Promovido[]>([]);
+    const [lotePromoting, setLotePromoting] = useState(false);
+    const [isLotePromoted, setIsLotePromoted] = useState(false);
+    const [openIndividualAlertaDialog, setOpenIndividualAlertaDialog] = useState(false);
+    const [individualTargetToPromote, setIndividualTargetToPromote] = useState<Inscricao | null>(null);
+    const [loadingResumo, setLoadingResumo] = useState(false);
 
     // Estado para o Dialog de Confirmação de Exclusão
     const [deleteTarget, setDeleteTarget] = useState<Inscricao | null>(null);
@@ -110,22 +135,121 @@ export default function InscricoesPage() {
             return 0;
         });
 
+    // Mapeia IDs para a posição FIFO
+    const filaReservasIds = [...inscricoes]
+        .filter(i => i.status === 'reserva')
+        .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+        .map(i => i.id);
+
     useEffect(() => {
         fetchEventos();
-        fetchInscricoes();
     }, []);
 
     useEffect(() => {
-        fetchInscricoes();
+        if (filtroEvento !== -1) {
+            fetchInscricoes();
+            fetchResumoReservas();
+        }
     }, [filtroEvento]);
+
+    const fetchResumoReservas = async () => {
+        if (filtroEvento <= 0) {
+            setResumoReservas(null);
+            return;
+        }
+        setLoadingResumo(true);
+        try {
+            const res = await getResumoReservas(filtroEvento);
+            setResumoReservas(res);
+        } catch (err) {
+            console.error('Erro ao carregar resumo de reservas:', err);
+        } finally {
+            setLoadingResumo(false);
+        }
+    };
+
+    const handleLotePromoClick = async () => {
+        if (filtroEvento <= 0 || quantidadePromover <= 0) return;
+        setLotePromoting(true);
+        try {
+            const fila = await getFilaEspera(filtroEvento);
+            const preview = fila.slice(0, quantidadePromover);
+            setPreviewPromovidos(preview);
+            setIsLotePromoted(false);
+            setOpenLoteDialog(true);
+        } catch (err: any) {
+            setError('Erro ao carregar preview da promoção: ' + err.message);
+        } finally {
+            setLotePromoting(false);
+        }
+    };
+
+    const handleConfirmLotePromo = async () => {
+        if (filtroEvento <= 0 || quantidadePromover <= 0) return;
+        setLotePromoting(true);
+        try {
+            const res = await promoverReservasLote(filtroEvento, quantidadePromover);
+            if (res.success) {
+                setPromovidosResult(res.promovidos);
+                setIsLotePromoted(true);
+                fetchInscricoes();
+                fetchResumoReservas();
+                setSuccess(`${res.total_promovidos} inscrições promovidas com sucesso!`);
+            } else {
+                setError(res.message || 'Erro ao processar promoção.');
+                setOpenLoteDialog(false);
+            }
+        } catch (err: any) {
+            setError('Erro ao executar promoção: ' + err.message);
+            setOpenLoteDialog(false);
+        } finally {
+            setLotePromoting(false);
+        }
+    };
+
+    const handleConfirmOverride = async () => {
+        if (!individualTargetToPromote) return;
+        setOpenIndividualAlertaDialog(false);
+        const target = individualTargetToPromote;
+        setIndividualTargetToPromote(null);
+        await handleConfirm(target.id.toString(), 'reserva');
+    };
+
+    const handleStatusChipClick = (insc: Inscricao) => {
+        if (insc.status === 'reserva') {
+            const position = filaReservasIds.indexOf(insc.id) + 1;
+            if (position > 1) {
+                setIndividualTargetToPromote(insc);
+                setOpenIndividualAlertaDialog(true);
+                return;
+            }
+        }
+        handleConfirm(insc.id.toString(), insc.status || 'pendente');
+    };
 
     const fetchEventos = async () => {
         const { data } = await supabase
             .from('eventos')
-            .select('id, nome')
-            .order('data_inicio', { ascending: false });
+            .select('id, nome, inscricao_inicio, inscricao_fim, realizacao_inicio, realizacao_fim, publicado, status_manual, vagas, is_paid')
+            .order('realizacao_inicio', { ascending: false });
 
-        setEventos(data || []);
+        const lista = data || [];
+        setEventos(lista);
+
+        // Encontrar o primeiro evento ativo (aberto ou em andamento ou inscrições em breve)
+        const now = new Date();
+        const ativo = lista.find(e => {
+            if (e.status_manual === 'cancelado') return false;
+            return e.publicado && new Date(e.realizacao_fim || '') > now;
+        });
+
+        if (ativo) {
+            setFiltroEvento(ativo.id);
+        } else if (lista.length > 0) {
+            setFiltroEvento(lista[0].id); // senão o primeiro da lista
+        } else {
+            setFiltroEvento(0); // senão todos
+        }
     };
 
     const fetchInscricoes = async () => {
@@ -227,13 +351,29 @@ export default function InscricoesPage() {
 
     const handleConfirm = async (id: string, currentStatus: string) => {
         let newStatus = 'confirmada';
-        if (currentStatus === 'confirmada') newStatus = 'pendente';
-        else if (currentStatus === 'pendente') newStatus = 'confirmada';
-        else if (currentStatus === 'reserva') newStatus = 'confirmada'; // Promover da reserva para vaga confirmada!
+        let updateData: any = {};
+
+        if (currentStatus === 'confirmada') {
+            newStatus = 'pendente';
+            updateData = { status: newStatus };
+        } else if (currentStatus === 'pendente') {
+            newStatus = 'confirmada';
+            updateData = { status: newStatus };
+        } else if (currentStatus === 'reserva') {
+            // Promover da reserva respeitando se o evento é pago
+            const evt = eventos.find(e => e.id === filtroEvento);
+            if (evt?.is_paid) {
+                newStatus = 'pendente';
+                updateData = { status: newStatus, payment_method_used: 'pix' };
+            } else {
+                newStatus = 'confirmada';
+                updateData = { status: newStatus, payment_method_used: null };
+            }
+        }
 
         const { error } = await supabase
             .from('inscricoes')
-            .update({ status: newStatus })
+            .update(updateData)
             .eq('id', id);
 
         if (error) {
@@ -241,6 +381,7 @@ export default function InscricoesPage() {
         } else {
             setSuccess(`Status alterado para ${newStatus.toUpperCase()} com sucesso!`);
             fetchInscricoes();
+            fetchResumoReservas();
         }
     };
 
@@ -311,7 +452,7 @@ export default function InscricoesPage() {
                         select
                         size="small"
                         label="Filtrar por Evento"
-                        value={filtroEvento}
+                        value={filtroEvento === -1 ? '' : filtroEvento}
                         onChange={(e) => setFiltroEvento(Number(e.target.value))}
                         sx={{ minWidth: 220 }}
                         InputProps={{
@@ -319,11 +460,39 @@ export default function InscricoesPage() {
                         }}
                     >
                         <MenuItem value={0}>Todos os Eventos</MenuItem>
-                        {eventos.map((evento) => (
-                            <MenuItem key={evento.id} value={evento.id}>
-                                {evento.nome}
-                            </MenuItem>
-                        ))}
+                        {(() => {
+                            const now = new Date();
+                            const ativos = eventos.filter(e => {
+                                if (e.status_manual === 'cancelado') return false;
+                                return e.publicado && new Date(e.realizacao_fim || '') > now;
+                            });
+                            const encerrados = eventos.filter(e => {
+                                return e.status_manual === 'cancelado' || !e.publicado || new Date(e.realizacao_fim || '') <= now;
+                            });
+
+                            const items = [];
+                            if (ativos.length > 0) {
+                                items.push(<ListSubheader key="header-ativos">🟢 Eventos Ativos</ListSubheader>);
+                                ativos.forEach(evento => {
+                                    items.push(
+                                        <MenuItem key={evento.id} value={evento.id}>
+                                            {evento.nome}
+                                        </MenuItem>
+                                    );
+                                });
+                            }
+                            if (encerrados.length > 0) {
+                                items.push(<ListSubheader key="header-encerrados">📁 Encerrados</ListSubheader>);
+                                encerrados.forEach(evento => {
+                                    items.push(
+                                        <MenuItem key={evento.id} value={evento.id}>
+                                            {evento.nome}
+                                        </MenuItem>
+                                    );
+                                });
+                            }
+                            return items;
+                        })()}
                     </TextField>
                     <Button
                         variant="contained"
@@ -335,6 +504,108 @@ export default function InscricoesPage() {
                     </Button>
                 </Box>
             </Box>
+
+            {/* Resumo de Inscrições e Vagas do Evento Selecionado */}
+            {filtroEvento > 0 && (
+                <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 3 }}>
+                    <Chip
+                        label={`✅ ${inscricoes.filter(i => i.status === 'confirmada').length} Confirmadas`}
+                        color="success"
+                        variant="outlined"
+                        size="small"
+                        sx={{ fontWeight: 'bold' }}
+                    />
+                    <Chip
+                        label={`⏳ ${inscricoes.filter(i => i.status === 'pendente').length} Pendentes`}
+                        color="warning"
+                        variant="outlined"
+                        size="small"
+                        sx={{ fontWeight: 'bold' }}
+                    />
+                    <Chip
+                        label={`📋 ${inscricoes.filter(i => i.status === 'reserva').length} Reservas`}
+                        color="secondary"
+                        variant="outlined"
+                        size="small"
+                        sx={{ fontWeight: 'bold' }}
+                    />
+                    {(() => {
+                        const evt = eventos.find(e => e.id === filtroEvento);
+                        if (!evt || evt.vagas === undefined) return null;
+                        const preenchidas = inscricoes.filter(i => i.status === 'confirmada' || i.status === 'pendente').length;
+                        const disponiveis = Math.max(0, evt.vagas - preenchidas);
+                        return (
+                            <Chip
+                                label={`🪑 Vagas: ${preenchidas}/${evt.vagas} (${disponiveis} disponíveis)`}
+                                color={disponiveis > 0 ? "primary" : "error"}
+                                size="small"
+                                sx={{ fontWeight: 'bold' }}
+                            />
+                        );
+                    })()}
+                </Box>
+            )}
+
+            {/* Painel de Promoção em Lote (Frente 1) */}
+            {filtroStatus === 'reserva' && filtroEvento > 0 && inscricoes.filter(i => i.status === 'reserva').length > 0 && (
+                <Paper sx={{ p: 2.5, mb: 3, border: `1px solid ${alpha('#9c27b0', 0.2)}`, bgcolor: alpha('#9c27b0', 0.02) }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+                        <Box>
+                            <Typography variant="subtitle1" fontWeight="bold" color="secondary.main">
+                                📋 Lista de Espera Ativa
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Existem <strong>{inscricoes.filter(i => i.status === 'reserva').length}</strong> pessoas na fila cronológica.
+                                {(() => {
+                                    const evt = eventos.find(e => e.id === filtroEvento);
+                                    if (!evt || evt.vagas === undefined) return null;
+                                    const preenchidas = inscricoes.filter(i => i.status === 'confirmada' || i.status === 'pendente').length;
+                                    const disponiveis = Math.max(0, evt.vagas - preenchidas);
+                                    return (
+                                        <span> Vagas disponíveis no evento: <strong>{disponiveis}</strong>.</span>
+                                    );
+                                })()}
+                            </Typography>
+                        </Box>
+                        
+                        {(() => {
+                            const evt = eventos.find(e => e.id === filtroEvento);
+                            const preenchidas = inscricoes.filter(i => i.status === 'confirmada' || i.status === 'pendente').length;
+                            const disponiveis = evt && evt.vagas !== undefined ? Math.max(0, evt.vagas - preenchidas) : 0;
+                            const totalReservas = inscricoes.filter(i => i.status === 'reserva').length;
+                            const maxPromover = Math.min(totalReservas, disponiveis);
+
+                            return (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <TextField
+                                        size="small"
+                                        label="Qtd. a promover"
+                                        type="number"
+                                        value={quantidadePromover === 0 ? '' : quantidadePromover}
+                                        onChange={(e) => {
+                                            const val = Math.min(maxPromover, Math.max(0, Number(e.target.value)));
+                                            setQuantidadePromover(val);
+                                        }}
+                                        inputProps={{ min: 0, max: maxPromover }}
+                                        sx={{ width: 150 }}
+                                        disabled={maxPromover === 0 || lotePromoting}
+                                        helperText={disponiveis === 0 ? "Sem vagas livres" : `Máximo: ${maxPromover}`}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        startIcon={<RocketLaunch />}
+                                        onClick={handleLotePromoClick}
+                                        disabled={quantidadePromover <= 0 || quantidadePromover > maxPromover || lotePromoting}
+                                    >
+                                        {lotePromoting ? 'Carregando...' : 'Promover em Lote'}
+                                    </Button>
+                                </Box>
+                            );
+                        })()}
+                    </Box>
+                </Paper>
+            )}
 
             {/* Barra de busca e ordenação */}
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 3, flexWrap: 'wrap' }}>
@@ -386,6 +657,7 @@ export default function InscricoesPage() {
                     <Table>
                         <TableHead>
                             <TableRow>
+                                {filtroStatus === 'reserva' && <TableCell align="center" width="60"><strong>#</strong></TableCell>}
                                 <TableCell><strong>Tipo</strong></TableCell>
                                 <TableCell><strong>Pessoa 1</strong></TableCell>
                                 <TableCell><strong>Pessoa 2</strong></TableCell>
@@ -399,14 +671,36 @@ export default function InscricoesPage() {
                         <TableBody>
                             {inscricoesFiltradas.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={8} align="center">
+                                    <TableCell colSpan={filtroStatus === 'reserva' ? 9 : 8} align="center">
                                         {termoBusca || filtroStatus ? 'Nenhum resultado para os filtros aplicados.' : 'Nenhuma inscrição encontrada.'}
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                inscricoesFiltradas.map((inscricao) => (
-                                    <TableRow key={inscricao.id}>
-                                        <TableCell>
+                                inscricoesFiltradas.map((inscricao) => {
+                                    const position = filaReservasIds.indexOf(inscricao.id) + 1;
+                                    const isBeingPromotedPreview = filtroStatus === 'reserva' && quantidadePromover > 0 && position <= quantidadePromover;
+
+                                    return (
+                                        <TableRow 
+                                            key={inscricao.id}
+                                            sx={isBeingPromotedPreview ? {
+                                                outline: '2px solid #2e7d32',
+                                                backgroundColor: alpha('#4caf50', 0.08),
+                                                transition: 'all 0.3s'
+                                            } : {}}
+                                        >
+                                            {filtroStatus === 'reserva' && (
+                                                <TableCell align="center">
+                                                    <Chip
+                                                        label={`#${position}`}
+                                                        size="small"
+                                                        color="secondary"
+                                                        variant="outlined"
+                                                        sx={{ fontWeight: 'bold' }}
+                                                    />
+                                                </TableCell>
+                                            )}
+                                            <TableCell>
                                             <Chip
                                                 label={inscricao.tipo === 'individual' ? 'Individual' : 'Casal'}
                                                 color={inscricao.tipo === 'individual' ? 'info' : 'default'}
@@ -475,7 +769,7 @@ export default function InscricoesPage() {
                                                         inscricao.status === 'reserva' ? 'secondary' : 'warning'
                                                     }
                                                     size="small"
-                                                    onClick={() => handleConfirm(inscricao.id.toString(), inscricao.status || 'pendente')}
+                                                    onClick={() => handleStatusChipClick(inscricao)}
                                                     sx={{
                                                         cursor: 'pointer',
                                                         fontWeight: 'bold',
@@ -520,7 +814,8 @@ export default function InscricoesPage() {
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
-                                ))
+                                    );
+                                })
                             )}
                         </TableBody>
                     </Table>
@@ -711,6 +1006,54 @@ export default function InscricoesPage() {
                     setSuccess('Inscrição criada com sucesso!');
                     fetchInscricoes();
                 }}
+            />
+            {/* Dialog de Alerta FIFO Individual */}
+            <Dialog
+                open={openIndividualAlertaDialog}
+                onClose={() => setOpenIndividualAlertaDialog(false)}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Warning color="warning" /> Atenção: Fila FIFO
+                </DialogTitle>
+                <DialogContent>
+                    <Typography gutterBottom>
+                        Este participante <strong>não é o próximo da fila</strong>.
+                    </Typography>
+                    {individualTargetToPromote && (
+                        <Typography variant="body2" color="text.secondary">
+                            A posição atual dele na Lista de Espera é{' '}
+                            <strong>#{filaReservasIds.indexOf(individualTargetToPromote.id) + 1}</strong>.
+                        </Typography>
+                    )}
+                    <Typography variant="body2" sx={{ mt: 2 }}>
+                        Deseja promover mesmo assim, ignorando a ordem cronológica?
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenIndividualAlertaDialog(false)}>Cancelar</Button>
+                    <Button onClick={handleConfirmOverride} color="warning" variant="contained">
+                        Promover mesmo assim
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Dialog de Promoção em Lote */}
+            <PromoverReservaDialog
+                open={openLoteDialog}
+                onClose={() => {
+                    setOpenLoteDialog(false);
+                    setQuantidadePromover(0);
+                }}
+                eventoNome={eventos.find(e => e.id === filtroEvento)?.nome || ''}
+                quantidade={quantidadePromover}
+                previewList={previewPromovidos}
+                isPromoted={isLotePromoted}
+                promovidosList={promovidosResult}
+                restantesNaFila={resumoReservas?.totalReservas || 0}
+                onConfirm={handleConfirmLotePromo}
+                loading={lotePromoting}
             />
         </Box>
     );

@@ -51,6 +51,16 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 | **5.3** | 27/06/2026 | **Módulo de Gestão de Palestrantes**: Cadastro global, upload de foto no Storage, redes sociais, associação N:N no cronograma e exibição na timeline pública. |
 | **5.4** | 27/06/2026 | **Segurança Fortalecida & Otimização de Performance**: Regras de Senha Forte (10+ carac, letras, núm, símbolos), visualizador de senha 👁️ e Code Splitting (bundle 78% mais leve para conexões móveis). |
 | **5.5** | **27/06/2026** | **Cadastro de Reserva (Lista de Espera)**: Aceite automatizado de inscrições com status de reserva ao atingir o limite de vagas, suspensão de PIX na reserva e promoção manual pelo Admin. |
+| **5.5.5** | **03/07/2026** | **Promoção Semi-Automática FIFO & Otimização do Dashboard**: Promoção em lote da lista de espera respeitando ordem cronológica com preview e relatório (WhatsApp/PDF) + Otimização da carga inicial do painel administrativo via lazy loading e dropdown de eventos ativos. |
+
+---
+
+### ✅ Promoção Semi-Automática FIFO & Otimização de Performance (v5.5.5)
+- [x] **Promoção em Lote (RPC)**: Nova função server-side `promover_reservas_lote` para mover registros da lista de reserva para pendente/confirmada respeitando estritamente a fila cronológica.
+- [x] **Relatório de Contato**: Geração automatizada de PDF de contato dos contemplados, cópia de resumo e link WhatsApp direto com mensagem pré-formatada.
+- [x] **Alerta de Quebra de Fila FIFO**: Alerta explícito no painel caso o admin tente promover individualmente uma inscrição fora da primeira posição.
+- [x] **Otimização de Inicialização do Dashboard**: Redução das consultas de carga para 5 HEAD requests rápidos. Gráficos, Pivot e Listas são carregados sob demanda ao expandir blocos.
+- [x] **Dropdown Inteligente de Inscrições**: Exibição agrupada de eventos ativos e encerrados, selecionando o primeiro ativo por padrão.
 
 ---
 
@@ -137,4 +147,4 @@ Acesse: `http://localhost:5173`
 ## 🤝 Contribuição
 Desenvolvido por **Flávio Santiago** com assistência de IA (Antigravity).
 Contato: flavio.santiago.ti@outlook.com
-© 2026 Bom Pastor Digital • **Versão 5.2**
+© 2026 Bom Pastor Digital • **Versão 5.5.5**

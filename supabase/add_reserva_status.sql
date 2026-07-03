@@ -76,7 +76,7 @@ BEGIN
 
     SELECT COUNT(*) INTO v_total_inscritos 
     FROM inscricoes 
-    WHERE evento_id = (payload->>'evento_id')::INTEGER AND status != 'cancelada';
+    WHERE evento_id = (payload->>'evento_id')::INTEGER AND status IN ('confirmada', 'pendente');
 
     IF v_vagas IS NOT NULL AND v_total_inscritos >= v_vagas THEN
         v_status := 'reserva';
@@ -193,7 +193,7 @@ BEGIN
 
     SELECT COUNT(*) INTO v_total_inscritos 
     FROM inscricoes 
-    WHERE evento_id = (payload->>'evento_id')::INTEGER AND status != 'cancelada';
+    WHERE evento_id = (payload->>'evento_id')::INTEGER AND status IN ('confirmada', 'pendente');
 
     IF v_vagas IS NOT NULL AND v_total_inscritos >= v_vagas THEN
         v_status := 'reserva';
