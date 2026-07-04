@@ -3,7 +3,7 @@
  */
 
 /** Versão Global do Sistema */
-export const APP_VERSION = '5.5.5';
+export const APP_VERSION = '6.0';
 
 /**
  * Tipo de inscrição
@@ -35,8 +35,6 @@ export interface DadosConjuntos {
     nova_uniao: boolean;
     membro_pasfam: boolean;
     pastorais?: string[];
-    necessita_hospedagem: boolean;
-    restricoes_alimentares?: string;
     observacoes?: string;
 }
 

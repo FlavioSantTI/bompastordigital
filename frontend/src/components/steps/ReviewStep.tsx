@@ -122,9 +122,6 @@ export default function ReviewStep() {
                             {data.dados_conjuntos?.membro_pasfam && (
                                 <Chip label="Membro Pasfam" color="primary" size="small" />
                             )}
-                            {data.dados_conjuntos?.necessita_hospedagem && (
-                                <Chip label="Necessita Hospedagem" color="secondary" size="small" />
-                            )}
                         </Box>
 
                         {data.dados_conjuntos?.membro_pasfam && data.dados_conjuntos?.pastorais && data.dados_conjuntos.pastorais.length > 0 && (
@@ -143,30 +140,18 @@ export default function ReviewStep() {
                 </Paper>
             </Box>
 
-            {/* Seção: Observações */}
-            {(data.dados_conjuntos?.restricoes_alimentares || data.dados_conjuntos?.observacoes) && (
+            {data.dados_conjuntos?.observacoes && (
                 <Box>
                     <Typography variant="subtitle1" fontWeight="bold" color="primary.dark" gutterBottom>
                         📝 Observações
                     </Typography>
                     <Paper variant="outlined" sx={{ p: 2 }}>
-                        {data.dados_conjuntos?.restricoes_alimentares && (
-                            <Box sx={{ mb: data.dados_conjuntos?.observacoes ? 2 : 0 }}>
-                                <Typography variant="body2" color="text.secondary" gutterBottom>
-                                    Restrições Alimentares:
-                                </Typography>
-                                <Typography variant="body1">{data.dados_conjuntos.restricoes_alimentares}</Typography>
-                            </Box>
-                        )}
-
-                        {data.dados_conjuntos?.observacoes && (
-                            <Box>
-                                <Typography variant="body2" color="text.secondary" gutterBottom>
-                                    Observações Gerais:
-                                </Typography>
-                                <Typography variant="body1">{data.dados_conjuntos.observacoes}</Typography>
-                            </Box>
-                        )}
+                        <Box>
+                            <Typography variant="body2" color="text.secondary" gutterBottom>
+                                Observações Gerais:
+                            </Typography>
+                            <Typography variant="body1">{data.dados_conjuntos.observacoes}</Typography>
+                        </Box>
                     </Paper>
                 </Box>
             )}

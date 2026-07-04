@@ -39,8 +39,6 @@ const baseSchema = {
         nova_uniao: z.boolean(),
         membro_pasfam: z.boolean(),
         pastorais: z.array(z.string()).optional(),
-        necessita_hospedagem: z.boolean(),
-        restricoes_alimentares: z.string().optional(),
         observacoes: z.string().optional(),
     }),
 };
@@ -120,8 +118,6 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
             nova_uniao: false,
             membro_pasfam: false,
             pastorais: [],
-            necessita_hospedagem: false,
-            restricoes_alimentares: '',
             observacoes: '',
         },
     };

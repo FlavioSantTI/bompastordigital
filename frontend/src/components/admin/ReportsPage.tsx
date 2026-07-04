@@ -190,10 +190,6 @@ export default function ReportsPage() {
                         membro_pasfam: dc.membro_pasfam,
                         nova_uniao: dc.nova_uniao
                     },
-                    logistica: {
-                        necessita_hospedagem: dc.necessita_hospedagem,
-                        restricoes_alimentares: dc.restricoes_alimentares
-                    },
                     observacoes: insc.observacoes || ''
                 };
             });

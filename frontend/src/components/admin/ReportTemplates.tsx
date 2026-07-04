@@ -334,10 +334,9 @@ export const FichasInscricaoTemplate = ({ dados, tituloEvento }: { dados: DadosE
                 </View>
 
                 <View style={s.section}>
-                    <Text style={s.sectionTitle}>DADOS PASTORAIS E LOGÍSTICA</Text>
+                    <Text style={s.sectionTitle}>DADOS PASTORAIS</Text>
                     <View style={s.row}><Text style={s.label}>Paróquia:</Text><Text style={s.value}>{d.pastoral.paroquia}</Text></View>
                     <View style={s.row}><Text style={s.label}>Membro Pasfam:</Text><Text style={s.value}>{d.pastoral.membro_pasfam ? 'Sim' : 'Não'}</Text></View>
-                    <View style={s.row}><Text style={s.label}>Hospedagem:</Text><Text style={s.value}>{d.logistica.necessita_hospedagem ? 'Sim' : 'Não'}</Text></View>
                     <View style={s.row}><Text style={s.label}>Observações:</Text><Text style={s.value}>{d.observacoes || 'Nenhuma'}</Text></View>
                 </View>
 

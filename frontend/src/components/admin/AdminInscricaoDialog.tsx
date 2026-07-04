@@ -101,8 +101,6 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
     const [endereco, setEndereco] = useState('');
     const [novaUniao, setNovaUniao] = useState(false);
     const [membroPasfam, setMembroPasfam] = useState(false);
-    const [necessitaHospedagem, setNecessitaHospedagem] = useState(false);
-    const [restricoesAlimentares, setRestricoesAlimentares] = useState('');
     const [observacoes, setObservacoes] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -164,8 +162,6 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
         setEndereco('');
         setNovaUniao(false);
         setMembroPasfam(false);
-        setNecessitaHospedagem(false);
-        setRestricoesAlimentares('');
         setObservacoes('');
         setMunicipioId(null);
         setMunicipioNome('');
@@ -215,8 +211,6 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
                     endereco: endereco || undefined,
                     nova_uniao: novaUniao,
                     membro_pasfam: membroPasfam,
-                    necessita_hospedagem: necessitaHospedagem,
-                    restricoes_alimentares: restricoesAlimentares || undefined,
                     observacoes: observacoes || undefined,
                     cidade: municipioNome || undefined,
                 },
@@ -491,32 +485,18 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
                                     control={<Checkbox size="small" checked={membroPasfam} onChange={(e) => setMembroPasfam(e.target.checked)} />}
                                     label={<Typography variant="body2">Membro Pasfam</Typography>}
                                 />
-                                <FormControlLabel
-                                    control={<Checkbox size="small" checked={necessitaHospedagem} onChange={(e) => setNecessitaHospedagem(e.target.checked)} />}
-                                    label={<Typography variant="body2">Necessita Hospedagem</Typography>}
-                                />
                             </Box>
 
-                            <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-                                <TextField
-                                    label="Restrições Alimentares"
-                                    size="small"
-                                    value={restricoesAlimentares}
-                                    onChange={(e) => setRestricoesAlimentares(e.target.value)}
-                                    sx={{ flex: '1 1 250px' }}
-                                    helperText="Opcional"
-                                />
-                                <TextField
-                                    label="Observações Gerais"
-                                    size="small"
-                                    multiline
-                                    rows={2}
-                                    value={observacoes}
-                                    onChange={(e) => setObservacoes(e.target.value)}
-                                    sx={{ flex: '1 1 250px' }}
-                                    helperText="Opcional"
-                                />
-                            </Box>
+                            <TextField
+                                label="Observações Gerais"
+                                size="small"
+                                multiline
+                                rows={2}
+                                value={observacoes}
+                                onChange={(e) => setObservacoes(e.target.value)}
+                                fullWidth
+                                helperText="Opcional"
+                            />
                         </Box>
                     </Box>
                 </Box>

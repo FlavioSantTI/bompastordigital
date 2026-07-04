@@ -102,8 +102,6 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
     const [novaUniao, setNovaUniao] = useState(false);
     const [membroPasfam, setMembroPasfam] = useState(false);
     const [pastorais, setPastorais] = useState<string[]>([]);
-    const [necessitaHospedagem, setNecessitaHospedagem] = useState(false);
-    const [restricoesAlimentares, setRestricoesAlimentares] = useState('');
     const [observacoes, setObservacoes] = useState('');
 
     useEffect(() => {
@@ -132,8 +130,6 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
         setNovaUniao(inscricao.dados_conjuntos?.nova_uniao || false);
         setMembroPasfam(inscricao.dados_conjuntos?.membro_pasfam || false);
         setPastorais(inscricao.dados_conjuntos?.pastorais || []);
-        setNecessitaHospedagem(inscricao.dados_conjuntos?.necessita_hospedagem || false);
-        setRestricoesAlimentares(inscricao.dados_conjuntos?.restricoes_alimentares || '');
         setObservacoes(inscricao.dados_conjuntos?.observacoes || '');
 
         loadInitialLocation(inscricao?.diocese_id, cidadePreservada);
@@ -260,8 +256,6 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
                         nova_uniao: novaUniao,
                         membro_pasfam: membroPasfam,
                         pastorais,
-                        necessita_hospedagem: necessitaHospedagem,
-                        restricoes_alimentares: restricoesAlimentares || null,
                         observacoes: observacoes || null,
                     },
                 })
@@ -515,15 +509,6 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
                                     }
                                     label="Membro da Pastoral Familiar"
                                 />
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            checked={necessitaHospedagem}
-                                            onChange={(e) => setNecessitaHospedagem(e.target.checked)}
-                                        />
-                                    }
-                                    label="Necessita Hospedagem"
-                                />
                             </Box>
 
                             {/* Pastorais */}
@@ -551,16 +536,6 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
                                     }
                                 />
                             )}
-
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={2}
-                                label="Restrições Alimentares"
-                                value={restricoesAlimentares}
-                                onChange={(e) => setRestricoesAlimentares(e.target.value)}
-                                placeholder="Ex: vegetariano, intolerância a lactose, etc."
-                            />
 
                             <TextField
                                 fullWidth

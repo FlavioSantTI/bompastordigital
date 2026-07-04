@@ -52,6 +52,16 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 | **5.4** | 27/06/2026 | **Segurança Fortalecida & Otimização de Performance**: Regras de Senha Forte (10+ carac, letras, núm, símbolos), visualizador de senha 👁️ e Code Splitting (bundle 78% mais leve para conexões móveis). |
 | **5.5** | **27/06/2026** | **Cadastro de Reserva (Lista de Espera)**: Aceite automatizado de inscrições com status de reserva ao atingir o limite de vagas, suspensão de PIX na reserva e promoção manual pelo Admin. |
 | **5.5.5** | **03/07/2026** | **Promoção Semi-Automática FIFO & Otimização do Dashboard**: Promoção em lote da lista de espera respeitando ordem cronológica com preview e relatório (WhatsApp/PDF) + Otimização da carga inicial do painel administrativo via lazy loading e dropdown de eventos ativos. |
+| **6.0** | **04/07/2026** | **Simplificação do Formulário de Inscrição**: Remoção completa dos campos "Restrições Alimentares" e "Necessito de Hospedagem" do formulário público, formulários admin (criação e edição) e de todas as exportações (Excel, PDF de fichas e template @react-pdf). |
+
+---
+
+### ✅ Simplificação do Formulário de Inscrição (v6.0)
+- [x] **Remoção do Campo "Restrições Alimentares"**: Eliminado do formulário público (JointStep), tela de revisão (ReviewStep), schema Zod, formulários admin de criação e edição, e de todas as exportações (Excel e PDF).
+- [x] **Remoção do Campo "Necessito de Hospedagem"**: Eliminado do formulário público (checkbox), tela de revisão (chip visual), formulários admin, templates PDF (@react-pdf e jsPDF) e exportação Excel.
+- [x] **Compatibilidade com Dados Históricos**: Os dados de inscrições antigas são preservados intactos no banco (JSONB `dados_conjuntos`) sem necessidade de migração.
+- [x] **Sem Impacto no Banco de Dados**: Nenhuma alteração de schema, RPCs ou migrações SQL foi necessária.
+- [x] **Build Validado**: Compilação limpa confirmada (`npm run build` — 0 erros, 0 warnings de tipagem).
 
 ---
 
@@ -147,4 +157,4 @@ Acesse: `http://localhost:5173`
 ## 🤝 Contribuição
 Desenvolvido por **Flávio Santiago** com assistência de IA (Antigravity).
 Contato: flavio.santiago.ti@outlook.com
-© 2026 Bom Pastor Digital • **Versão 5.5.5**
+© 2026 Bom Pastor Digital • **Versão 6.0**

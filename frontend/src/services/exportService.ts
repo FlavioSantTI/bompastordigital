@@ -34,10 +34,6 @@ export interface DadosExportacao {
         membro_pasfam?: boolean;
         nova_uniao?: boolean;
     };
-    logistica: {
-        necessita_hospedagem?: boolean;
-        restricoes_alimentares?: string;
-    };
     observacoes?: string;
     data_inscricao: string;
 }
@@ -73,7 +69,6 @@ export const exportService = {
                     'Paróquia': item.pastoral.paroquia,
                     'Segunda União': item.pastoral.nova_uniao ? 'Sim' : 'Não',
                     'Membro Pasfam': item.pastoral.membro_pasfam ? 'Sim' : 'Não',
-                    'Hospedagem': item.logistica.necessita_hospedagem ? 'Sim' : 'Não',
                 };
 
                 if (individualizar) {
@@ -106,7 +101,6 @@ export const exportService = {
                         'Telefone 2': item.esposa?.telefone || (item.tipo === 'casal' ? '-' : '---'),
                         'Endereço': item.endereco.completo,
                         'Pároco': item.pastoral.paroco || '-',
-                        'Restrições': item.logistica.restricoes_alimentares || '-',
                         'Observações': item.observacoes || '-'
                     });
                 }
@@ -202,8 +196,6 @@ export const exportService = {
                 desenharBloco('DADOS PASTORAIS E LOGÍSTICA', [
                     `Paróquia: ${inscricao.pastoral.paroquia}   |   Pároco: ${inscricao.pastoral.paroco || '-'}`,
                     `Membro Pasfam: ${inscricao.pastoral.membro_pasfam ? 'Sim' : 'Não'}   |   Segunda União: ${inscricao.pastoral.nova_uniao ? 'Sim' : 'Não'}`,
-                    `Necessita Hospedagem: ${inscricao.logistica.necessita_hospedagem ? 'Sim' : 'Não'}`,
-                    `Restrições Alimentares: ${inscricao.logistica.restricoes_alimentares || 'Nenhuma'}`,
                     `Observações: ${inscricao.observacoes || '-'}`
                 ]);
 
