@@ -181,7 +181,7 @@ export default function ParticipantDashboard() {
                         onClick={() => setShowForm(true)}
                         sx={{ px: 4, py: 1.5, borderRadius: 2, fontWeight: 'bold' }}
                     >
-                        Fazer Minha Primeira Inscrição
+                        Efetuar Cadastro
                     </Button>
                 </Paper>
             </Container>
