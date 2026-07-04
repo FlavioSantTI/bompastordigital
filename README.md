@@ -56,9 +56,11 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 
 ---
 
-### ✅ Simplificação do Formulário de Inscrição (v6.0)
+### ✅ Simplificação do Formulário de Inscrição & Assinatura Premium (v6.0)
 - [x] **Remoção do Campo "Restrições Alimentares"**: Eliminado do formulário público (JointStep), tela de revisão (ReviewStep), schema Zod, formulários admin de criação e edição, e de todas as exportações (Excel e PDF).
 - [x] **Remoção do Campo "Necessito de Hospedagem"**: Eliminado do formulário público (checkbox), tela de revisão (chip visual), formulários admin, templates PDF (@react-pdf e jsPDF) e exportação Excel.
+- [x] **Rodapés de Assinatura Atualizados**: Inclusão da assinatura personalizada `© 2026 Bom Pastor Digital - Versão 6.O / Powered by Flavio Santiago – Consultor IA` em todas as páginas, inclusive na tela de login.
+- [x] **Atualização de UX no Dashboard**: Botão "Fazer Minha Primeira Inscrição" renomeado para "Efetuar Cadastro" para melhor adequação de contexto.
 - [x] **Compatibilidade com Dados Históricos**: Os dados de inscrições antigas são preservados intactos no banco (JSONB `dados_conjuntos`) sem necessidade de migração.
 - [x] **Sem Impacto no Banco de Dados**: Nenhuma alteração de schema, RPCs ou migrações SQL foi necessária.
 - [x] **Build Validado**: Compilação limpa confirmada (`npm run build` — 0 erros, 0 warnings de tipagem).
