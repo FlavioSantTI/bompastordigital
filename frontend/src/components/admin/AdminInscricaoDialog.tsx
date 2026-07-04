@@ -23,6 +23,7 @@ import React from 'react';
 import { supabase } from '../../lib/supabase';
 import { registerByAdmin } from '../../services/registrationService';
 import type { TipoInscricao } from '../../types';
+import { PASTORAIS_DISPONIVEIS } from '../../types';
 
 // Máscaras
 const CPFMask = React.forwardRef<HTMLInputElement, any>((props, ref) => {
@@ -101,6 +102,7 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
     const [endereco, setEndereco] = useState('');
     const [novaUniao, setNovaUniao] = useState(false);
     const [membroPasfam, setMembroPasfam] = useState(false);
+    const [pastorais, setPastorais] = useState<string[]>([]);
     const [observacoes, setObservacoes] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -162,6 +164,7 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
         setEndereco('');
         setNovaUniao(false);
         setMembroPasfam(false);
+        setPastorais([]);
         setObservacoes('');
         setMunicipioId(null);
         setMunicipioNome('');
@@ -211,6 +214,7 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
                     endereco: endereco || undefined,
                     nova_uniao: novaUniao,
                     membro_pasfam: membroPasfam,
+                    pastorais: membroPasfam && pastorais.length > 0 ? pastorais : undefined,
                     observacoes: observacoes || undefined,
                     cidade: municipioNome || undefined,
                 },
@@ -482,10 +486,46 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
                                     label={<Typography variant="body2">Nova União</Typography>}
                                 />
                                 <FormControlLabel
-                                    control={<Checkbox size="small" checked={membroPasfam} onChange={(e) => setMembroPasfam(e.target.checked)} />}
+                                    control={<Checkbox size="small" checked={membroPasfam} onChange={(e) => {
+                                        const checked = e.target.checked;
+                                        setMembroPasfam(checked);
+                                        if (!checked) {
+                                            setPastorais([]);
+                                        }
+                                    }} />}
                                     label={<Typography variant="body2">Membro Pasfam</Typography>}
                                 />
                             </Box>
+
+                            {/* Pastorais — exibido apenas se membro Pasfam */}
+                            {membroPasfam && (
+                                <Autocomplete
+                                    multiple
+                                    options={[...PASTORAIS_DISPONIVEIS]}
+                                    value={pastorais}
+                                    onChange={(_, newValue) => setPastorais(newValue)}
+                                    size="small"
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Pastorais em que atua"
+                                            placeholder="Selecione..."
+                                            size="small"
+                                            helperText="Opcional"
+                                        />
+                                    )}
+                                    renderTags={(value, getTagProps) =>
+                                        value.map((option, index) => (
+                                            <Chip
+                                                label={option}
+                                                {...getTagProps({ index })}
+                                                key={option}
+                                                size="small"
+                                            />
+                                        ))
+                                    }
+                                />
+                            )}
 
                             <TextField
                                 label="Observações Gerais"

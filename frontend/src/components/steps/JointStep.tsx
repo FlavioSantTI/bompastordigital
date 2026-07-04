@@ -3,7 +3,7 @@ import { useFormContext, Controller } from 'react-hook-form';
 import { PASTORAIS_DISPONIVEIS } from '../../types';
 
 export default function JointStep() {
-    const { register, formState: { errors }, control, watch } = useFormContext();
+    const { register, formState: { errors }, control, watch, setValue } = useFormContext();
 
     // Observar o valor de membro_pasfam para mostrar/ocultar pastoral
     const membroPasfam = watch('dados_conjuntos.membro_pasfam');
@@ -71,7 +71,13 @@ export default function JointStep() {
                                 control={
                                     <Checkbox
                                         checked={field.value}
-                                        onChange={(e) => field.onChange(e.target.checked)}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            field.onChange(checked);
+                                            if (!checked) {
+                                                setValue('dados_conjuntos.pastorais', []);
+                                            }
+                                        }}
                                     />
                                 }
                                 label="Membro da Pastoral Familiar (Pasfam)"

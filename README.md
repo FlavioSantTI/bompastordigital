@@ -36,6 +36,7 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 
 | Versão | Data | Mudanças |
 |--------|----------|----------|
+| **6.1** | **04/07/2026** | **Correções Pastorais Críticas & Consolidação**: Unificação da lista de pastorais (types.ts), limpeza de dados ao desmarcar membro da Pasfam, campo de pastorais inserido no AdminInscricaoDialog, validação de campos obrigatórios no editor admin, e resolução do bug crítico `v_evento is not assigned yet` nas RPCs de casal e individual. |
 | 1.0 - 3.7| Jan-Abr 2026 | Evolução do sistema (Auth, Inscrições, Dashboard, Gráficos Recharts, Relatórios PDF Base) |
 | **4.0** | 21/04/2026 | **Módulo de Cronograma do Evento**: Gestão de Salas, Atividades e Categorias Dinâmicas. Timeline Pública. |
 | **4.1** | 21/04/2026 | **Lista de Presença por Diocese**: Relatório automatizado com campo de assinatura e exportação XLS. |
@@ -53,6 +54,15 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 | **5.5** | **27/06/2026** | **Cadastro de Reserva (Lista de Espera)**: Aceite automatizado de inscrições com status de reserva ao atingir o limite de vagas, suspensão de PIX na reserva e promoção manual pelo Admin. |
 | **5.5.5** | **03/07/2026** | **Promoção Semi-Automática FIFO & Otimização do Dashboard**: Promoção em lote da lista de espera respeitando ordem cronológica com preview e relatório (WhatsApp/PDF) + Otimização da carga inicial do painel administrativo via lazy loading e dropdown de eventos ativos. |
 | **6.0** | **04/07/2026** | **Simplificação do Formulário de Inscrição**: Remoção completa dos campos "Restrições Alimentares" e "Necessito de Hospedagem" do formulário público, formulários admin (criação e edição) e de todas as exportações (Excel, PDF de fichas e template @react-pdf). |
+
+---
+
+### ✅ Correções Pastorais Críticas & Consolidação (v6.1)
+- [x] **Sincronização de Pastorais**: Unificação de `PASTORAIS_DISPONIVEIS` centralizado em `types.ts` utilizado simultaneamente nas telas públicas e de admin, evitando perda de dados na edição.
+- [x] **Limpeza de Seleções Órfãs**: Pastorais selecionadas são limpas automaticamente caso o usuário ou admin desmarque o checkbox "Membro Pasfam".
+- [x] **Pastorais na Criação Admin**: Campo de seleção múltipla de pastorais adicionado ao `AdminInscricaoDialog.tsx`.
+- [x] **Validação no Editor**: Adicionadas travas de segurança contra campos obrigatórios vazios ou inválidos no painel admin de edição.
+- [x] **Consolidação de RPCs**: Escrita de script SQL unificado em `supabase/fix_rpcs_consolidated.sql` resolvendo o erro crítico `record "v_evento" is not assigned yet` nas funções PostgreSQL.
 
 ---
 
@@ -159,4 +169,4 @@ Acesse: `http://localhost:5173`
 ## 🤝 Contribuição
 Desenvolvido por **Flávio Santiago** com assistência de IA (Antigravity).
 Contato: flavio.santiago.ti@outlook.com
-© 2026 Bom Pastor Digital • **Versão 6.0**
+© 2026 Bom Pastor Digital • **Versão 6.1**

@@ -19,6 +19,7 @@ import {
     Paper,
 } from '@mui/material';
 import { supabase } from '../../lib/supabase';
+import { PASTORAIS_DISPONIVEIS } from '../../types';
 
 interface Pessoa {
     id: string;
@@ -57,17 +58,8 @@ interface EditInscricaoDialogProps {
     onSave: () => void;
 }
 
-const PASTORAIS_OPCOES = [
-    'Pastoral Familiar',
-    'Pastoral da Criança',
-    'Pastoral da Juventude',
-    'Pastoral da Saúde',
-    'Pastoral Social',
-    'Liturgia',
-    'Música',
-    'Catequese',
-    'Outras',
-];
+// Usando lista unificada de PASTORAIS_DISPONIVEIS importada de types.ts
+const PASTORAIS_OPCOES = [...PASTORAIS_DISPONIVEIS];
 
 export default function EditInscricaoDialog({ open, inscricao, eventos, onClose, onSave }: EditInscricaoDialogProps) {
     const [error, setError] = useState('');
@@ -208,6 +200,39 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
         if (!inscricao) return;
 
         setError('');
+
+        // ── Validação de campos obrigatórios ──
+        if (!esposoNome || esposoNome.trim().length < 3) {
+            setError('Nome do ' + (inscricao.tipo === 'individual' ? 'participante' : 'esposo') + ' é obrigatório (mín. 3 caracteres).');
+            return;
+        }
+        if (!esposoNascimento) {
+            setError('Data de nascimento do ' + (inscricao.tipo === 'individual' ? 'participante' : 'esposo') + ' é obrigatória.');
+            return;
+        }
+        if (inscricao.tipo !== 'individual') {
+            if (!esposaNome || esposaNome.trim().length < 3) {
+                setError('Nome da esposa é obrigatório (mín. 3 caracteres).');
+                return;
+            }
+            if (!esposaNascimento) {
+                setError('Data de nascimento da esposa é obrigatória.');
+                return;
+            }
+        }
+        if (!paroquia || paroquia.trim().length < 3) {
+            setError('Paróquia é obrigatória (mín. 3 caracteres).');
+            return;
+        }
+        if (!paroco || paroco.trim().length < 3) {
+            setError('Nome do pároco é obrigatório (mín. 3 caracteres).');
+            return;
+        }
+        if (!endereco || endereco.trim().length < 10) {
+            setError('Endereço é obrigatório (mín. 10 caracteres).');
+            return;
+        }
+
         try {
             setSaving(true);
             setError('');
@@ -504,7 +529,13 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
                                     control={
                                         <Checkbox
                                             checked={membroPasfam}
-                                            onChange={(e) => setMembroPasfam(e.target.checked)}
+                                            onChange={(e) => {
+                                                const checked = e.target.checked;
+                                                setMembroPasfam(checked);
+                                                if (!checked) {
+                                                    setPastorais([]);
+                                                }
+                                            }}
                                         />
                                     }
                                     label="Membro da Pastoral Familiar"
