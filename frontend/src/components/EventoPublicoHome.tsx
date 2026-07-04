@@ -257,10 +257,12 @@ export default function EventoPublicoHome() {
                     ))}
                 </Box>
 
-                {/* Footer */}
                 <Box sx={{ mt: 8, textAlign: 'center' }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ opacity: 0.8, fontWeight: 700 }}>
-                        © 2026 Bom Pastor Digital • Versão {APP_VERSION}
+                    <Typography variant="caption" color="text.secondary" component="div" sx={{ opacity: 0.8, fontWeight: 700 }}>
+                        © 2026 Bom Pastor Digital - Versão 6.O
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" component="div" sx={{ mt: 0.5, opacity: 0.7 }}>
+                        Powered by Flavio Santiago – Consultor IA
                     </Typography>
                 </Box>
             </Container>

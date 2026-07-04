@@ -2,7 +2,6 @@ import { Box, AppBar, Toolbar, Typography, Container, Button } from '@mui/materi
 import { Logout, AccountCircle } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { APP_VERSION } from '../types';
 
 interface ClientLayoutProps {
     children: React.ReactNode;
@@ -88,10 +87,13 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
                 </Container>
             </Box>
 
-            {/* Footer Simples */}
+            {/* Footer */}
             <Box component="footer" sx={{ py: 3, textAlign: 'center', bgcolor: 'transparent' }}>
-                <Typography variant="caption" color="text.secondary">
-                    <strong>© 2026 Bom Pastor Digital</strong> • <span style={{ color: '#ff9800', fontWeight: 'bold' }}>Versão {APP_VERSION}</span>
+                <Typography variant="caption" color="text.secondary" component="div">
+                    <strong>© 2026 Bom Pastor Digital</strong> - Versão 6.O
+                </Typography>
+                <Typography variant="caption" color="text.secondary" component="div" sx={{ mt: 0.5, opacity: 0.8 }}>
+                    Powered by Flavio Santiago – Consultor IA
                 </Typography>
             </Box>
         </Box>
