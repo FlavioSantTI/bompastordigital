@@ -227,8 +227,11 @@ export default function LoginPage() {
                 </form>
 
                 <Box sx={{ mt: 3 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
-                        <strong>© 2026 Bom Pastor Digital</strong> • <span style={{ color: '#ff9800', fontWeight: 'bold' }}>Versão {APP_VERSION}</span>
+                    <Typography variant="caption" color="text.secondary" component="div" sx={{ fontSize: '0.65rem' }}>
+                        <strong>© 2026 Bom Pastor Digital</strong> - Versão 6.O
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" component="div" sx={{ mt: 0.5, fontSize: '0.65rem' }}>
+                        Powered by Flavio Santiago – Consultor IA
                     </Typography>
                 </Box>
             </Paper>
