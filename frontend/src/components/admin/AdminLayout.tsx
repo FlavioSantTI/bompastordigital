@@ -153,7 +153,7 @@ export default function AdminLayout() {
                 {/* Footer Admin */}
                 <Box sx={{ mt: 4, pt: 2, textAlign: 'center', borderTop: '1px solid', borderColor: 'grey.300', opacity: 0.8 }}>
                     <Typography variant="caption" color="text.secondary" component="div">
-                        <strong>© 2026 Bom Pastor Digital</strong> - Versão 6.O
+                        <strong>© 2026 Bom Pastor Digital</strong> - Versão 6.1
                     </Typography>
                     <Typography variant="caption" color="text.secondary" component="div" sx={{ mt: 0.5 }}>
                         Powered by Flavio Santiago – Consultor IA
