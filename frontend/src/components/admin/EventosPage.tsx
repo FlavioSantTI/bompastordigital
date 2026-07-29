@@ -30,7 +30,7 @@ import {
     Tooltip,
     Divider,
 } from '@mui/material';
-import { Add, Edit, Delete, CalendarMonth, HowToReg } from '@mui/icons-material';
+import { Add, Edit, Delete, CalendarMonth, HowToReg, Person } from '@mui/icons-material';
 import { supabase } from '../../lib/supabase';
 import MunicipioAutocomplete from '../common/MunicipioAutocomplete';
 import { validatePixKey } from '../../services/pixService';
@@ -68,6 +68,7 @@ export default function EventosPage() {
         municipio_id: 0,
         vagas: 50,
         publicado: false,
+        permite_individual: true,
         is_paid: false,
         event_price: '',
         pix_key_type: '',
@@ -211,6 +212,7 @@ export default function EventosPage() {
                 municipio_id: evento.municipio_id || 0,
                 vagas: evento.vagas,
                 publicado: evento.publicado || false,
+                permite_individual: evento.permite_individual !== false,
                 is_paid: evento.is_paid || false,
                 event_price: formattedPrice,
                 pix_key_type: evento.pix_key_type || '',
@@ -229,6 +231,7 @@ export default function EventosPage() {
                 municipio_id: 0,
                 vagas: 50,
                 publicado: false,
+                permite_individual: true,
                 is_paid: false,
                 event_price: '',
                 pix_key_type: '',
@@ -254,6 +257,7 @@ export default function EventosPage() {
             municipio_id: 0,
             vagas: 50,
             publicado: false,
+            permite_individual: true,
             is_paid: false,
             event_price: '',
             pix_key_type: '',
@@ -353,6 +357,7 @@ export default function EventosPage() {
             municipio_id: formData.municipio_id,
             vagas: formData.vagas,
             publicado: formData.publicado,
+            permite_individual: formData.permite_individual,
             status_manual: editingEvento?.status_manual || null,
             is_paid: formData.is_paid,
             event_price: parsedPrice,
@@ -531,6 +536,9 @@ export default function EventosPage() {
                                                     <Typography variant="caption" color="text.secondary" display="block">
                                                         (não publicado)
                                                     </Typography>
+                                                )}
+                                                {evento.permite_individual === false && (
+                                                    <Chip label="Somente Casais" size="small" color="secondary" variant="outlined" sx={{ mt: 0.5 }} />
                                                 )}
                                             </Box>
                                         </TableCell>
@@ -723,6 +731,27 @@ export default function EventosPage() {
                         {!formData.publicado && (
                             <FormHelperText>
                                 Eventos não publicados ficam como rascunho e não aparecem na listagem pública.
+                            </FormHelperText>
+                        )}
+
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={formData.permite_individual}
+                                    onChange={(e) => setFormData({ ...formData, permite_individual: e.target.checked })}
+                                    color="info"
+                                />
+                            }
+                            label={
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    <Person fontSize="small" />
+                                    Permitir Inscrições Individuais
+                                </Box>
+                            }
+                        />
+                        {!formData.permite_individual && (
+                            <FormHelperText sx={{ color: 'warning.main' }}>
+                                ⚠️ Apenas inscrições de <strong>casal</strong> serão aceitas neste evento. A opção "Individual" ficará oculta no formulário público.
                             </FormHelperText>
                         )}
 

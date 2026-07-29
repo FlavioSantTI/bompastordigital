@@ -63,7 +63,7 @@ function App() {
           <BrowserRouter>
           <Routes>
             {/* Rotas Públicas */}
-            <Route path="/" element={<RecadastramentoLandingPage />} />
+            <Route path="/" element={<AuthRedirect />} />
             <Route path="/landing" element={<RecadastramentoLandingPage />} />
             <Route path="/recadastramento" element={<RecadastramentoLandingPage />} />
             <Route path="/cronograma/:eventoId" element={<CronogramaPublico />} />

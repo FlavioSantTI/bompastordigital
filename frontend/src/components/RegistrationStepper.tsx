@@ -107,6 +107,7 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
     const defaultValues = {
         evento_id: 0,
         tipo: 'casal' as TipoInscricao,
+        _permite_individual: true,
         esposo: { nome: '', cpf: '', nascimento: '', email: '', telefone: '' },
         esposa: { nome: '', cpf: '', nascimento: '', email: '', telefone: '' },
         participante: { nome: '', cpf: '', nascimento: '', email: '', telefone: '' },
@@ -136,10 +137,16 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
         // Step 1 (tipo selection) — sync tipo state
         if (activeStep === 1) {
             const selectedTipo = methods.getValues('tipo') as TipoInscricao;
-            if (!selectedTipo) {
+            const permiteIndividual = methods.getValues('_permite_individual') !== false;
+            // Force casal if individual is not permitted
+            const finalTipo = (!permiteIndividual && selectedTipo === 'individual') ? 'casal' : selectedTipo;
+            if (!finalTipo) {
                 return; // Não avança sem seleção
             }
-            setTipo(selectedTipo);
+            if (finalTipo !== selectedTipo) {
+                methods.setValue('tipo', finalTipo);
+            }
+            setTipo(finalTipo);
         }
 
         const fieldsToValidate = getFieldsByStep(activeStep);

@@ -31,7 +31,8 @@ export default function EventSelectionStep() {
                     status_manual,
                     municipio_id,
                     is_paid,
-                    event_price
+                    event_price,
+                    permite_individual
                 `)
                 .eq('publicado', true)
                 .order('realizacao_inicio');
@@ -133,6 +134,8 @@ export default function EventSelectionStep() {
                                                 setSelectedEventId(evento.id);
                                                 field.onChange(evento.id);
                                                 setValue('evento_id', evento.id);
+                                                // Store permite_individual flag for TypeSelectionStep
+                                                setValue('_permite_individual', evento.permite_individual !== false);
                                             }}
                                             disabled={!isSelectable}
                                             sx={{ p: 2 }}

@@ -17,6 +17,8 @@ import {
     Autocomplete,
     Checkbox,
     FormControlLabel,
+    Tooltip,
+    Chip,
 } from '@mui/material';
 import { IMaskInput } from 'react-imask';
 import React from 'react';
@@ -68,6 +70,7 @@ const PhoneMask = React.forwardRef<HTMLInputElement, any>((props, ref) => {
 interface Evento {
     id: number;
     nome: string;
+    permite_individual?: boolean;
 }
 
 interface Diocese {
@@ -127,7 +130,7 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
     const loadEventos = async () => {
         const { data } = await supabase
             .from('eventos')
-            .select('id, nome')
+            .select('id, nome, permite_individual')
             .order('data_inicio', { ascending: false });
         setEventos(data || []);
     };
@@ -260,14 +263,25 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
                             select
                             label="Evento"
                             value={eventoId}
-                            onChange={(e) => setEventoId(Number(e.target.value))}
+                            onChange={(e) => {
+                                const newEventoId = Number(e.target.value);
+                                setEventoId(newEventoId);
+                                // If event disallows individual, force casal
+                                const selectedEvento = eventos.find(ev => ev.id === newEventoId);
+                                if (selectedEvento && selectedEvento.permite_individual === false && tipo === 'individual') {
+                                    setTipo('casal');
+                                }
+                            }}
                             sx={{ flex: '1 1 300px' }}
                             helperText="Opcional"
                             size="small"
                         >
                             <MenuItem value={0}><em>Nenhum (cadastro avulso)</em></MenuItem>
                             {eventos.map((e) => (
-                                <MenuItem key={e.id} value={e.id}>{e.nome}</MenuItem>
+                                <MenuItem key={e.id} value={e.id}>
+                                    {e.nome}
+                                    {e.permite_individual === false && ' (Somente Casais)'}
+                                </MenuItem>
                             ))}
                         </TextField>
 
@@ -282,7 +296,25 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
                                 size="small"
                             >
                                 <ToggleButton value="casal">👫 Casal</ToggleButton>
-                                <ToggleButton value="individual">👤 Individual</ToggleButton>
+                                <Tooltip title={(() => {
+                                    const selectedEvento = eventos.find(ev => ev.id === eventoId);
+                                    if (selectedEvento && selectedEvento.permite_individual === false) {
+                                        return 'Este evento não permite inscrições individuais';
+                                    }
+                                    return '';
+                                })()}>
+                                    <span>
+                                        <ToggleButton
+                                            value="individual"
+                                            disabled={(() => {
+                                                const selectedEvento = eventos.find(ev => ev.id === eventoId);
+                                                return selectedEvento?.permite_individual === false;
+                                            })()}
+                                        >
+                                            👤 Individual
+                                        </ToggleButton>
+                                    </span>
+                                </Tooltip>
                             </ToggleButtonGroup>
                         </Box>
                     </Box>

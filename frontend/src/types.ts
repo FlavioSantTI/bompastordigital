@@ -3,7 +3,7 @@
  */
 
 /** Versão Global do Sistema */
-export const APP_VERSION = '6.1';
+export const APP_VERSION = '6.2';
 
 /**
  * Tipo de inscrição
@@ -118,6 +118,7 @@ export interface Evento {
     // Controle
     publicado: boolean;
     status_manual: string | null;
+    permite_individual?: boolean;
     // Campos financeiros (PRD v1.2)
     is_paid: boolean;
     event_price?: number | null;

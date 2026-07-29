@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, useTheme } from '@mui/material';
+import { Box, Typography, Paper, Alert, useTheme } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
 import type { TipoInscricao } from '../../types';
 
@@ -28,10 +28,16 @@ export default function TypeSelectionStep() {
     const { setValue, watch } = useFormContext();
     const theme = useTheme();
     const selectedType = watch('tipo') as TipoInscricao;
+    const permiteIndividual = watch('_permite_individual') !== false;
 
     const handleSelect = (tipo: TipoInscricao) => {
         setValue('tipo', tipo, { shouldValidate: true });
     };
+
+    // Filter options based on event configuration
+    const availableOptions = permiteIndividual
+        ? typeOptions
+        : typeOptions.filter(opt => opt.value !== 'individual');
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
@@ -42,8 +48,14 @@ export default function TypeSelectionStep() {
                 Escolha a modalidade de inscrição para o evento selecionado.
             </Typography>
 
+            {!permiteIndividual && (
+                <Alert severity="info" sx={{ width: '100%', maxWidth: 620 }}>
+                    Este evento aceita apenas inscrições de <strong>casal</strong>. Selecione a opção abaixo para continuar.
+                </Alert>
+            )}
+
             <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flexWrap: 'wrap', width: '100%' }}>
-                {typeOptions.map((option) => {
+                {availableOptions.map((option) => {
                     const isSelected = selectedType === option.value;
                     return (
                         <Paper

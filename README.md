@@ -36,6 +36,7 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 
 | Versão | Data | Mudanças |
 |--------|----------|----------|
+| **6.2** | **29/07/2026** | **Configuração Dinâmica de Inscrição Individual & Entrada Direta**: Controle por evento no Admin (`permite_individual`), ocultando modalidade individual no público e travando no Admin para eventos de Casais. Remoção da rota `/` para Landing Page com entrada direta no app. |
 | **6.1** | **04/07/2026** | **Correções Pastorais Críticas & Consolidação**: Unificação da lista de pastorais (types.ts), limpeza de dados ao desmarcar membro da Pasfam, campo de pastorais inserido no AdminInscricaoDialog, validação de campos obrigatórios no editor admin, e resolução do bug crítico `v_evento is not assigned yet` nas RPCs de casal e individual. |
 | 1.0 - 3.7| Jan-Abr 2026 | Evolução do sistema (Auth, Inscrições, Dashboard, Gráficos Recharts, Relatórios PDF Base) |
 | **4.0** | 21/04/2026 | **Módulo de Cronograma do Evento**: Gestão de Salas, Atividades e Categorias Dinâmicas. Timeline Pública. |
@@ -54,6 +55,15 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 | **5.5** | **27/06/2026** | **Cadastro de Reserva (Lista de Espera)**: Aceite automatizado de inscrições com status de reserva ao atingir o limite de vagas, suspensão de PIX na reserva e promoção manual pelo Admin. |
 | **5.5.5** | **03/07/2026** | **Promoção Semi-Automática FIFO & Otimização do Dashboard**: Promoção em lote da lista de espera respeitando ordem cronológica com preview e relatório (WhatsApp/PDF) + Otimização da carga inicial do painel administrativo via lazy loading e dropdown de eventos ativos. |
 | **6.0** | **04/07/2026** | **Simplificação do Formulário de Inscrição**: Remoção completa dos campos "Restrições Alimentares" e "Necessito de Hospedagem" do formulário público, formulários admin (criação e edição) e de todas as exportações (Excel, PDF de fichas e template @react-pdf). |
+
+---
+
+### ✅ Configuração Dinâmica de Inscrição Individual & Entrada Direta (v6.2)
+- [x] **Controle de Modalidade por Evento (Admin)**: Adicionada a flag `permite_individual` no formulário de criação e edição de eventos no painel Admin.
+- [x] **Experiência do Usuário (Formulário Público)**: Quando o evento selecionado não aceita inscrições individuais, o formulário público omite a opção "Individual" e exibe aviso informativo orientando a inscrição de casal.
+- [x] **Trava de Segurança no Admin**: No diálogo de nova inscrição do Admin, a opção "Individual" é desabilitada com tooltip explicativo caso o evento selecionado seja exclusivo para casais.
+- [x] **Script de Migração SQL**: Criado o script `supabase/add_permite_individual.sql` para adicionar a coluna `permite_individual` (padrão `TRUE`) no PostgreSQL.
+- [x] **Redirecionamento Direto (App Route)**: Rota raiz `/` alterada para chamar diretamente a aplicação (`AuthRedirect`), direcionando o usuário para Login ou Dashboard sem passar pela Landing Page.
 
 ---
 
@@ -169,4 +179,4 @@ Acesse: `http://localhost:5173`
 ## 🤝 Contribuição
 Desenvolvido por **Flávio Santiago** com assistência de IA (Antigravity).
 Contato: flavio.santiago.ti@outlook.com
-© 2026 Bom Pastor Digital • **Versão 6.1**
+© 2026 Bom Pastor Digital • **Versão 6.2**

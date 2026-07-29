@@ -109,7 +109,7 @@ export default function ConfirmarPresenca() {
                 <ErrorOutline sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
                 <Typography variant="h5" gutterBottom>QR Code Inválido</Typography>
                 <Typography color="text.secondary">Por favor, escaneie novamente o código exibido pela organização.</Typography>
-                <Button onClick={() => navigate('/landing')} sx={{ mt: 4 }}>Voltar para o Início</Button>
+                <Button onClick={() => navigate('/')} sx={{ mt: 4 }}>Voltar para o Início</Button>
             </Container>
         );
     }
