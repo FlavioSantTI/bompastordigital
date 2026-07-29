@@ -1,25 +1,29 @@
 import { createTheme } from '@mui/material/styles';
 import { ptBR } from '@mui/material/locale';
 
-// Cores extraídas do Logo
+// Paleta Azul Celestial & Orvalho (Sky & Ice Light - v6.2)
 const colors = {
-    primaryDark: '#1E3A5F',   // Azul Petróleo Profundo
-    primaryLight: '#53789e',  // Azul Médio
-    secondary: '#6B9AC4',     // Azul Céu Suave
-    background: '#F8F6F2',    // Creme/Off-white (Papel)
-    textPrimary: '#2D3748',   // Cinza Chumbo
+    primaryMain: '#0284C7',   // Azul Celeste Radiante
+    primaryDark: '#0369A1',   // Azul Oceano Nobre
+    primaryLight: '#38BDF8',  // Azul Céu Límpido
+    secondary: '#0EA5E9',     // Azul Orvalho Vibrante
+    background: '#F0F7FF',    // Fundo Azul Orvalho Suave (Soft Ice Blue)
+    textPrimary: '#0F172A',   // Azul Slate Escuro
+    textSecondary: '#475569', // Azul Acinzentado
     white: '#FFFFFF',
 };
 
 const theme = createTheme({
     palette: {
         primary: {
-            main: colors.primaryDark,
+            main: colors.primaryMain,
             light: colors.primaryLight,
+            dark: colors.primaryDark,
             contrastText: '#ffffff',
         },
         secondary: {
             main: colors.secondary,
+            light: colors.primaryLight,
             contrastText: '#ffffff',
         },
         background: {
@@ -28,7 +32,7 @@ const theme = createTheme({
         },
         text: {
             primary: colors.textPrimary,
-            secondary: '#718096',
+            secondary: colors.textSecondary,
         },
     },
     typography: {
@@ -70,7 +74,7 @@ const theme = createTheme({
         },
     },
     shape: {
-        borderRadius: 8, // Bordas levemente arredondadas (moderno)
+        borderRadius: 10, // Bordas levemente arredondadas (moderno)
     },
     components: {
         MuiButton: {
@@ -80,26 +84,29 @@ const theme = createTheme({
                     padding: '8px 24px',
                     boxShadow: 'none',
                     '&:hover': {
-                        boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
+                        boxShadow: '0px 6px 16px rgba(2, 132, 199, 0.25)',
                     },
                 },
                 containedPrimary: {
-                    background: `linear-gradient(45deg, ${colors.primaryDark} 30%, ${colors.primaryLight} 90%)`,
+                    background: `linear-gradient(135deg, ${colors.primaryMain} 0%, ${colors.primaryLight} 100%)`,
+                    '&:hover': {
+                        background: `linear-gradient(135deg, ${colors.primaryDark} 0%, ${colors.primaryMain} 100%)`,
+                    },
                 },
             },
         },
         MuiPaper: {
             styleOverrides: {
                 root: {
-                    boxShadow: '0px 4px 20px rgba(0,0,0,0.05)', // Sombras suaves (Premium)
+                    boxShadow: '0px 4px 24px rgba(2, 132, 199, 0.07)', // Sombras celestes suaves
                 },
             },
         },
         MuiAppBar: {
             styleOverrides: {
                 root: {
-                    backgroundColor: colors.primaryDark,
-                    boxShadow: '0px 2px 10px rgba(0,0,0,0.1)',
+                    background: `linear-gradient(135deg, ${colors.primaryDark} 0%, ${colors.primaryMain} 100%)`,
+                    boxShadow: '0px 4px 16px rgba(2, 132, 199, 0.2)',
                 },
             },
         },
