@@ -58,12 +58,13 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 
 ---
 
-### ✅ Configuração Dinâmica de Inscrição Individual & Entrada Direta (v6.2)
+### ✅ Configuração Dinâmica de Inscrição Individual, Entrada Direta & Nova Identidade Visual (v6.2)
 - [x] **Controle de Modalidade por Evento (Admin)**: Adicionada a flag `permite_individual` no formulário de criação e edição de eventos no painel Admin.
 - [x] **Experiência do Usuário (Formulário Público)**: Quando o evento selecionado não aceita inscrições individuais, o formulário público omite a opção "Individual" e exibe aviso informativo orientando a inscrição de casal.
 - [x] **Trava de Segurança no Admin**: No diálogo de nova inscrição do Admin, a opção "Individual" é desabilitada com tooltip explicativo caso o evento selecionado seja exclusivo para casais.
 - [x] **Script de Migração SQL**: Criado o script `supabase/add_permite_individual.sql` para adicionar a coluna `permite_individual` (padrão `TRUE`) no PostgreSQL.
 - [x] **Redirecionamento Direto (App Route)**: Rota raiz `/` alterada para chamar diretamente a aplicação (`AuthRedirect`), direcionando o usuário para Login ou Dashboard sem passar pela Landing Page.
+- [x] **Nova Identidade Visual (Azul Celestial & Orvalho)**: Nova paleta leve e moderna 100% azul no `theme.ts` (Azul Celeste `#0284C7`, Azul Oceano `#0369A1`, Fundo Ice `#F0F7FF` e botões em degradê suave), sem alteração de rotas ou regras de negócio.
 
 ---
 
