@@ -39,7 +39,17 @@ interface RpcResponse {
     inscricaoId?: string;
     tipo?: string;
     status?: StatusInscricao;
-    evento?: { nome: string; data_inicio: string; data_fim: string };
+    evento?: {
+        nome: string;
+        data_inicio: string;
+        data_fim: string;
+        is_paid?: boolean;
+        event_price?: number | null;
+        pix_key?: string | null;
+        pix_key_type?: string | null;
+        merchant_name?: string | null;
+        merchant_city?: string | null;
+    };
 }
 
 /**
@@ -135,6 +145,12 @@ export async function registerCouple(payload: RegistrationPayload): Promise<{
         data_inicio: string;
         data_fim: string;
         local?: string;
+        is_paid?: boolean;
+        event_price?: number | null;
+        pix_key?: string | null;
+        pix_key_type?: string | null;
+        merchant_name?: string | null;
+        merchant_city?: string | null;
     };
 }> {
     try {
@@ -174,7 +190,17 @@ export async function registerCouple(payload: RegistrationPayload): Promise<{
             message: rpcResult.message,
             inscricaoId: rpcResult.inscricaoId,
             status: rpcResult.status,
-            evento: rpcResult.evento,
+            evento: rpcResult.evento ? {
+                nome: rpcResult.evento.nome,
+                data_inicio: rpcResult.evento.data_inicio,
+                data_fim: rpcResult.evento.data_fim,
+                is_paid: rpcResult.evento.is_paid,
+                event_price: rpcResult.evento.event_price,
+                pix_key: rpcResult.evento.pix_key,
+                pix_key_type: rpcResult.evento.pix_key_type,
+                merchant_name: rpcResult.evento.merchant_name,
+                merchant_city: rpcResult.evento.merchant_city,
+            } : undefined,
         };
 
     } catch (error: any) {
@@ -195,6 +221,12 @@ export async function registerIndividual(payload: IndividualRegistrationPayload)
         nome: string;
         data_inicio: string;
         data_fim: string;
+        is_paid?: boolean;
+        event_price?: number | null;
+        pix_key?: string | null;
+        pix_key_type?: string | null;
+        merchant_name?: string | null;
+        merchant_city?: string | null;
     };
 }> {
     try {
@@ -229,7 +261,17 @@ export async function registerIndividual(payload: IndividualRegistrationPayload)
             message: rpcResult.message,
             inscricaoId: rpcResult.inscricaoId,
             status: rpcResult.status,
-            evento: rpcResult.evento,
+            evento: rpcResult.evento ? {
+                nome: rpcResult.evento.nome,
+                data_inicio: rpcResult.evento.data_inicio,
+                data_fim: rpcResult.evento.data_fim,
+                is_paid: rpcResult.evento.is_paid,
+                event_price: rpcResult.evento.event_price,
+                pix_key: rpcResult.evento.pix_key,
+                pix_key_type: rpcResult.evento.pix_key_type,
+                merchant_name: rpcResult.evento.merchant_name,
+                merchant_city: rpcResult.evento.merchant_city,
+            } : undefined,
         };
 
     } catch (error: any) {

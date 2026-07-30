@@ -218,7 +218,16 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
                         tipo: 'casal',
                         inscricaoId: result.inscricaoId,
                         status: result.status,
-                        evento: result.evento,
+                        evento: {
+                            ...result.evento,
+                            id: casalData.evento_id,
+                            is_paid: result.evento.is_paid ?? false,
+                            event_price: result.evento.event_price ?? null,
+                            pix_key: result.evento.pix_key ?? null,
+                            pix_key_type: result.evento.pix_key_type ?? null,
+                            merchant_name: result.evento.merchant_name ?? null,
+                            merchant_city: result.evento.merchant_city ?? null,
+                        },
                         esposo: casalData.esposo,
                         esposa: casalData.esposa,
                     });
@@ -246,7 +255,16 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
                         tipo: 'individual',
                         inscricaoId: result.inscricaoId,
                         status: result.status,
-                        evento: result.evento,
+                        evento: {
+                            ...result.evento,
+                            id: individualData.evento_id,
+                            is_paid: result.evento.is_paid ?? false,
+                            event_price: result.evento.event_price ?? null,
+                            pix_key: result.evento.pix_key ?? null,
+                            pix_key_type: result.evento.pix_key_type ?? null,
+                            merchant_name: result.evento.merchant_name ?? null,
+                            merchant_city: result.evento.merchant_city ?? null,
+                        },
                         participante: individualData.participante,
                     });
                     return true;

@@ -36,6 +36,7 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 
 | Versão | Data | Mudanças |
 |--------|----------|----------|
+| **6.3** | **30/07/2026** | **Correção de Pagamento PIX em Eventos Pagos**: Ajuste no retorno das RPCs PostgreSQL (`registrar_casal_ecc` e `registrar_individual_ecc`), no `registrationService` e no `RegistrationStepper` para trafegar corretamente os campos de pagamento PIX (`is_paid`, `event_price`, `pix_key`, etc.) para a tela final de confirmação. |
 | **6.2** | **29/07/2026** | **Configuração Dinâmica de Inscrição Individual & Entrada Direta**: Controle por evento no Admin (`permite_individual`), ocultando modalidade individual no público e travando no Admin para eventos de Casais. Remoção da rota `/` para Landing Page com entrada direta no app. |
 | **6.1** | **04/07/2026** | **Correções Pastorais Críticas & Consolidação**: Unificação da lista de pastorais (types.ts), limpeza de dados ao desmarcar membro da Pasfam, campo de pastorais inserido no AdminInscricaoDialog, validação de campos obrigatórios no editor admin, e resolução do bug crítico `v_evento is not assigned yet` nas RPCs de casal e individual. |
 | 1.0 - 3.7| Jan-Abr 2026 | Evolução do sistema (Auth, Inscrições, Dashboard, Gráficos Recharts, Relatórios PDF Base) |
@@ -55,6 +56,13 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 | **5.5** | **27/06/2026** | **Cadastro de Reserva (Lista de Espera)**: Aceite automatizado de inscrições com status de reserva ao atingir o limite de vagas, suspensão de PIX na reserva e promoção manual pelo Admin. |
 | **5.5.5** | **03/07/2026** | **Promoção Semi-Automática FIFO & Otimização do Dashboard**: Promoção em lote da lista de espera respeitando ordem cronológica com preview e relatório (WhatsApp/PDF) + Otimização da carga inicial do painel administrativo via lazy loading e dropdown de eventos ativos. |
 | **6.0** | **04/07/2026** | **Simplificação do Formulário de Inscrição**: Remoção completa dos campos "Restrições Alimentares" e "Necessito de Hospedagem" do formulário público, formulários admin (criação e edição) e de todas as exportações (Excel, PDF de fichas e template @react-pdf). |
+
+---
+
+### ✅ Correção de Pagamento PIX em Eventos Pagos (v6.3)
+- [x] **Retorno das RPCs de Inscrição**: Atualizadas as funções PostgreSQL `registrar_casal_ecc` e `registrar_individual_ecc` para carregar e retornar os campos financeiros do evento (`is_paid`, `event_price`, `pix_key`, `pix_key_type`, `merchant_name`, `merchant_city`).
+- [x] **Mapeamento no Service**: Ajustadas as interfaces TypeScript `RpcResponse` e os métodos `registerCouple` e `registerIndividual` em `registrationService.ts` para repassar as informações financeiras.
+- [x] **Integração no Stepper**: Atualizado o `RegistrationStepper.tsx` para repassar os dados completos do evento ao estado `savedRegistration`, garantindo a exibição do QR Code PIX e chave copia e cola na tela final (`ConfirmationStep.tsx`).
 
 ---
 
@@ -180,4 +188,4 @@ Acesse: `http://localhost:5173`
 ## 🤝 Contribuição
 Desenvolvido por **Flávio Santiago** com assistência de IA (Antigravity).
 Contato: flavio.santiago.ti@outlook.com
-© 2026 Bom Pastor Digital • **Versão 6.2**
+© 2026 Bom Pastor Digital • **Versão 6.3**
