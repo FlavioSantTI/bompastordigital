@@ -399,7 +399,7 @@ export default function NewLandingPage() {
                         }}
                     />
                     <Typography variant="caption" sx={{ opacity: 0.5 }} component="div">
-                        <strong>© 2026 Bom Pastor Digital</strong> - Versão 6.2
+                        <strong>© 2026 Bom Pastor Digital</strong> - Versão 6.3
                     </Typography>
                     <Typography variant="caption" sx={{ opacity: 0.5, display: 'block', mt: 0.5 }}>
                         Powered by Flavio Santiago – Consultor IA
