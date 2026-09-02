@@ -15,11 +15,18 @@ CREATE TABLE IF NOT EXISTS circulos (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 1.1 Garantir que as colunas existam caso a tabela já estivesse criada anteriormente
+-- 1.1 Garantir que as colunas existam e compatibilidade de schema caso a tabela já estivesse criada anteriormente
 ALTER TABLE circulos ADD COLUMN IF NOT EXISTS esposo_coordenador_id UUID REFERENCES pessoas(id);
 ALTER TABLE circulos ADD COLUMN IF NOT EXISTS esposa_coordenador_id UUID REFERENCES pessoas(id);
 ALTER TABLE circulos ADD COLUMN IF NOT EXISTS cor VARCHAR(7) DEFAULT '#0284C7';
 ALTER TABLE circulos ADD COLUMN IF NOT EXISTS descricao TEXT;
+
+DO $$ 
+BEGIN 
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'circulos' AND column_name = 'coordenador_id') THEN
+        ALTER TABLE circulos ALTER COLUMN coordenador_id DROP NOT NULL;
+    END IF;
+END $$;
 
 -- 2. Criar Tabela Associativa circulo_membros
 CREATE TABLE IF NOT EXISTS circulo_membros (

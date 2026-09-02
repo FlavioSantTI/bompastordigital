@@ -313,6 +313,7 @@ export async function createCirculo(dados: {
             nome: dados.nome,
             descricao: dados.descricao || null,
             cor: dados.cor || '#0284C7',
+            coordenador_id: dados.esposo_coordenador_id, // Garantia de retrocompatibilidade com constraint not-null antiga
             esposo_coordenador_id: dados.esposo_coordenador_id,
             esposa_coordenador_id: dados.esposa_coordenador_id || null,
         })
@@ -346,6 +347,7 @@ export async function updateCirculo(
             nome: dados.nome,
             descricao: dados.descricao || null,
             cor: dados.cor,
+            coordenador_id: dados.esposo_coordenador_id, // Garantia de retrocompatibilidade com constraint not-null antiga
             esposo_coordenador_id: dados.esposo_coordenador_id,
             esposa_coordenador_id: dados.esposa_coordenador_id || null,
         })
