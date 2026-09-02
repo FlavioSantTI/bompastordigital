@@ -24,6 +24,7 @@ import {
     Badge as BadgeIcon,
     Launch,
     Groups,
+    Church,
 } from '@mui/icons-material';
 import { supabase } from '../../lib/supabase';
 import { fetchEquipes } from '../../services/equipeService';
@@ -44,7 +45,7 @@ export default function ReportsPage() {
 
     // Estados para o Preview de PDF
     const [previewOpen, setPreviewOpen] = useState(false);
-    const [previewTipo, setPreviewTipo] = useState<'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial' | 'equipes'>('lista');
+    const [previewTipo, setPreviewTipo] = useState<'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial' | 'equipes' | 'paroquia'>('lista');
     const [previewDados, setPreviewDados] = useState<any[]>([]);
     const [previewTitulo, setPreviewTitulo] = useState('');
 
@@ -66,7 +67,7 @@ export default function ReportsPage() {
         }
     };
 
-    const handleExport = async (tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial' | 'equipes') => {
+    const handleExport = async (tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial' | 'equipes' | 'paroquia') => {
         if (tipo === 'crachas_branco') {
             setPreviewDados([]);
             setPreviewTitulo('Regional Norte 3');
@@ -436,6 +437,21 @@ export default function ReportsPage() {
                                             <Typography variant="body2" fontWeight="bold" sx={{ color: '#0369A1' }}>Equipes por Evento</Typography>
                                             <Typography variant="caption" color="text.secondary" display="block">
                                                 Coordenadores & Membros
+                                            </Typography>
+                                        </CardContent>
+                                    </CardActionArea>
+                                </Card>
+                            </Grid>
+
+                            {/* Relatório por Paróquia (NOVO) */}
+                            <Grid size={{ xs: 12, sm: 3 }}>
+                                <Card variant="outlined" sx={{ borderRadius: 3, border: '1px solid #6366f1', bgcolor: '#f5f3ff' }}>
+                                    <CardActionArea onClick={() => handleExport('paroquia')} disabled={loading}>
+                                        <CardContent sx={{ textAlign: 'center', py: 1.5 }}>
+                                            <Church sx={{ fontSize: 32, mb: 0.5, color: '#6366f1' }} />
+                                            <Typography variant="body2" fontWeight="bold" sx={{ color: '#4f46e5' }}>Por Paróquia</Typography>
+                                            <Typography variant="caption" color="text.secondary" display="block">
+                                                Inscritos por Paróquia
                                             </Typography>
                                         </CardContent>
                                     </CardActionArea>

@@ -680,3 +680,88 @@ export const RelatorioEquipesTemplate = ({ dados, tituloEvento }: { dados: Equip
         </Document>
     );
 };
+
+// 8. NOVO Template: Relatório por Paróquia (Quebra de página por Paróquia)
+export const RelatorioParoquiaTemplate = ({ dados, tituloEvento }: { dados: DadosExportacao[], tituloEvento: string }) => {
+    // Agrupar inscrições por Paróquia
+    const agrupado: Record<string, DadosExportacao[]> = {};
+    dados.forEach(d => {
+        const paroquia = d.pastoral.paroquia || 'Sem Paróquia';
+        if (!agrupado[paroquia]) agrupado[paroquia] = [];
+        agrupado[paroquia].push(d);
+    });
+
+    const nomesParoquias = Object.keys(agrupado).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+    return (
+        <Document title={`Relatorio por Paroquia - ${tituloEvento}`}>
+            {nomesParoquias.map((paroquiaNome) => {
+                const inscricoes = agrupado[paroquiaNome].sort((a, b) => a.esposo.nome.localeCompare(b.esposo.nome, 'pt-BR'));
+
+                return (
+                    <Page key={paroquiaNome} size="A4" style={s.page} orientation="landscape" wrap>
+                        <View style={s.header} fixed>
+                            <Image src="/img/logo.jpg" style={s.logo} />
+                            <View style={s.headerText}>
+                                <Text style={s.title}>Relatório por Paróquia</Text>
+                                <Text style={s.subtitle}>
+                                    EVENTO: {tituloEvento} | PARÓQUIA: {paroquiaNome.toUpperCase()} — {inscricoes.length} inscrição(ões)
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* Cabeçalho da Tabela */}
+                        <View style={[s.tableRow, s.tableHeader, { borderTopWidth: 1, borderTopColor: BORDER_COLOR }]} fixed>
+                            <View style={[s.tableCol, { width: '4%' }]}><Text style={s.tableCellHeader}>#</Text></View>
+                            <View style={[s.tableCol, { width: '32%' }]}><Text style={s.tableCellHeader}>Participante(s)</Text></View>
+                            <View style={[s.tableCol, { width: '22%' }]}><Text style={s.tableCellHeader}>Contato(s)</Text></View>
+                            <View style={[s.tableCol, { width: '8%' }]}><Text style={s.tableCellHeader}>Tipo</Text></View>
+                            <View style={[s.tableCol, { width: '10%' }]}><Text style={s.tableCellHeader}>Status</Text></View>
+                            <View style={[s.tableCol, { width: '24%' }]}><Text style={s.tableCellHeader}>Diocese</Text></View>
+                        </View>
+
+                        {/* Linhas */}
+                        {inscricoes.map((d, i) => {
+                            const nomes = d.tipo === 'casal'
+                                ? `${d.esposo.nome}${d.esposa ? ' & ' + d.esposa.nome : ''}`
+                                : d.esposo.nome;
+
+                            const contatos = d.tipo === 'casal'
+                                ? `${formatarTelefone(d.esposo.telefone)} ${d.esposa?.telefone ? '/ ' + formatarTelefone(d.esposa.telefone) : ''}`
+                                : formatarTelefone(d.esposo.telefone);
+
+                            return (
+                                <View key={d.id || i} style={[s.tableRow, i % 2 === 0 ? {} : s.tableRowStripe]} wrap={false}>
+                                    <View style={[s.tableCol, { width: '4%' }]}>
+                                        <Text style={[s.tableCell, { textAlign: 'center' }]}>{i + 1}</Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '32%' }]}>
+                                        <Text style={[s.tableCell, { fontWeight: 'bold' }]}>{nomes}</Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '22%' }]}>
+                                        <Text style={s.tableCell}>{contatos}</Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '8%' }]}>
+                                        <Text style={[s.tableCell, { textAlign: 'center' }]}>
+                                            {d.tipo === 'casal' ? 'CASAL' : 'INDIV.'}
+                                        </Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '10%' }]}>
+                                        <Text style={[s.tableCell, { textAlign: 'center' }]}>
+                                            {d.status.toUpperCase()}
+                                        </Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '24%' }]}>
+                                        <Text style={s.tableCell}>{d.pastoral.diocese || '—'}</Text>
+                                    </View>
+                                </View>
+                            );
+                        })}
+
+                        <Text style={s.version} fixed>© 2026 Bom Pastor Digital • Versão {APP_VERSION}</Text>
+                    </Page>
+                );
+            })}
+        </Document>
+    );
+};

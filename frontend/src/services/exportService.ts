@@ -393,5 +393,49 @@ export const exportService = {
             console.error('Erro Excel Equipes:', error);
             throw error;
         }
+    },
+
+    // 6. Exportar Relatório por Paróquia para Excel
+    exportarParoquiaExcel: (dados: DadosExportacao[], nomeArquivo: string = 'Relatorio_por_Paroquia') => {
+        try {
+            const linhas: any[] = [];
+            const dadosOrdenados = [...dados].sort((a, b) => {
+                const pA = a.pastoral.paroquia || 'Sem Paróquia';
+                const pB = b.pastoral.paroquia || 'Sem Paróquia';
+                const cmp = pA.localeCompare(pB, 'pt-BR');
+                if (cmp !== 0) return cmp;
+                return a.esposo.nome.localeCompare(b.esposo.nome, 'pt-BR');
+            });
+
+            dadosOrdenados.forEach((item, idx) => {
+                const participantes = item.tipo === 'casal'
+                    ? `${item.esposo.nome} & ${item.esposa?.nome || ''}`
+                    : item.esposo.nome;
+                
+                const telefones = item.tipo === 'casal'
+                    ? `${item.esposo.telefone || '-'} / ${item.esposa?.telefone || '-'}`
+                    : (item.esposo.telefone || '-');
+
+                linhas.push({
+                    '#': idx + 1,
+                    'Paróquia': item.pastoral.paroquia || 'Sem Paróquia',
+                    'Participante(s)': participantes,
+                    'Telefone / Contato': telefones,
+                    'Tipo': item.tipo === 'casal' ? 'Casal' : 'Individual',
+                    'Status': item.status?.toUpperCase() || 'PENDENTE',
+                    'Diocese': item.pastoral.diocese || 'N/A',
+                    'Cidade': item.endereco.cidade || 'N/A',
+                    'Pároco': item.pastoral.paroco || '-'
+                });
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(linhas);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Por Paróquia");
+            XLSX.writeFile(workbook, `${sanitizarNomeArquivo(nomeArquivo)}.xlsx`);
+        } catch (error) {
+            console.error('Erro Excel Paróquia:', error);
+            throw error;
+        }
     }
 };
