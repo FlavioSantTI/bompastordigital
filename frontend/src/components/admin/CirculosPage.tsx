@@ -21,7 +21,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogContentText,
-    DialogActions as MuiDialogActions,
+    DialogActions,
     Tooltip,
 } from '@mui/material';
 import {
