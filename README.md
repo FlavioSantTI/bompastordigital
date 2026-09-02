@@ -36,7 +36,15 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 
 | Versão | Data | Mudanças |
 |--------|----------|----------|
+| **6.4** | **02/09/2026** | **Gestão de Equipes (Casal Coordenador & Exibição de Contato)**: Atualização do rótulo da liderança de equipes de "Chefe / Subchefe" para "Casal Coordenador". Remoção do CPF da lista e autocomplete de componentes/liderança, substituído pela exibição direta de Telefone e Paróquia. |
 | **6.3** | **30/07/2026** | **Correção de Pagamento PIX em Eventos Pagos**: Ajuste no retorno das RPCs PostgreSQL (`registrar_casal_ecc` e `registrar_individual_ecc`), no `registrationService` e no `RegistrationStepper` para trafegar corretamente os campos de pagamento PIX (`is_paid`, `event_price`, `pix_key`, etc.) para a tela final de confirmação. |
+
+---
+
+### ✅ Gestão de Equipes (Casal Coordenador & Exibição de Contato) (v6.4)
+- [x] **Rótulo de Liderança de Equipes**: Atualizado o rótulo de liderança no modal de cadastro/edição de equipes e nos cards da interface de "Chefe / Subchefe" para **"Casal Coordenador"**, preservando intacta a estrutura de dados existente (níveis de cargo 1 e 2).
+- [x] **Privacidade no Gerenciamento**: Remoção da exibição do **CPF** na lista de componentes da equipe e no seletor de busca de pessoas.
+- [x] **Apresentação de Contato e Paróquia**: Exibição em tempo real do **Telefone** e da **Paróquia** dos integrantes e resultados de busca no cadastro de equipes.
 | **6.2** | **29/07/2026** | **Configuração Dinâmica de Inscrição Individual & Entrada Direta**: Controle por evento no Admin (`permite_individual`), ocultando modalidade individual no público e travando no Admin para eventos de Casais. Remoção da rota `/` para Landing Page com entrada direta no app. |
 | **6.1** | **04/07/2026** | **Correções Pastorais Críticas & Consolidação**: Unificação da lista de pastorais (types.ts), limpeza de dados ao desmarcar membro da Pasfam, campo de pastorais inserido no AdminInscricaoDialog, validação de campos obrigatórios no editor admin, e resolução do bug crítico `v_evento is not assigned yet` nas RPCs de casal e individual. |
 | 1.0 - 3.7| Jan-Abr 2026 | Evolução do sistema (Auth, Inscrições, Dashboard, Gráficos Recharts, Relatórios PDF Base) |
@@ -188,4 +196,4 @@ Acesse: `http://localhost:5173`
 ## 🤝 Contribuição
 Desenvolvido por **Flávio Santiago** com assistência de IA (Antigravity).
 Contato: flavio.santiago.ti@outlook.com
-© 2026 Bom Pastor Digital • **Versão 6.3**
+© 2026 Bom Pastor Digital • **Versão 6.4**

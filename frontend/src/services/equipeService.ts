@@ -52,7 +52,32 @@ export async function fetchEquipes(eventoId: number): Promise<any[]> {
 }
 
 /**
- * Carrega equipe completa com membros (join pessoas + cargos)
+ * Helper para buscar o mapa de paróquias das pessoas vinculadas em inscrições
+ */
+async function fetchParoquiasMap(pessoaIds: string[]): Promise<Record<string, string>> {
+    if (!pessoaIds || pessoaIds.length === 0) return {};
+    try {
+        const { data } = await supabase
+            .from('inscricoes')
+            .select('esposo_id, esposa_id, dados_conjuntos')
+            .or(`esposo_id.in.(${pessoaIds.join(',')}),esposa_id.in.(${pessoaIds.join(',')})`);
+
+        const paroquiasMap: Record<string, string> = {};
+        (data || []).forEach((insc: any) => {
+            const paroquia = insc.dados_conjuntos?.paroquia;
+            if (paroquia) {
+                if (insc.esposo_id) paroquiasMap[insc.esposo_id] = paroquia;
+                if (insc.esposa_id) paroquiasMap[insc.esposa_id] = paroquia;
+            }
+        });
+        return paroquiasMap;
+    } catch {
+        return {};
+    }
+}
+
+/**
+ * Carrega equipe completa com membros (join pessoas + cargos + paróquia)
  */
 export async function fetchEquipeComMembros(equipeId: number): Promise<any> {
     const { data, error } = await supabase
@@ -75,6 +100,19 @@ export async function fetchEquipeComMembros(equipeId: number): Promise<any> {
         console.error('Erro ao buscar equipe com membros:', error);
         throw error;
     }
+
+    if (data?.equipe_membros?.length) {
+        const ids = data.equipe_membros.map((m: any) => m.pessoa_id).filter(Boolean);
+        const paroquiasMap = await fetchParoquiasMap(ids);
+        data.equipe_membros = data.equipe_membros.map((m: any) => ({
+            ...m,
+            pessoa: m.pessoa ? {
+                ...m.pessoa,
+                paroquia: paroquiasMap[m.pessoa.id] || ''
+            } : null
+        }));
+    }
+
     return data;
 }
 
@@ -221,6 +259,16 @@ export async function buscarPessoas(termo: string): Promise<any[]> {
         console.error('Erro ao buscar pessoas:', error);
         throw error;
     }
+
+    if (data && data.length > 0) {
+        const ids = data.map(p => p.id);
+        const paroquiasMap = await fetchParoquiasMap(ids);
+        return data.map(p => ({
+            ...p,
+            paroquia: paroquiasMap[p.id] || ''
+        }));
+    }
+
     return data || [];
 }
 

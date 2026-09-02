@@ -233,14 +233,14 @@ export default function EquipesPage() {
                                             </Typography>
                                         )}
 
-                                        {/* Chefe */}
+                                        {/* Casal Coordenador */}
                                         {chefe && (
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                                                 <Chip
-                                                    label="Chefe"
+                                                    label="Casal Coordenador"
                                                     size="small"
                                                     color="primary"
-                                                    sx={{ fontWeight: 'bold', minWidth: 70 }}
+                                                    sx={{ fontWeight: 'bold' }}
                                                 />
                                                 <Typography variant="body2" fontWeight="medium">
                                                     {chefe.pessoa?.nome || '—'}
@@ -248,14 +248,13 @@ export default function EquipesPage() {
                                             </Box>
                                         )}
 
-                                        {/* Subchefe */}
                                         {subchefe && (
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                                                 <Chip
-                                                    label="Subchefe"
+                                                    label="Casal Coordenador"
                                                     size="small"
                                                     color="secondary"
-                                                    sx={{ fontWeight: 'bold', minWidth: 70 }}
+                                                    sx={{ fontWeight: 'bold' }}
                                                 />
                                                 <Typography variant="body2" fontWeight="medium">
                                                     {subchefe.pessoa?.nome || '—'}

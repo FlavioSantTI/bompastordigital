@@ -27,7 +27,9 @@ interface MembroLocal {
     pessoa_id: string;
     cargo_id: number;
     pessoaNome: string;
-    pessoaCpf: string;
+    pessoaCpf?: string;
+    pessoaTelefone?: string;
+    pessoaParoquia?: string;
     cargoNome: string;
     cargoNivel: number;
     isNew?: boolean;
@@ -57,6 +59,13 @@ const STATUS_OPTIONS: { value: StatusTarefa; label: string; color: string }[] = 
     { value: 'em_andamento', label: 'Em Andamento', color: '#2196f3' },
     { value: 'concluida', label: 'Concluída', color: '#4caf50' },
 ];
+
+const formatPersonOptionLabel = (o: any) => {
+    const info: string[] = [];
+    if (o.telefone) info.push(`Tel: ${o.telefone}`);
+    if (o.paroquia) info.push(`Paróquia: ${o.paroquia}`);
+    return `${o.nome}${info.length > 0 ? ' (' + info.join(' — ') + ')' : ''}`;
+};
 
 export default function EquipeDialog({ open, equipeId, eventoId, onClose, onSave }: Props) {
     const [tabIndex, setTabIndex] = useState(0);
@@ -107,6 +116,8 @@ export default function EquipeDialog({ open, equipeId, eventoId, onClose, onSave
                     cargo_id: m.cargo_id,
                     pessoaNome: m.pessoa?.nome || '',
                     pessoaCpf: m.pessoa?.cpf || '',
+                    pessoaTelefone: m.pessoa?.telefone || '',
+                    pessoaParoquia: m.pessoa?.paroquia || '',
                     cargoNome: m.cargo?.nome || '',
                     cargoNivel: m.cargo?.nivel || 3,
                 }));
@@ -164,6 +175,8 @@ export default function EquipeDialog({ open, equipeId, eventoId, onClose, onSave
             cargo_id: cargo.id,
             pessoaNome: pessoa.nome,
             pessoaCpf: pessoa.cpf,
+            pessoaTelefone: pessoa.telefone || '',
+            pessoaParoquia: pessoa.paroquia || '',
             cargoNome: cargo.nome,
             cargoNivel: cargo.nivel,
             isNew: true,
@@ -293,7 +306,7 @@ export default function EquipeDialog({ open, equipeId, eventoId, onClose, onSave
                     <>
                         <Tabs value={tabIndex} onChange={(_, v) => setTabIndex(v)} sx={{ mb: 2 }}>
                             <Tab label="Dados" />
-                            <Tab label={`Liderança (${lideranca.length})`} />
+                            <Tab label={`Casal Coordenador (${lideranca.length})`} />
                             <Tab label={`Componentes (${componentes.length})`} />
                             <Tab label={`Tarefas (${tarefasVisiveis.length})`} />
                         </Tabs>
@@ -314,20 +327,24 @@ export default function EquipeDialog({ open, equipeId, eventoId, onClose, onSave
                             </Box>
                         )}
 
-                        {/* ABA 2: LIDERANÇA */}
+                        {/* ABA 2: CASAL COORDENADOR */}
                         {tabIndex === 1 && (
                             <Box sx={{ pt: 1 }}>
                                 {[1, 2].map(nivel => {
-                                    const cargo = cargos.find(c => c.nivel === nivel);
                                     const membro = lideranca.find(m => m.cargoNivel === nivel);
+                                    const labelTitulo = `Casal Coordenador (${nivel === 1 ? '1º Integrante' : '2º Integrante'})`;
                                     return (
                                         <Box key={nivel} sx={{ mb: 3 }}>
                                             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                                                {cargo?.nome || (nivel === 1 ? 'Chefe' : 'Subchefe')}
+                                                {labelTitulo}
                                             </Typography>
                                             {membro ? (
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
-                                                    <Typography flex={1}>{membro.pessoaNome} — CPF: {membro.pessoaCpf}</Typography>
+                                                    <Typography flex={1}>
+                                                        <strong>{membro.pessoaNome}</strong>
+                                                        {membro.pessoaTelefone && ` — Tel: ${membro.pessoaTelefone}`}
+                                                        {membro.pessoaParoquia && ` — Paróquia: ${membro.pessoaParoquia}`}
+                                                    </Typography>
                                                     <IconButton size="small" color="error" onClick={() => removerMembro(membros.indexOf(membro))}>
                                                         <Delete fontSize="small" />
                                                     </IconButton>
@@ -335,12 +352,12 @@ export default function EquipeDialog({ open, equipeId, eventoId, onClose, onSave
                                             ) : (
                                                 <Autocomplete
                                                     options={pessoasBusca}
-                                                    getOptionLabel={(o: any) => `${o.nome} — CPF: ${o.cpf}`}
+                                                    getOptionLabel={formatPersonOptionLabel}
                                                     loading={buscando}
                                                     onInputChange={(_, v) => handleBuscarPessoas(v)}
                                                     onChange={(_, pessoa) => { if (pessoa) adicionarMembro(pessoa, nivel); setPessoasBusca([]); }}
                                                     renderInput={(params) => (
-                                                        <TextField {...params} label={`Buscar ${cargo?.nome || ''} por nome ou CPF`}
+                                                        <TextField {...params} label="Buscar integrante do Casal Coordenador por nome"
                                                             size="small" placeholder="Digite pelo menos 2 caracteres..." />
                                                     )}
                                                     noOptionsText="Nenhuma pessoa encontrada"
@@ -360,12 +377,12 @@ export default function EquipeDialog({ open, equipeId, eventoId, onClose, onSave
                             <Box sx={{ pt: 1 }}>
                                 <Autocomplete
                                     options={pessoasBusca}
-                                    getOptionLabel={(o: any) => `${o.nome} — CPF: ${o.cpf}`}
+                                    getOptionLabel={formatPersonOptionLabel}
                                     loading={buscando}
                                     onInputChange={(_, v) => handleBuscarPessoas(v)}
                                     onChange={(_, pessoa) => { if (pessoa) adicionarMembro(pessoa, 3); setPessoasBusca([]); }}
                                     renderInput={(params) => (
-                                        <TextField {...params} label="Buscar pessoa por nome ou CPF" size="small"
+                                        <TextField {...params} label="Buscar componente por nome" size="small"
                                             placeholder="Digite pelo menos 2 caracteres..." />
                                     )}
                                     noOptionsText="Nenhuma pessoa encontrada"
@@ -381,9 +398,14 @@ export default function EquipeDialog({ open, equipeId, eventoId, onClose, onSave
                                     <List dense>
                                         {componentes.map((m) => {
                                             const idx = membros.indexOf(m);
+                                            const secondaryText = [
+                                                m.pessoaTelefone ? `Tel: ${m.pessoaTelefone}` : null,
+                                                m.pessoaParoquia ? `Paróquia: ${m.pessoaParoquia}` : null,
+                                            ].filter(Boolean).join(' | ');
+
                                             return (
                                                 <ListItem key={idx} sx={{ bgcolor: 'action.hover', borderRadius: 1, mb: 0.5 }}>
-                                                    <ListItemText primary={m.pessoaNome} secondary={`CPF: ${m.pessoaCpf}`} />
+                                                    <ListItemText primary={m.pessoaNome} secondary={secondaryText || 'Sem telefone/paróquia cadastrados'} />
                                                     <ListItemSecondaryAction>
                                                         <IconButton size="small" color="error" onClick={() => removerMembro(idx)}>
                                                             <Delete fontSize="small" />
