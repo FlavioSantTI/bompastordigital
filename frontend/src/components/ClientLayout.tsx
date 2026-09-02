@@ -90,7 +90,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
             {/* Footer */}
             <Box component="footer" sx={{ py: 3, textAlign: 'center', bgcolor: 'transparent' }}>
                 <Typography variant="caption" color="text.secondary" component="div">
-                    <strong>© 2026 Bom Pastor Digital</strong> - Versão 6.5.0
+                    <strong>© 2026 Bom Pastor Digital</strong> - Versão 7.0.0
                 </Typography>
                 <Typography variant="caption" color="text.secondary" component="div" sx={{ mt: 0.5, opacity: 0.8 }}>
                     Powered by Flavio Santiago – Consultor IA
