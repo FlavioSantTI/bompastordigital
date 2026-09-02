@@ -36,7 +36,7 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 
 | Versão | Data | Mudanças |
 |--------|----------|----------|
-| **7.0.0** | **02/09/2026** | **Módulo Completo de Círculos & Relatórios**: Implementação do módulo CRUD de Círculos com Casal Coordenador estrito (base global, sem casais desvinculados), Alocação Dual-List (Transfer List) fixo lado a lado, Seletor de Cores Nativo com Roda de Cores, e novo Relatório de Círculos por Evento (PDF e Excel). |
+| **7.0.0** | **02/09/2026** | **Módulo Completo de Círculos, Relatórios & Painel de Inscrições**: Módulo CRUD de Círculos com Casal Coordenador estrito, Alocação Dual-List fixo lado a lado, Seletor de Cores Nativo com Roda de Cores, Relatório de Círculos por Evento (PDF e Excel), Assinatura Visual Estrela Guia v7.0.0, Painel de Inscrições e Alerta de Contagem Regressiva em Vermelho. |
 | **6.5.0** | **02/09/2026** | **Módulo de CRUD de Círculos**: Lançamento do módulo de Círculos por evento, com metadados visuais (nome, descrição e cores em Hexadecimal), busca de Casal Coordenador elegível na base global (não inscritos no evento atual), gerenciador Dual-List de membros com regra de pertencimento único por participante e dashboard com métricas de alocação. |
 | **6.4.1** | **02/09/2026** | **Novos Relatórios de Equipes e por Paróquia**: Lançamento dos relatórios "Equipes por Evento" (Casal Coordenador e Membros com Telefone e Paróquia) e "Relatório por Paróquia" (agrupamento inteligente com quebra de página e exportação em PDF e Excel). |
 | **6.4** | **02/09/2026** | **Gestão de Equipes (Casal Coordenador & Exibição de Contato)**: Atualização do rótulo da liderança de equipes de "Chefe / Subchefe" para "Casal Coordenador". Remoção do CPF da lista e autocomplete de componentes/liderança, substituído pela exibição direta de Telefone e Paróquia. |
@@ -44,12 +44,14 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 
 ---
 
-### 🌟 Módulo de Círculos & Relatórios (v7.0.0)
+### 🌟 Módulo de Círculos, Relatórios & Painel de Inscrições (v7.0.0)
 - [x] **Gestão Completa de Círculos**: Tabelas PostgreSQL `circulos` e `circulo_membros` integradas no painel administrativo `/admin/circulos`.
 - [x] **Regra Estrita de Casais Coordenadores**: Filtro de busca na base global de `pessoas` exigindo cadastro completo de casal (`tipo = 'casal'`), bloqueando indivíduos solteiros e desvinculações incorretas.
 - [x] **Interface Dual-List (Transfer List)**: Gerenciador de membros com duas listas fixas lado a lado (`minWidth: 780px`, sem quebra vertical) com botões centrais de transferência (`Mover`, `Mover Todos`, `Remover`, `Remover Todos`).
 - [x] **Seletor de Cores Personalizado**: Formulário com paleta rápida de cores e botão de **Roda de Cores nativa (`<input type="color">`)** para seleção customizada de qualquer tom de cor no espectro RGB/HSL.
 - [x] **Relatório de Círculos por Evento**: Adicionado card no módulo *Relatórios e Fichas* permitindo pré-visualização em PDF e download de planilhas Excel (XLSX) contendo o Casal Coordenador e os membros alocados em cada círculo.
+- [x] **Assinatura Visual Estrela Guia v7.0.0**: Animação celestial etérea de 10 segundos ao carregar o painel administrativo com auréola dourada (`shepherd-glow`) no selo de versão.
+- [x] **Painel de Inscrições & Contagem Regressiva**: Atualização do rótulo para **Painel de Inscrições** e adição de badge vermelho dinâmico (`⏰ Faltam XX dia(s) para o Evento`) calculando o prazo de realização do evento selecionado.
 
 ### ✅ Novos Relatórios: Equipes por Evento & Por Paróquia (v6.4.1)
 - [x] **Relatório de Equipes por Evento**: Geração de relatório PDF e Excel estruturado por equipe, apresentando o **Casal Coordenador** e os **Membros** com seus respectivos números de **Telefone** e **Paróquia**.
