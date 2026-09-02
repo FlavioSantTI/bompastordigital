@@ -3,7 +3,7 @@
  */
 
 /** Versão Global do Sistema */
-export const APP_VERSION = '6.4.1';
+export const APP_VERSION = '6.5.0';
 
 /**
  * Tipo de inscrição
@@ -274,5 +274,43 @@ export interface AtividadePalestrante {
     tipo_participacao: TipoParticipacao;
     created_at?: string;
     palestrante?: Palestrante;
+}
+
+// ========================================
+// MÓDULO CÍRCULOS (v6.5)
+// ========================================
+
+export interface Circulo {
+    id: string;
+    evento_id: number;
+    nome: string;
+    descricao?: string | null;
+    cor: string;
+    esposo_coordenador_id: string;
+    esposa_coordenador_id?: string | null;
+    created_at?: string;
+    updated_at?: string;
+    esposo_coordenador?: {
+        id: string;
+        nome: string;
+        telefone?: string;
+        email?: string;
+    };
+    esposa_coordenador?: {
+        id: string;
+        nome: string;
+        telefone?: string;
+        email?: string;
+    };
+    circulo_membros?: CirculoMembro[];
+    total_membros?: number;
+}
+
+export interface CirculoMembro {
+    id: string;
+    circulo_id: string;
+    inscricao_id: string;
+    created_at?: string;
+    inscricao?: any;
 }
 

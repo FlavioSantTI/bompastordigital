@@ -1,5 +1,5 @@
 import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
-import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment, CalendarMonth, QrCode, Groups, RecordVoiceOver } from '@mui/icons-material';
+import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment, CalendarMonth, QrCode, Groups, RecordVoiceOver, GroupWork } from '@mui/icons-material';
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,6 +11,7 @@ const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/admin' },
     { text: 'Inscrições', icon: <People />, path: '/admin/inscricoes' },
     { text: 'Equipes', icon: <Groups />, path: '/admin/equipes' },
+    { text: 'Círculos', icon: <GroupWork />, path: '/admin/circulos' },
     { text: 'Relatórios & Fichas', icon: <Assessment />, path: '/admin/relatorios' },
     { text: 'Eventos', icon: <Event />, path: '/admin/eventos' },
     { text: 'Cronograma', icon: <CalendarMonth />, path: '/admin/cronograma' },
@@ -153,7 +154,7 @@ export default function AdminLayout() {
                 {/* Footer Admin */}
                 <Box sx={{ mt: 4, pt: 2, textAlign: 'center', borderTop: '1px solid', borderColor: 'grey.300', opacity: 0.8 }}>
                     <Typography variant="caption" color="text.secondary" component="div">
-                        <strong>© 2026 Bom Pastor Digital</strong> - Versão 6.4.1
+                        <strong>© 2026 Bom Pastor Digital</strong> - Versão 6.5.0
                     </Typography>
                     <Typography variant="caption" color="text.secondary" component="div" sx={{ mt: 0.5 }}>
                         Powered by Flavio Santiago – Consultor IA

@@ -23,6 +23,7 @@ import ReportsPage from './components/admin/ReportsPage';
 import UsuariosPage from './components/admin/UsuariosPage';
 import CrachasPage from './components/admin/CrachasPage';
 import EquipesPage from './components/admin/EquipesPage';
+import CirculosPage from './components/admin/CirculosPage';
 import CronogramaPage from './components/admin/CronogramaPage';
 import PalestrantesPage from './components/admin/PalestrantesPage';
 import CronogramaPublico from './components/CronogramaPublico';
@@ -94,6 +95,7 @@ function App() {
                 <Route path="eventos" element={<EventosPage />} />
                 <Route path="inscricoes" element={<InscricoesPage />} />
                 <Route path="equipes" element={<EquipesPage />} />
+                <Route path="circulos" element={<CirculosPage />} />
                 <Route path="relatorios" element={<ReportsPage />} />
                 <Route path="crachas" element={<CrachasPage />} />
                 <Route path="cronograma" element={<CronogramaPage />} />
