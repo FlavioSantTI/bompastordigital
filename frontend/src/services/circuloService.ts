@@ -9,7 +9,7 @@ export interface CasalCoordenadorOpcao {
         telefone?: string;
         email?: string;
     };
-    esposa?: {
+    esposa: {
         id: string;
         nome: string;
         cpf?: string;
@@ -88,14 +88,13 @@ export async function fetchCirculos(eventoId: number): Promise<Circulo[]> {
 }
 
 /**
- * Busca casais candidatos a coordenadores na base de pessoas.
- * REGRA: Pessoas inscritas no evento atual NÃO PODEM ser coordenadoras deste evento.
- * REGRA DE CÔNJUGE: Busca apenas inscrições do tipo 'casal' válidas (não canceladas) mais recentes.
+ * Busca apenas CASAIS VÁLIDOS (Esposo & Esposa) cadastrados no banco geral para atuarem como Coordenadores.
+ * REGRA: Pessoas/casais inscritos no evento atual NÃO PODEM ser coordenadores deste mesmo evento.
  */
 export async function buscarCasalCoordenador(query: string, eventoId: number): Promise<CasalCoordenadorOpcao[]> {
     if (!query || query.trim().length < 2) return [];
 
-    // 1. Obter IDs de pessoas inscritas no evento atual para excluir
+    // 1. Obter IDs de pessoas inscritas no evento atual para excluir (ambos os cônjuges do evento atual)
     const { data: inscritosEvento } = await supabase
         .from('inscricoes')
         .select('esposo_id, esposa_id')
@@ -107,28 +106,31 @@ export async function buscarCasalCoordenador(query: string, eventoId: number): P
         if (i.esposa_id) pessoaIdsInscritasNoEvento.add(i.esposa_id);
     });
 
-    // 2. Buscar pessoas por nome na tabela pessoas
+    // 2. Buscar pessoas pelo nome na tabela pessoas
     const { data: pessoas, error } = await supabase
         .from('pessoas')
         .select('id, nome, cpf, email, telefone')
         .ilike('nome', `%${query.trim()}%`)
-        .limit(25);
+        .limit(30);
 
-    if (error || !pessoas) return [];
+    if (error || !pessoas || pessoas.length === 0) return [];
 
     // 3. Filtrar quem está inscrito no evento atual
     const pessoasElegiveis = pessoas.filter(p => !pessoaIdsInscritasNoEvento.has(p.id));
     if (pessoasElegiveis.length === 0) return [];
 
-    // 4. Buscar os vínculos de casal reais e recentes (tipo = 'casal', status != 'cancelada')
+    // 4. Buscar inscrições de casal válidas (tipo = 'casal', status != 'cancelada', esposa_id não nulo)
     const pessoaIds = pessoasElegiveis.map(p => p.id);
     const { data: vinculosInscricoes } = await supabase
         .from('inscricoes')
         .select('esposo_id, esposa_id, dados_conjuntos, created_at')
         .eq('tipo', 'casal')
         .neq('status', 'cancelada')
+        .not('esposa_id', 'is', null)
         .or(`esposo_id.in.(${pessoaIds.join(',')}),esposa_id.in.(${pessoaIds.join(',')})`)
         .order('created_at', { ascending: false });
+
+    if (!vinculosInscricoes || vinculosInscricoes.length === 0) return [];
 
     const resultados: CasalCoordenadorOpcao[] = [];
     const processados = new Set<string>();
@@ -136,38 +138,43 @@ export async function buscarCasalCoordenador(query: string, eventoId: number): P
     for (const p of pessoasElegiveis) {
         if (processados.has(p.id)) continue;
 
-        // Achar a inscrição de casal mais recente que contenha essa pessoa
-        const vinculo = (vinculosInscricoes || []).find(
-            v => v.esposo_id === p.id || v.esposa_id === p.id
+        // Achar a inscrição de casal mais recente em que p faz parte
+        const vinculo = vinculosInscricoes.find(
+            v => (v.esposo_id === p.id || v.esposa_id === p.id) && v.esposo_id && v.esposa_id
         );
 
-        let esposa: any = undefined;
-        let paroquia: string | undefined = undefined;
+        if (!vinculo) continue; // SE NÃO FOR UM CASAL VÁLIDO, NÃO ADICIONA!
 
-        if (vinculo) {
-            paroquia = vinculo.dados_conjuntos?.paroquia;
+        const outroPessoaId = vinculo.esposo_id === p.id ? vinculo.esposa_id : vinculo.esposo_id;
 
-            const outroPessoaId = vinculo.esposo_id === p.id ? vinculo.esposa_id : vinculo.esposo_id;
-            if (outroPessoaId && outroPessoaId !== p.id && !pessoaIdsInscritasNoEvento.has(outroPessoaId)) {
-                // Buscar dados do cônjuge legítimo se não estiver no evento atual
-                const { data: conjuge } = await supabase
-                    .from('pessoas')
-                    .select('id, nome, cpf, email, telefone')
-                    .eq('id', outroPessoaId)
-                    .single();
-
-                if (conjuge) {
-                    esposa = conjuge;
-                    processados.add(conjuge.id);
-                }
-            }
+        // O cônjuge também NÃO pode estar inscrito no evento atual
+        if (!outroPessoaId || outroPessoaId === p.id || pessoaIdsInscritasNoEvento.has(outroPessoaId)) {
+            continue;
         }
 
-        processados.add(p.id);
+        // Carregar dados de ambos os cônjuges da tabela pessoas
+        const esposoIdTarget = vinculo.esposo_id;
+        const esposaIdTarget = vinculo.esposa_id;
+
+        const { data: pessoasCasal } = await supabase
+            .from('pessoas')
+            .select('id, nome, cpf, email, telefone')
+            .in('id', [esposoIdTarget, esposaIdTarget]);
+
+        if (!pessoasCasal || pessoasCasal.length < 2) continue;
+
+        const esposoObj = pessoasCasal.find(x => x.id === esposoIdTarget);
+        const esposaObj = pessoasCasal.find(x => x.id === esposaIdTarget);
+
+        if (!esposoObj || !esposaObj) continue;
+
+        processados.add(esposoObj.id);
+        processados.add(esposaObj.id);
+
         resultados.push({
-            esposo: p,
-            esposa,
-            paroquia,
+            esposo: esposoObj,
+            esposa: esposaObj,
+            paroquia: vinculo.dados_conjuntos?.paroquia || undefined,
         });
     }
 
