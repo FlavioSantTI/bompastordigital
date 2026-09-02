@@ -445,7 +445,7 @@ export default function InscricoesPage() {
         <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h4" fontWeight="bold">
-                    Inscrições
+                    Painel de Inscrições
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                     <TextField
@@ -540,6 +540,41 @@ export default function InscricoesPage() {
                                 color={disponiveis > 0 ? "primary" : "error"}
                                 size="small"
                                 sx={{ fontWeight: 'bold' }}
+                            />
+                        );
+                    })()}
+                    {(() => {
+                        const evt = eventos.find(e => e.id === filtroEvento);
+                        if (!evt) return null;
+                        const dataEventoStr = evt.realizacao_inicio || (evt as any).data_inicio;
+                        if (!dataEventoStr) return null;
+
+                        const dataEvento = new Date(dataEventoStr);
+                        const hoje = new Date();
+                        hoje.setHours(0, 0, 0, 0);
+                        const targetDate = new Date(dataEvento);
+                        targetDate.setHours(0, 0, 0, 0);
+
+                        const diffTime = targetDate.getTime() - hoje.getTime();
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                        if (isNaN(diffDays)) return null;
+
+                        let texto = '';
+                        if (diffDays > 0) {
+                            texto = `⏰ Faltam ${diffDays} dia(s) para o Evento`;
+                        } else if (diffDays === 0) {
+                            texto = `🎉 O Evento é HOJE!`;
+                        } else {
+                            texto = `🏁 Evento Realizado (${Math.abs(diffDays)} dia(s) atrás)`;
+                        }
+
+                        return (
+                            <Chip
+                                label={texto}
+                                color="error"
+                                size="small"
+                                sx={{ fontWeight: 'bold', bgcolor: '#d32f2f', color: '#FFFFFF' }}
                             />
                         );
                     })()}

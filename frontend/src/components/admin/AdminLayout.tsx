@@ -9,7 +9,7 @@ const drawerWidth = 240;
 
 const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/admin' },
-    { text: 'Inscrições', icon: <People />, path: '/admin/inscricoes' },
+    { text: 'Painel de Inscrições', icon: <People />, path: '/admin/inscricoes' },
     { text: 'Equipes', icon: <Groups />, path: '/admin/equipes' },
     { text: 'Círculos', icon: <GroupWork />, path: '/admin/circulos' },
     { text: 'Relatórios & Fichas', icon: <Assessment />, path: '/admin/relatorios' },
