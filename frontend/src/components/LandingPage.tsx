@@ -57,7 +57,7 @@ export default function LandingPage() {
 
             <Box sx={{ mt: 4, textAlign: 'center' }}>
                 <Typography variant="body2" sx={{ opacity: 0.8 }} component="div">
-                    <strong>© 2026 Bom Pastor Digital</strong> - Versão 6.4
+                    <strong>© 2026 Bom Pastor Digital</strong> - Versão 6.4.1
                 </Typography>
                 <Typography variant="caption" color="text.secondary" component="div" sx={{ mt: 0.5 }}>
                     Powered by Flavio Santiago – Consultor IA

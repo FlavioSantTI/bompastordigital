@@ -36,8 +36,16 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 
 | Versão | Data | Mudanças |
 |--------|----------|----------|
+| **6.4.1** | **02/09/2026** | **Novos Relatórios de Equipes e por Paróquia**: Lançamento dos relatórios "Equipes por Evento" (Casal Coordenador e Membros com Telefone e Paróquia) e "Relatório por Paróquia" (agrupamento inteligente com quebra de página e exportação em PDF e Excel). |
 | **6.4** | **02/09/2026** | **Gestão de Equipes (Casal Coordenador & Exibição de Contato)**: Atualização do rótulo da liderança de equipes de "Chefe / Subchefe" para "Casal Coordenador". Remoção do CPF da lista e autocomplete de componentes/liderança, substituído pela exibição direta de Telefone e Paróquia. |
 | **6.3** | **30/07/2026** | **Correção de Pagamento PIX em Eventos Pagos**: Ajuste no retorno das RPCs PostgreSQL (`registrar_casal_ecc` e `registrar_individual_ecc`), no `registrationService` e no `RegistrationStepper` para trafegar corretamente os campos de pagamento PIX (`is_paid`, `event_price`, `pix_key`, etc.) para a tela final de confirmação. |
+
+---
+
+### ✅ Novos Relatórios: Equipes por Evento & Por Paróquia (v6.4.1)
+- [x] **Relatório de Equipes por Evento**: Geração de relatório PDF e Excel estruturado por equipe, apresentando o **Casal Coordenador** e os **Membros** com seus respectivos números de **Telefone** e **Paróquia**.
+- [x] **Relatório por Paróquia**: Agrupamento automático dos participantes do evento selecionado por Paróquia, com quebra de página por comunidade em PDF e exportação para planilha Excel (XLSX).
+- [x] **Pré-visualização Interativa**: Integração com o componente de preview em tela cheia com alternância instantânea entre PDF e Excel.
 
 ---
 
@@ -196,4 +204,4 @@ Acesse: `http://localhost:5173`
 ## 🤝 Contribuição
 Desenvolvido por **Flávio Santiago** com assistência de IA (Antigravity).
 Contato: flavio.santiago.ti@outlook.com
-© 2026 Bom Pastor Digital • **Versão 6.4**
+© 2026 Bom Pastor Digital • **Versão 6.4.1**
