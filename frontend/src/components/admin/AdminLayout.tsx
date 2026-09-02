@@ -31,7 +31,7 @@ export default function AdminLayout() {
 
     useEffect(() => {
         // Dispara a assinatura visual etérea v7.0.0 (Estrela Guia Celestial)
-        triggerGuidingStarSplash();
+        triggerGuidingStarSplash(true);
     }, []);
 
     const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
