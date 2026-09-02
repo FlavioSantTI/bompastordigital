@@ -211,7 +211,7 @@ export default function CirculoMembrosDialog({
     if (!circulo) return null;
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+        <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
             <DialogTitle
                 sx={{
                     fontWeight: 'bold',
@@ -234,7 +234,7 @@ export default function CirculoMembrosDialog({
                 </IconButton>
             </DialogTitle>
 
-            <DialogContent dividers sx={{ p: 2.5 }}>
+            <DialogContent dividers sx={{ p: 2.5, overflowX: 'auto' }}>
                 {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
                 {loading ? (
@@ -245,9 +245,9 @@ export default function CirculoMembrosDialog({
                         </Typography>
                     </Box>
                 ) : (
-                    <Grid container spacing={2} alignItems="center">
+                    <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1.5, width: '100%', minWidth: 780 }}>
                         {/* PAINEL DA ESQUERDA: DISPONÍVEIS */}
-                        <Grid item xs={12} md={5}>
+                        <Box sx={{ flex: 1, minWidth: 300 }}>
                             <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
                                 {/* Header do Painel */}
                                 <Box sx={{ p: 1.5, bgcolor: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
@@ -351,69 +351,67 @@ export default function CirculoMembrosDialog({
                                     )}
                                 </Box>
                             </Paper>
-                        </Grid>
+                        </Box>
 
-                        {/* BOTÕES DE TRANSFERÊNCIA NO CENTRO */}
-                        <Grid item xs={12} md={2}>
-                            <Stack
-                                direction={{ xs: 'row', md: 'column' }}
-                                spacing={1}
-                                justifyContent="center"
-                                alignItems="center"
-                                sx={{ py: { xs: 1, md: 0 } }}
+                        {/* BOTÕES DE TRANSFERÊNCIA NO CENTRO (SEMPRE VERTICAIS) */}
+                        <Stack
+                            direction="column"
+                            spacing={1}
+                            justifyContent="center"
+                            alignItems="center"
+                            sx={{ px: 0.5 }}
+                        >
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={handleMoveRight}
+                                disabled={leftChecked.length === 0}
+                                startIcon={<ChevronRight />}
+                                sx={{ minWidth: 110, textTransform: 'none', whiteSpace: 'nowrap' }}
                             >
-                                <Button
-                                    variant="outlined"
-                                    size="small"
-                                    onClick={handleMoveRight}
-                                    disabled={leftChecked.length === 0}
-                                    startIcon={<ChevronRight />}
-                                    sx={{ minWidth: 110, textTransform: 'none' }}
-                                >
-                                    Mover ({leftChecked.length})
-                                </Button>
+                                Mover ({leftChecked.length})
+                            </Button>
 
-                                <Button
-                                    variant="contained"
-                                    size="small"
-                                    onClick={handleMoveAllRight}
-                                    disabled={disponiveisSemCirculo.length === 0}
-                                    startIcon={<KeyboardDoubleArrowRight />}
-                                    sx={{ minWidth: 110, textTransform: 'none', bgcolor: circulo.cor || '#0284C7' }}
-                                >
-                                    Mover Todos
-                                </Button>
+                            <Button
+                                variant="contained"
+                                size="small"
+                                onClick={handleMoveAllRight}
+                                disabled={disponiveisSemCirculo.length === 0}
+                                startIcon={<KeyboardDoubleArrowRight />}
+                                sx={{ minWidth: 110, textTransform: 'none', whiteSpace: 'nowrap', bgcolor: circulo.cor || '#0284C7' }}
+                            >
+                                Mover Todos
+                            </Button>
 
-                                <Divider flexItem sx={{ my: 1, display: { xs: 'none', md: 'block' } }} />
+                            <Divider flexItem sx={{ my: 0.5 }} />
 
-                                <Button
-                                    variant="outlined"
-                                    size="small"
-                                    color="error"
-                                    onClick={handleMoveLeft}
-                                    disabled={rightChecked.length === 0}
-                                    startIcon={<ChevronLeft />}
-                                    sx={{ minWidth: 110, textTransform: 'none' }}
-                                >
-                                    Remover ({rightChecked.length})
-                                </Button>
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                color="error"
+                                onClick={handleMoveLeft}
+                                disabled={rightChecked.length === 0}
+                                startIcon={<ChevronLeft />}
+                                sx={{ minWidth: 110, textTransform: 'none', whiteSpace: 'nowrap' }}
+                            >
+                                Remover ({rightChecked.length})
+                            </Button>
 
-                                <Button
-                                    variant="outlined"
-                                    size="small"
-                                    color="error"
-                                    onClick={handleMoveAllLeft}
-                                    disabled={membrosNoCirculo.length === 0}
-                                    startIcon={<KeyboardDoubleArrowLeft />}
-                                    sx={{ minWidth: 110, textTransform: 'none' }}
-                                >
-                                    Remover Todos
-                                </Button>
-                            </Stack>
-                        </Grid>
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                color="error"
+                                onClick={handleMoveAllLeft}
+                                disabled={membrosNoCirculo.length === 0}
+                                startIcon={<KeyboardDoubleArrowLeft />}
+                                sx={{ minWidth: 110, textTransform: 'none', whiteSpace: 'nowrap' }}
+                            >
+                                Remover Todos
+                            </Button>
+                        </Stack>
 
                         {/* PAINEL DA DIREITA: MEMBROS ALOCADOS NO CÍRCULO */}
-                        <Grid item xs={12} md={5}>
+                        <Box sx={{ flex: 1, minWidth: 300 }}>
                             <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', borderColor: circulo.cor || '#0284C7' }}>
                                 {/* Header do Painel */}
                                 <Box sx={{ p: 1.5, bgcolor: `${circulo.cor}15`, borderBottom: `1px solid ${circulo.cor}30` }}>
@@ -521,8 +519,8 @@ export default function CirculoMembrosDialog({
                                     )}
                                 </Box>
                             </Paper>
-                        </Grid>
-                    </Grid>
+                        </Box>
+                    </Box>
                 )}
             </DialogContent>
 
