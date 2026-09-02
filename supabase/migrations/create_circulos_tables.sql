@@ -35,7 +35,17 @@ CREATE INDEX IF NOT EXISTS idx_circulos_evento_id ON circulos(evento_id);
 CREATE INDEX IF NOT EXISTS idx_circulo_membros_circulo_id ON circulo_membros(circulo_id);
 CREATE INDEX IF NOT EXISTS idx_circulo_membros_inscricao_id ON circulo_membros(inscricao_id);
 
--- 4. Trigger de Atualização Automática de updated_at
+-- 4. Polítcas de RLS / Permissões de Acesso
+ALTER TABLE circulos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE circulo_membros ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Acesso total circulos" ON circulos;
+CREATE POLICY "Acesso total circulos" ON circulos FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Acesso total circulo_membros" ON circulo_membros;
+CREATE POLICY "Acesso total circulo_membros" ON circulo_membros FOR ALL USING (true) WITH CHECK (true);
+
+-- 5. Trigger de Atualização Automática de updated_at
 CREATE OR REPLACE FUNCTION update_circulos_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
