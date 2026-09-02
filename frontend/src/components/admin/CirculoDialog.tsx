@@ -14,12 +14,14 @@ import {
     Stack,
     Chip,
     Avatar,
+    InputAdornment,
 } from '@mui/material';
 import {
     Palette,
     PersonSearch,
     Favorite,
     CheckCircle,
+    ColorLens,
 } from '@mui/icons-material';
 import { createCirculo, updateCirculo, buscarCasalCoordenador, type CasalCoordenadorOpcao } from '../../services/circuloService';
 import type { Circulo } from '../../types';
@@ -207,14 +209,15 @@ export default function CirculoDialog({
                         <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <Palette fontSize="small" color="primary" /> Cor do Círculo
                         </Typography>
-                        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1 }}>
+                        
+                        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
                             {PALETA_CORES.map((c) => (
                                 <Box
                                     key={c}
                                     onClick={() => setCor(c)}
                                     sx={{
-                                        width: 32,
-                                        height: 32,
+                                        width: 34,
+                                        height: 34,
                                         borderRadius: '50%',
                                         bgcolor: c,
                                         cursor: 'pointer',
@@ -222,21 +225,117 @@ export default function CirculoDialog({
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         border: cor === c ? '3px solid #000' : '2px solid transparent',
-                                        transition: 'transform 0.15s ease',
+                                        boxShadow: cor === c ? '0 0 8px rgba(0,0,0,0.3)' : 'none',
+                                        transition: 'all 0.15s ease',
                                         '&:hover': { transform: 'scale(1.15)' },
                                     }}
                                 >
                                     {cor === c && <CheckCircle sx={{ color: '#fff', fontSize: 18 }} />}
                                 </Box>
                             ))}
+
+                            {/* Seletor Customizado Nativo (Roda de Cores) */}
+                            <Box
+                                component="label"
+                                sx={{
+                                    width: 34,
+                                    height: 34,
+                                    borderRadius: '50%',
+                                    background: 'conic-gradient(red, yellow, lime, cyan, blue, magenta, red)',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '2px solid #CBD5E1',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                                    transition: 'transform 0.15s ease',
+                                    '&:hover': { transform: 'scale(1.15)' },
+                                }}
+                                title="Clique para abrir o Seletor Personalizado de Cores"
+                            >
+                                <input
+                                    type="color"
+                                    value={cor}
+                                    onChange={(e) => setCor(e.target.value)}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        opacity: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        cursor: 'pointer',
+                                    }}
+                                />
+                                <ColorLens sx={{ color: '#FFFFFF', fontSize: 20, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.8))' }} />
+                            </Box>
                         </Stack>
-                        <TextField
-                            label="Código Hexadecimal"
-                            size="small"
-                            value={cor}
-                            onChange={(e) => setCor(e.target.value)}
-                            sx={{ width: 180 }}
-                        />
+
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                            <Box
+                                component="label"
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                    cursor: 'pointer',
+                                    py: 0.75,
+                                    px: 1.5,
+                                    border: '1px solid #CBD5E1',
+                                    borderRadius: 2,
+                                    bgcolor: '#F8FAFC',
+                                    transition: 'background-color 0.15s ease',
+                                    '&:hover': { bgcolor: '#F1F5F9' }
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        width: 24,
+                                        height: 24,
+                                        borderRadius: 1,
+                                        bgcolor: cor,
+                                        border: '1px solid rgba(0,0,0,0.2)',
+                                        position: 'relative',
+                                        overflow: 'hidden'
+                                    }}
+                                >
+                                    <input
+                                        type="color"
+                                        value={cor}
+                                        onChange={(e) => setCor(e.target.value)}
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            opacity: 0,
+                                            width: '100%',
+                                            height: '100%',
+                                            cursor: 'pointer',
+                                        }}
+                                    />
+                                </Box>
+                                <Typography variant="body2" fontWeight="bold" color="text.primary">
+                                    Seletor Personalizado
+                                </Typography>
+                            </Box>
+
+                            <TextField
+                                label="Código Hex"
+                                size="small"
+                                value={cor}
+                                onChange={(e) => setCor(e.target.value)}
+                                sx={{ width: 160 }}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <Box sx={{ width: 14, height: 14, borderRadius: '50%', bgcolor: cor, border: '1px solid rgba(0,0,0,0.2)' }} />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                        </Stack>
                     </Box>
 
                     {/* Autocomplete para Buscar Casal Coordenador */}
