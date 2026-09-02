@@ -8,13 +8,13 @@ import { useState } from 'react';
 import { Download, Close, CloudUpload } from '@mui/icons-material';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import { Backdrop } from '@mui/material';
-import { ListaPresencaTemplate, FichasInscricaoTemplate, ListaGeralTemplate, ListaPresencaDioceseTemplate, CrachasEmBrancoTemplate } from './ReportTemplates';
+import { ListaPresencaTemplate, FichasInscricaoTemplate, ListaGeralTemplate, ListaPresencaDioceseTemplate, CrachasEmBrancoTemplate, RelatorioEquipesTemplate } from './ReportTemplates';
 import CrachaTemplate, { type CrachaData } from './CrachaTemplate';
 import { type DadosExportacao, exportService } from '../../services/exportService';
 
 interface ReportPreviewDialogProps {
     open: boolean;
-    tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial';
+    tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial' | 'equipes';
     dados: any[];
     tituloEvento: string;
     onClose: () => void;
@@ -50,6 +50,9 @@ export default function ReportPreviewDialog({
         }
         if (tipo === 'crachas_branco') {
             return <CrachasEmBrancoTemplate />;
+        }
+        if (tipo === 'equipes') {
+            return <RelatorioEquipesTemplate dados={dados} tituloEvento={tituloEvento} />;
         }
         
         // Mapeamento para Crachás
@@ -88,6 +91,7 @@ export default function ReportPreviewDialog({
             case 'lista_presenca_diocese': return 'Pré-visualização: Lista de Presença por Diocese';
             case 'crachas_branco': return 'Pré-visualização: Crachás em Branco';
             case 'presenca_gerencial': return 'Relatório de Presença Gerencial';
+            case 'equipes': return 'Pré-visualização: Relatório de Equipes por Evento';
             default: return 'Pré-visualização';
         }
     };
@@ -189,6 +193,8 @@ export default function ReportPreviewDialog({
                             try {
                                 if (tipo === 'presenca_gerencial') {
                                     exportService.exportarPresencaExcel(dados, `Presenca_${tituloEvento}`);
+                                } else if (tipo === 'equipes') {
+                                    exportService.exportarEquipesExcel(dados, `Equipes_${tituloEvento}`);
                                 } else {
                                     const individualizar = tipo === 'lista_presenca_diocese' || tipo === 'lista';
                                     const fileTitle = tipo === 'lista_presenca_diocese' ? 'Lista de Presença' : getTitle();

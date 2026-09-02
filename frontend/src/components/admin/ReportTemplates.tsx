@@ -7,7 +7,7 @@ import {
     Image,
     Font,
 } from '@react-pdf/renderer';
-import { type DadosExportacao } from '../../services/exportService';
+import { type DadosExportacao, type EquipeReportData } from '../../services/exportService';
 import { APP_VERSION } from '../../types';
 
 // Registro de fontes para garantir consistência
@@ -571,6 +571,111 @@ export const PresenceQRCodeTemplate = ({
                     <Text style={styles.footerText}>Turno: {turno} • {data}</Text>
                 </View>
                 <Text style={styles.branding}>Sistema Bom Pastor Digital • © 2026</Text>
+            </Page>
+        </Document>
+    );
+};
+
+// 7. NOVO Template: Relatório de Equipes por Evento
+export const RelatorioEquipesTemplate = ({ dados, tituloEvento }: { dados: EquipeReportData[], tituloEvento: string }) => {
+    return (
+        <Document title={`Relatorio de Equipes - ${tituloEvento}`}>
+            <Page size="A4" style={s.page} wrap>
+                <View style={s.header} fixed>
+                    <Image src="/img/logo.jpg" style={s.logo} />
+                    <View style={s.headerText}>
+                        <Text style={s.title}>Relatório de Equipes por Evento</Text>
+                        <Text style={s.subtitle}>EVENTO: {tituloEvento} — {dados.length} equipe(s) cadastrada(s)</Text>
+                    </View>
+                </View>
+
+                {dados.map((eq, i) => (
+                    <View key={eq.id || i} style={{ marginBottom: 20 }} wrap={false}>
+                        {/* Banner da Equipe */}
+                        <View style={{ backgroundColor: eq.cor || PRIMARY, padding: 6, borderRadius: 3, marginBottom: 8 }}>
+                            <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 12 }}>
+                                EQUIPE: {eq.nome.toUpperCase()}
+                            </Text>
+                            {eq.descricao && (
+                                <Text style={{ color: '#E0E0E0', fontSize: 8, marginTop: 2 }}>
+                                    {eq.descricao}
+                                </Text>
+                            )}
+                        </View>
+
+                        {/* Bloco Casal Coordenador */}
+                        <Text style={{ fontWeight: 'bold', color: PRIMARY, fontSize: 9, marginBottom: 4 }}>
+                            CASAL COORDENADOR:
+                        </Text>
+                        <View style={[s.tableRow, s.tableHeader, { borderTopWidth: 1, borderTopColor: BORDER_COLOR, minHeight: 20 }]}>
+                            <View style={[s.tableCol, { width: '45%' }]}><Text style={s.tableCellHeader}>Nome</Text></View>
+                            <View style={[s.tableCol, { width: '25%' }]}><Text style={s.tableCellHeader}>Telefone</Text></View>
+                            <View style={[s.tableCol, { width: '30%' }]}><Text style={s.tableCellHeader}>Paróquia</Text></View>
+                        </View>
+                        {(!eq.casalCoordenador || eq.casalCoordenador.length === 0) ? (
+                            <View style={[s.tableRow, { minHeight: 20 }]}>
+                                <View style={[s.tableCol, { width: '100%' }]}>
+                                    <Text style={[s.tableCell, { color: TEXT_LIGHT, fontStyle: 'italic' }]}>
+                                        Nenhum coordenador cadastrado
+                                    </Text>
+                                </View>
+                            </View>
+                        ) : (
+                            eq.casalCoordenador.map((c, cIdx) => (
+                                <View key={cIdx} style={[s.tableRow, cIdx % 2 === 0 ? {} : s.tableRowStripe, { minHeight: 22 }]}>
+                                    <View style={[s.tableCol, { width: '45%' }]}>
+                                        <Text style={[s.tableCell, { fontWeight: 'bold' }]}>{c.nome}</Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '25%' }]}>
+                                        <Text style={s.tableCell}>{formatarTelefone(c.telefone)}</Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '30%' }]}>
+                                        <Text style={s.tableCell}>{c.paroquia || '—'}</Text>
+                                    </View>
+                                </View>
+                            ))
+                        )}
+
+                        {/* Bloco Membros da Equipe */}
+                        <Text style={{ fontWeight: 'bold', color: PRIMARY, fontSize: 9, marginTop: 8, marginBottom: 4 }}>
+                            MEMBROS DA EQUIPE ({eq.membros?.length || 0}):
+                        </Text>
+                        <View style={[s.tableRow, s.tableHeader, { borderTopWidth: 1, borderTopColor: BORDER_COLOR, minHeight: 20 }]}>
+                            <View style={[s.tableCol, { width: '6%' }]}><Text style={s.tableCellHeader}>#</Text></View>
+                            <View style={[s.tableCol, { width: '40%' }]}><Text style={s.tableCellHeader}>Nome</Text></View>
+                            <View style={[s.tableCol, { width: '25%' }]}><Text style={s.tableCellHeader}>Telefone</Text></View>
+                            <View style={[s.tableCol, { width: '29%' }]}><Text style={s.tableCellHeader}>Paróquia</Text></View>
+                        </View>
+                        {(!eq.membros || eq.membros.length === 0) ? (
+                            <View style={[s.tableRow, { minHeight: 20 }]}>
+                                <View style={[s.tableCol, { width: '100%' }]}>
+                                    <Text style={[s.tableCell, { color: TEXT_LIGHT, fontStyle: 'italic' }]}>
+                                        Nenhum componente cadastrado
+                                    </Text>
+                                </View>
+                            </View>
+                        ) : (
+                            eq.membros.map((m, mIdx) => (
+                                <View key={mIdx} style={[s.tableRow, mIdx % 2 === 0 ? {} : s.tableRowStripe, { minHeight: 20 }]}>
+                                    <View style={[s.tableCol, { width: '6%' }]}>
+                                        <Text style={[s.tableCell, { textAlign: 'center' }]}>{mIdx + 1}</Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '40%' }]}>
+                                        <Text style={s.tableCell}>{m.nome}</Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '25%' }]}>
+                                        <Text style={s.tableCell}>{formatarTelefone(m.telefone)}</Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '29%' }]}>
+                                        <Text style={s.tableCell}>{m.paroquia || '—'}</Text>
+                                    </View>
+                                </View>
+                            ))
+                        )}
+                    </View>
+                ))}
+
+                <Text style={s.version} fixed>© 2026 Bom Pastor Digital • Versão {APP_VERSION}</Text>
             </Page>
         </Document>
     );

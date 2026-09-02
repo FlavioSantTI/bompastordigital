@@ -22,10 +22,12 @@ import {
     ListAlt,
     PictureAsPdf,
     Badge as BadgeIcon,
-    Launch
+    Launch,
+    Groups,
 } from '@mui/icons-material';
 import { supabase } from '../../lib/supabase';
-import { type DadosExportacao } from '../../services/exportService';
+import { fetchEquipes } from '../../services/equipeService';
+import { type DadosExportacao, type EquipeReportData, type MembroEquipeReport } from '../../services/exportService';
 import ReportPreviewDialog from './ReportPreviewDialog';
 
 interface Evento {
@@ -42,7 +44,7 @@ export default function ReportsPage() {
 
     // Estados para o Preview de PDF
     const [previewOpen, setPreviewOpen] = useState(false);
-    const [previewTipo, setPreviewTipo] = useState<'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial'>('lista');
+    const [previewTipo, setPreviewTipo] = useState<'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial' | 'equipes'>('lista');
     const [previewDados, setPreviewDados] = useState<any[]>([]);
     const [previewTitulo, setPreviewTitulo] = useState('');
 
@@ -64,7 +66,7 @@ export default function ReportsPage() {
         }
     };
 
-    const handleExport = async (tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial') => {
+    const handleExport = async (tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial' | 'equipes') => {
         if (tipo === 'crachas_branco') {
             setPreviewDados([]);
             setPreviewTitulo('Regional Norte 3');
@@ -82,6 +84,82 @@ export default function ReportsPage() {
         setError('');
 
         try {
+            if (tipo === 'equipes') {
+                const equipes = await fetchEquipes(selectedEvento);
+                if (!equipes || equipes.length === 0) {
+                    setError('Nenhuma equipe cadastrada para este evento.');
+                    setLoading(false);
+                    return;
+                }
+
+                // Buscar paróquia dos membros vinculados a inscrições
+                const pessoaIds: string[] = [];
+                equipes.forEach(eq => {
+                    (eq.equipe_membros || []).forEach((m: any) => {
+                        if (m.pessoa_id) pessoaIds.push(m.pessoa_id);
+                    });
+                });
+
+                let paroquiasMap: Record<string, string> = {};
+                if (pessoaIds.length > 0) {
+                    const { data: inscData } = await supabase
+                        .from('inscricoes')
+                        .select('esposo_id, esposa_id, dados_conjuntos')
+                        .or(`esposo_id.in.(${pessoaIds.join(',')}),esposa_id.in.(${pessoaIds.join(',')})`);
+
+                    (inscData || []).forEach((insc: any) => {
+                        const paroquia = insc.dados_conjuntos?.paroquia;
+                        if (paroquia) {
+                            if (insc.esposo_id) paroquiasMap[insc.esposo_id] = paroquia;
+                            if (insc.esposa_id) paroquiasMap[insc.esposa_id] = paroquia;
+                        }
+                    });
+                }
+
+                const dadosEquipes: EquipeReportData[] = equipes.map(eq => {
+                    const casalCoordenador: MembroEquipeReport[] = [];
+                    const componentes: MembroEquipeReport[] = [];
+
+                    (eq.equipe_membros || []).forEach((m: any) => {
+                        const pessoa = m.pessoa || {};
+                        const cargo = m.cargo || {};
+                        const item: MembroEquipeReport = {
+                            nome: pessoa.nome || '—',
+                            telefone: pessoa.telefone || '',
+                            paroquia: paroquiasMap[pessoa.id] || '',
+                            cargoNome: cargo.nome || '',
+                            cargoNivel: cargo.nivel || 3,
+                        };
+
+                        if (cargo.nivel <= 2) {
+                            casalCoordenador.push(item);
+                        } else {
+                            componentes.push(item);
+                        }
+                    });
+
+                    casalCoordenador.sort((a, b) => a.cargoNivel - b.cargoNivel);
+                    componentes.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+
+                    return {
+                        id: eq.id,
+                        nome: eq.nome,
+                        descricao: eq.descricao,
+                        cor: eq.cor || '#1E3A5F',
+                        casalCoordenador,
+                        membros: componentes,
+                    };
+                });
+
+                const infoEvento = eventos.find(e => e.id === selectedEvento);
+                setPreviewDados(dadosEquipes);
+                setPreviewTitulo(infoEvento?.nome || 'Evento');
+                setPreviewTipo('equipes');
+                setPreviewOpen(true);
+                setLoading(false);
+                return;
+            }
+
             if (tipo === 'presenca_gerencial') {
                 const { data, error: fetchError } = await supabase
                     .from('view_presenca_gerencial')
@@ -343,6 +421,21 @@ export default function ReportsPage() {
                                             <Typography variant="body2" fontWeight="bold">Crachás Branco</Typography>
                                             <Typography variant="caption" color="text.secondary" display="block">
                                                 Para preenchimento
+                                            </Typography>
+                                        </CardContent>
+                                    </CardActionArea>
+                                </Card>
+                            </Grid>
+
+                             {/* Equipes por Evento (NOVO) */}
+                            <Grid size={{ xs: 12, sm: 3 }}>
+                                <Card variant="outlined" sx={{ borderRadius: 3, border: '1px solid #0284C7', bgcolor: '#f0f9ff' }}>
+                                    <CardActionArea onClick={() => handleExport('equipes')} disabled={loading}>
+                                        <CardContent sx={{ textAlign: 'center', py: 1.5 }}>
+                                            <Groups sx={{ fontSize: 32, mb: 0.5, color: '#0284C7' }} />
+                                            <Typography variant="body2" fontWeight="bold" sx={{ color: '#0369A1' }}>Equipes por Evento</Typography>
+                                            <Typography variant="caption" color="text.secondary" display="block">
+                                                Coordenadores & Membros
                                             </Typography>
                                         </CardContent>
                                     </CardActionArea>

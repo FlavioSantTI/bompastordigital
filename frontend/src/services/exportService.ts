@@ -38,6 +38,23 @@ export interface DadosExportacao {
     data_inscricao: string;
 }
 
+export interface MembroEquipeReport {
+    nome: string;
+    telefone?: string;
+    paroquia?: string;
+    cargoNome: string;
+    cargoNivel: number;
+}
+
+export interface EquipeReportData {
+    id: number;
+    nome: string;
+    descricao?: string;
+    cor?: string;
+    casalCoordenador: MembroEquipeReport[];
+    membros: MembroEquipeReport[];
+}
+
 export interface DadosPresenca {
     participante: string;
     turno: string;
@@ -316,6 +333,64 @@ export const exportService = {
             XLSX.writeFile(workbook, `${sanitizarNomeArquivo(nomeArquivo)}.xlsx`);
         } catch (error) {
             console.error('Erro Excel Presença:', error);
+            throw error;
+        }
+    },
+
+    // 5. Exportar Equipes por Evento para Excel
+    exportarEquipesExcel: (dados: EquipeReportData[], nomeArquivo: string = 'Relatorio_Equipes') => {
+        try {
+            const linhas: any[] = [];
+            dados.forEach(eq => {
+                // Casal Coordenador
+                if (eq.casalCoordenador && eq.casalCoordenador.length > 0) {
+                    eq.casalCoordenador.forEach(c => {
+                        linhas.push({
+                            'Equipe': eq.nome,
+                            'Função / Cargo': 'Casal Coordenador',
+                            'Nome': c.nome,
+                            'Telefone': c.telefone || '-',
+                            'Paróquia': c.paroquia || '-'
+                        });
+                    });
+                } else {
+                    linhas.push({
+                        'Equipe': eq.nome,
+                        'Função / Cargo': 'Casal Coordenador',
+                        'Nome': 'Nenhum coordenador cadastrado',
+                        'Telefone': '-',
+                        'Paróquia': '-'
+                    });
+                }
+
+                // Membros
+                if (eq.membros && eq.membros.length > 0) {
+                    eq.membros.forEach(m => {
+                        linhas.push({
+                            'Equipe': eq.nome,
+                            'Função / Cargo': 'Componente',
+                            'Nome': m.nome,
+                            'Telefone': m.telefone || '-',
+                            'Paróquia': m.paroquia || '-'
+                        });
+                    });
+                } else {
+                    linhas.push({
+                        'Equipe': eq.nome,
+                        'Função / Cargo': 'Componente',
+                        'Nome': 'Nenhum componente cadastrado',
+                        'Telefone': '-',
+                        'Paróquia': '-'
+                    });
+                }
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(linhas);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Equipes");
+            XLSX.writeFile(workbook, `${sanitizarNomeArquivo(nomeArquivo)}.xlsx`);
+        } catch (error) {
+            console.error('Erro Excel Equipes:', error);
             throw error;
         }
     }
