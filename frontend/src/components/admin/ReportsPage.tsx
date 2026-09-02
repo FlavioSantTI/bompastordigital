@@ -25,10 +25,12 @@ import {
     Launch,
     Groups,
     Church,
+    GroupWork,
 } from '@mui/icons-material';
 import { supabase } from '../../lib/supabase';
 import { fetchEquipes } from '../../services/equipeService';
-import { type DadosExportacao, type EquipeReportData, type MembroEquipeReport } from '../../services/exportService';
+import { fetchCirculos } from '../../services/circuloService';
+import { type DadosExportacao, type EquipeReportData, type MembroEquipeReport, type CirculoReportData } from '../../services/exportService';
 import ReportPreviewDialog from './ReportPreviewDialog';
 
 interface Evento {
@@ -156,6 +158,93 @@ export default function ReportsPage() {
                 setPreviewDados(dadosEquipes);
                 setPreviewTitulo(infoEvento?.nome || 'Evento');
                 setPreviewTipo('equipes');
+                setPreviewOpen(true);
+                setLoading(false);
+                return;
+            }
+
+            if (tipo === 'circulos') {
+                const circulos = await fetchCirculos(Number(selectedEvento));
+                if (!circulos || circulos.length === 0) {
+                    setError('Nenhum círculo cadastrado para este evento.');
+                    setLoading(false);
+                    return;
+                }
+
+                const dadosCirculos: CirculoReportData[] = [];
+
+                for (const c of circulos) {
+                    const casalCoordenador: { nome: string; telefone?: string; paroquia?: string }[] = [];
+                    if (c.esposo_coordenador) {
+                        casalCoordenador.push({
+                            nome: c.esposo_coordenador.nome,
+                            telefone: c.esposo_coordenador.telefone,
+                        });
+                    }
+                    if (c.esposa_coordenador) {
+                        casalCoordenador.push({
+                            nome: c.esposa_coordenador.nome,
+                            telefone: c.esposa_coordenador.telefone,
+                        });
+                    }
+
+                    const membrosDoCirculoIds = (c.circulo_membros || []).map((m: any) => m.inscricao_id).filter(Boolean);
+                    let membros: { nome: string; tipo: 'casal' | 'individual'; telefone?: string; paroquia?: string }[] = [];
+
+                    if (membrosDoCirculoIds.length > 0) {
+                        const { data: rawInscricoes } = await supabase
+                            .from('inscricoes')
+                            .select('*')
+                            .in('id', membrosDoCirculoIds);
+
+                        if (rawInscricoes && rawInscricoes.length > 0) {
+                            const pessoaIdsSet = new Set<string>();
+                            rawInscricoes.forEach((i: any) => {
+                                if (i.esposo_id) pessoaIdsSet.add(i.esposo_id);
+                                if (i.esposa_id) pessoaIdsSet.add(i.esposa_id);
+                            });
+
+                            let pessoasMap: Record<string, any> = {};
+                            if (pessoaIdsSet.size > 0) {
+                                const { data: pessoas } = await supabase
+                                    .from('pessoas')
+                                    .select('id, nome, telefone')
+                                    .in('id', Array.from(pessoaIdsSet));
+
+                                (pessoas || []).forEach((p: any) => { pessoasMap[p.id] = p; });
+                            }
+
+                            membros = rawInscricoes.map((insc: any) => {
+                                const esposo = pessoasMap[insc.esposo_id] || {};
+                                const esposa = insc.esposa_id ? pessoasMap[insc.esposa_id] : undefined;
+                                const nome = insc.esposa_id ? `${esposo.nome || ''} & ${esposa?.nome || ''}` : (esposo.nome || 'Participante');
+                                const telefone = esposo.telefone || esposa?.telefone || '-';
+                                const paroquia = insc.dados_conjuntos?.paroquia || '-';
+
+                                return {
+                                    nome,
+                                    tipo: (insc.esposa_id ? 'casal' : 'individual') as 'casal' | 'individual',
+                                    telefone,
+                                    paroquia,
+                                };
+                            }).sort((a: any, b: any) => a.nome.localeCompare(b.nome, 'pt-BR'));
+                        }
+                    }
+
+                    dadosCirculos.push({
+                        id: c.id,
+                        nome: c.nome,
+                        descricao: c.descricao || undefined,
+                        cor: c.cor,
+                        casalCoordenador,
+                        membros,
+                    });
+                }
+
+                const infoEvento = eventos.find(e => e.id === Number(selectedEvento));
+                setPreviewDados(dadosCirculos);
+                setPreviewTitulo(infoEvento?.nome || 'Evento');
+                setPreviewTipo('circulos');
                 setPreviewOpen(true);
                 setLoading(false);
                 return;
@@ -442,8 +531,7 @@ export default function ReportsPage() {
                                     </CardActionArea>
                                 </Card>
                             </Grid>
-
-                            {/* Relatório por Paróquia (NOVO) */}
+                                     {/* Relatório por Paróquia (NOVO) */}
                             <Grid size={{ xs: 12, sm: 3 }}>
                                 <Card variant="outlined" sx={{ borderRadius: 3, border: '1px solid #6366f1', bgcolor: '#f5f3ff' }}>
                                     <CardActionArea onClick={() => handleExport('paroquia')} disabled={loading}>
@@ -452,6 +540,21 @@ export default function ReportsPage() {
                                             <Typography variant="body2" fontWeight="bold" sx={{ color: '#4f46e5' }}>Por Paróquia</Typography>
                                             <Typography variant="caption" color="text.secondary" display="block">
                                                 Inscritos por Paróquia
+                                            </Typography>
+                                        </CardContent>
+                                    </CardActionArea>
+                                </Card>
+                            </Grid>
+
+                            {/* Círculos por Evento (NOVO) */}
+                            <Grid size={{ xs: 12, sm: 3 }}>
+                                <Card variant="outlined" sx={{ borderRadius: 3, border: '1px solid #7c3aed', bgcolor: '#f5f3ff' }}>
+                                    <CardActionArea onClick={() => handleExport('circulos')} disabled={loading}>
+                                        <CardContent sx={{ textAlign: 'center', py: 1.5 }}>
+                                            <GroupWork sx={{ fontSize: 32, mb: 0.5, color: '#7c3aed' }} />
+                                            <Typography variant="body2" fontWeight="bold" sx={{ color: '#6d28d9' }}>Círculos por Evento</Typography>
+                                            <Typography variant="caption" color="text.secondary" display="block">
+                                                Coordenadores & Membros
                                             </Typography>
                                         </CardContent>
                                     </CardActionArea>

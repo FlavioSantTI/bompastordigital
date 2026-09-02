@@ -55,6 +55,24 @@ export interface EquipeReportData {
     membros: MembroEquipeReport[];
 }
 
+export interface CirculoReportData {
+    id: string;
+    nome: string;
+    descricao?: string;
+    cor?: string;
+    casalCoordenador: {
+        nome: string;
+        telefone?: string;
+        paroquia?: string;
+    }[];
+    membros: {
+        nome: string;
+        tipo: 'casal' | 'individual';
+        telefone?: string;
+        paroquia?: string;
+    }[];
+}
+
 export interface DadosPresenca {
     participante: string;
     turno: string;
@@ -435,6 +453,52 @@ export const exportService = {
             XLSX.writeFile(workbook, `${sanitizarNomeArquivo(nomeArquivo)}.xlsx`);
         } catch (error) {
             console.error('Erro Excel Paróquia:', error);
+            throw error;
+        }
+    },
+
+    // 7. Exportar Relatório de Círculos por Evento para Excel
+    exportarCirculosExcel: (dados: CirculoReportData[], nomeArquivo: string = 'Relatorio_Circulos_por_Evento') => {
+        try {
+            const linhas: any[] = [];
+
+            dados.forEach(circulo => {
+                // Linha de título do Círculo
+                linhas.push({
+                    'Círculo': circulo.nome.toUpperCase(),
+                    'Tipo Registro': 'COORDENAÇÃO',
+                    'Nome / Integrantes': circulo.casalCoordenador.map(c => c.nome).join(' & ') || 'Sem Coordenador',
+                    'Telefone / Contato': circulo.casalCoordenador.map(c => c.telefone || '-').join(' / ') || '-',
+                    'Paróquia': circulo.casalCoordenador.map(c => c.paroquia || '-').join(' / ') || '-'
+                });
+
+                if (circulo.membros.length === 0) {
+                    linhas.push({
+                        'Círculo': circulo.nome.toUpperCase(),
+                        'Tipo Registro': 'MEMBRO',
+                        'Nome / Integrantes': 'Nenhum membro alocado',
+                        'Telefone / Contato': '-',
+                        'Paróquia': '-'
+                    });
+                } else {
+                    circulo.membros.forEach(m => {
+                        linhas.push({
+                            'Círculo': circulo.nome.toUpperCase(),
+                            'Tipo Registro': m.tipo === 'casal' ? 'MEMBRO (CASAL)' : 'MEMBRO (INDIV.)',
+                            'Nome / Integrantes': m.nome,
+                            'Telefone / Contato': m.telefone || '-',
+                            'Paróquia': m.paroquia || '-'
+                        });
+                    });
+                }
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(linhas);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Círculos");
+            XLSX.writeFile(workbook, `${sanitizarNomeArquivo(nomeArquivo)}.xlsx`);
+        } catch (error) {
+            console.error('Erro Excel Círculos:', error);
             throw error;
         }
     }

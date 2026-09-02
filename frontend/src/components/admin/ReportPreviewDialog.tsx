@@ -8,13 +8,13 @@ import { useState } from 'react';
 import { Download, Close, CloudUpload } from '@mui/icons-material';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import { Backdrop } from '@mui/material';
-import { ListaPresencaTemplate, FichasInscricaoTemplate, ListaGeralTemplate, ListaPresencaDioceseTemplate, CrachasEmBrancoTemplate, RelatorioEquipesTemplate, RelatorioParoquiaTemplate } from './ReportTemplates';
+import { ListaPresencaTemplate, FichasInscricaoTemplate, ListaGeralTemplate, ListaPresencaDioceseTemplate, CrachasEmBrancoTemplate, RelatorioEquipesTemplate, RelatorioParoquiaTemplate, RelatorioCirculosTemplate } from './ReportTemplates';
 import CrachaTemplate, { type CrachaData } from './CrachaTemplate';
 import { type DadosExportacao, exportService } from '../../services/exportService';
 
 interface ReportPreviewDialogProps {
     open: boolean;
-    tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial' | 'equipes' | 'paroquia';
+    tipo: 'lista' | 'fichas' | 'lista_geral' | 'crachas' | 'lista_presenca_diocese' | 'crachas_branco' | 'presenca_gerencial' | 'equipes' | 'paroquia' | 'circulos';
     dados: any[];
     tituloEvento: string;
     onClose: () => void;
@@ -57,6 +57,9 @@ export default function ReportPreviewDialog({
         if (tipo === 'paroquia') {
             return <RelatorioParoquiaTemplate dados={dados} tituloEvento={tituloEvento} />;
         }
+        if (tipo === 'circulos') {
+            return <RelatorioCirculosTemplate dados={dados} tituloEvento={tituloEvento} />;
+        }
         
         // Mapeamento para Crachás
         const crachaParticipants: CrachaData[] = [];
@@ -96,6 +99,7 @@ export default function ReportPreviewDialog({
             case 'presenca_gerencial': return 'Relatório de Presença Gerencial';
             case 'equipes': return 'Pré-visualização: Relatório de Equipes por Evento';
             case 'paroquia': return 'Pré-visualização: Relatório por Paróquia';
+            case 'circulos': return 'Pré-visualização: Relatório de Círculos por Evento';
             default: return 'Pré-visualização';
         }
     };
@@ -201,6 +205,8 @@ export default function ReportPreviewDialog({
                                     exportService.exportarEquipesExcel(dados, `Equipes_${tituloEvento}`);
                                 } else if (tipo === 'paroquia') {
                                     exportService.exportarParoquiaExcel(dados, `Paroquia_${tituloEvento}`);
+                                } else if (tipo === 'circulos') {
+                                    exportService.exportarCirculosExcel(dados, `Circulos_${tituloEvento}`);
                                 } else {
                                     const individualizar = tipo === 'lista_presenca_diocese' || tipo === 'lista';
                                     const fileTitle = tipo === 'lista_presenca_diocese' ? 'Lista de Presença' : getTitle();

@@ -7,7 +7,7 @@ import {
     Image,
     Font,
 } from '@react-pdf/renderer';
-import { type DadosExportacao, type EquipeReportData } from '../../services/exportService';
+import { type DadosExportacao, type EquipeReportData, type CirculoReportData } from '../../services/exportService';
 import { APP_VERSION } from '../../types';
 
 // Registro de fontes para garantir consistência
@@ -762,6 +762,107 @@ export const RelatorioParoquiaTemplate = ({ dados, tituloEvento }: { dados: Dado
                     </Page>
                 );
             })}
+        </Document>
+    );
+};
+
+// 9. NOVO Template: Relatório de Círculos por Evento
+export const RelatorioCirculosTemplate = ({ dados, tituloEvento }: { dados: CirculoReportData[], tituloEvento: string }) => {
+    return (
+        <Document title={`Relatorio de Circulos - ${tituloEvento}`}>
+            <Page size="A4" style={s.page} wrap>
+                <View style={s.header} fixed>
+                    <Image src="/img/logo.jpg" style={s.logo} />
+                    <View style={s.headerText}>
+                        <Text style={s.title}>Relatório de Círculos por Evento</Text>
+                        <Text style={s.subtitle}>EVENTO: {tituloEvento} — {dados.length} círculo(s) cadastrado(s)</Text>
+                    </View>
+                </View>
+
+                {dados.map((circulo, i) => (
+                    <View key={circulo.id || i} style={{ marginBottom: 20 }} wrap={false}>
+                        {/* Banner do Círculo */}
+                        <View style={{ backgroundColor: circulo.cor || PRIMARY, padding: 6, borderRadius: 3, marginBottom: 8 }}>
+                            <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 12 }}>
+                                CÍRCULO: {circulo.nome.toUpperCase()} ({circulo.membros.length} membro(s))
+                            </Text>
+                            {circulo.descricao && (
+                                <Text style={{ color: '#E0E0E0', fontSize: 8, marginTop: 2 }}>
+                                    {circulo.descricao}
+                                </Text>
+                            )}
+                        </View>
+
+                        {/* Bloco Casal Coordenador */}
+                        <Text style={{ fontWeight: 'bold', color: PRIMARY, fontSize: 9, marginBottom: 4 }}>
+                            CASAL COORDENADOR:
+                        </Text>
+                        <View style={[s.tableRow, s.tableHeader, { borderTopWidth: 1, borderTopColor: BORDER_COLOR, minHeight: 20 }]}>
+                            <View style={[s.tableCol, { width: '45%' }]}><Text style={s.tableCellHeader}>Nome</Text></View>
+                            <View style={[s.tableCol, { width: '25%' }]}><Text style={s.tableCellHeader}>Telefone</Text></View>
+                            <View style={[s.tableCol, { width: '30%' }]}><Text style={s.tableCellHeader}>Paróquia</Text></View>
+                        </View>
+                        {(!circulo.casalCoordenador || circulo.casalCoordenador.length === 0) ? (
+                            <View style={[s.tableRow, { minHeight: 20 }]}>
+                                <View style={[s.tableCol, { width: '100%' }]}>
+                                    <Text style={[s.tableCell, { color: TEXT_LIGHT, fontStyle: 'italic' }]}>
+                                        Nenhum coordenador cadastrado
+                                    </Text>
+                                </View>
+                            </View>
+                        ) : (
+                            circulo.casalCoordenador.map((c, cIdx) => (
+                                <View key={cIdx} style={[s.tableRow, cIdx % 2 === 0 ? {} : s.tableRowStripe, { minHeight: 22 }]}>
+                                    <View style={[s.tableCol, { width: '45%' }]}>
+                                        <Text style={[s.tableCell, { fontWeight: 'bold' }]}>{c.nome}</Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '25%' }]}>
+                                        <Text style={s.tableCell}>{formatarTelefone(c.telefone)}</Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '30%' }]}>
+                                        <Text style={s.tableCell}>{c.paroquia || '—'}</Text>
+                                    </View>
+                                </View>
+                            ))
+                        )}
+
+                        {/* Bloco Membros do Círculo */}
+                        <Text style={{ fontWeight: 'bold', color: PRIMARY, fontSize: 9, marginTop: 8, marginBottom: 4 }}>
+                            MEMBROS ALOCADOS NO CÍRCULO:
+                        </Text>
+                        <View style={[s.tableRow, s.tableHeader, { borderTopWidth: 1, borderTopColor: BORDER_COLOR, minHeight: 20 }]}>
+                            <View style={[s.tableCol, { width: '45%' }]}><Text style={s.tableCellHeader}>Nome do Participante</Text></View>
+                            <View style={[s.tableCol, { width: '25%' }]}><Text style={s.tableCellHeader}>Telefone / Contato</Text></View>
+                            <View style={[s.tableCol, { width: '30%' }]}><Text style={s.tableCellHeader}>Paróquia</Text></View>
+                        </View>
+                        {circulo.membros.length === 0 ? (
+                            <View style={[s.tableRow, { minHeight: 20 }]}>
+                                <View style={[s.tableCol, { width: '100%' }]}>
+                                    <Text style={[s.tableCell, { color: TEXT_LIGHT, fontStyle: 'italic' }]}>
+                                        Nenhum membro alocado neste círculo
+                                    </Text>
+                                </View>
+                            </View>
+                        ) : (
+                            circulo.membros.map((m, mIdx) => (
+                                <View key={mIdx} style={[s.tableRow, mIdx % 2 === 0 ? {} : s.tableRowStripe, { minHeight: 20 }]}>
+                                    <View style={[s.tableCol, { width: '45%' }]}>
+                                        <Text style={s.tableCell}>{m.nome}</Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '25%' }]}>
+                                        <Text style={s.tableCell}>{formatarTelefone(m.telefone)}</Text>
+                                    </View>
+                                    <View style={[s.tableCol, { width: '30%' }]}>
+                                        <Text style={s.tableCell}>{m.paroquia || '—'}</Text>
+                                    </View>
+                                </View>
+                            ))
+                        )}
+                    </View>
+                ))}
+
+                <Text style={s.version} fixed>© 2026 Bom Pastor Digital • Versão {APP_VERSION}</Text>
+            </Page>
         </Document>
     );
 };
