@@ -90,6 +90,7 @@ export async function fetchCirculos(eventoId: number): Promise<Circulo[]> {
 /**
  * Busca casais candidatos a coordenadores na base de pessoas.
  * REGRA: Pessoas inscritas no evento atual NÃO PODEM ser coordenadoras deste evento.
+ * REGRA DE CÔNJUGE: Busca apenas inscrições do tipo 'casal' válidas (não canceladas) mais recentes.
  */
 export async function buscarCasalCoordenador(query: string, eventoId: number): Promise<CasalCoordenadorOpcao[]> {
     if (!query || query.trim().length < 2) return [];
@@ -106,7 +107,7 @@ export async function buscarCasalCoordenador(query: string, eventoId: number): P
         if (i.esposa_id) pessoaIdsInscritasNoEvento.add(i.esposa_id);
     });
 
-    // 2. Buscar pessoas por nome ou telefone
+    // 2. Buscar pessoas por nome na tabela pessoas
     const { data: pessoas, error } = await supabase
         .from('pessoas')
         .select('id, nome, cpf, email, telefone')
@@ -119,12 +120,15 @@ export async function buscarCasalCoordenador(query: string, eventoId: number): P
     const pessoasElegiveis = pessoas.filter(p => !pessoaIdsInscritasNoEvento.has(p.id));
     if (pessoasElegiveis.length === 0) return [];
 
-    // 4. Buscar os vínculos de casal e paróquias em inscricoes (de outros eventos)
+    // 4. Buscar os vínculos de casal reais e recentes (tipo = 'casal', status != 'cancelada')
     const pessoaIds = pessoasElegiveis.map(p => p.id);
     const { data: vinculosInscricoes } = await supabase
         .from('inscricoes')
-        .select('esposo_id, esposa_id, dados_conjuntos')
-        .or(`esposo_id.in.(${pessoaIds.join(',')}),esposa_id.in.(${pessoaIds.join(',')})`);
+        .select('esposo_id, esposa_id, dados_conjuntos, created_at')
+        .eq('tipo', 'casal')
+        .neq('status', 'cancelada')
+        .or(`esposo_id.in.(${pessoaIds.join(',')}),esposa_id.in.(${pessoaIds.join(',')})`)
+        .order('created_at', { ascending: false });
 
     const resultados: CasalCoordenadorOpcao[] = [];
     const processados = new Set<string>();
@@ -132,7 +136,7 @@ export async function buscarCasalCoordenador(query: string, eventoId: number): P
     for (const p of pessoasElegiveis) {
         if (processados.has(p.id)) continue;
 
-        // Tentar achar a inscrição que conecta essa pessoa a seu cônjuge
+        // Achar a inscrição de casal mais recente que contenha essa pessoa
         const vinculo = (vinculosInscricoes || []).find(
             v => v.esposo_id === p.id || v.esposa_id === p.id
         );
@@ -144,8 +148,8 @@ export async function buscarCasalCoordenador(query: string, eventoId: number): P
             paroquia = vinculo.dados_conjuntos?.paroquia;
 
             const outroPessoaId = vinculo.esposo_id === p.id ? vinculo.esposa_id : vinculo.esposo_id;
-            if (outroPessoaId && !pessoaIdsInscritasNoEvento.has(outroPessoaId)) {
-                // Buscar dados do cônjuge se também não estiver no evento atual
+            if (outroPessoaId && outroPessoaId !== p.id && !pessoaIdsInscritasNoEvento.has(outroPessoaId)) {
+                // Buscar dados do cônjuge legítimo se não estiver no evento atual
                 const { data: conjuge } = await supabase
                     .from('pessoas')
                     .select('id, nome, cpf, email, telefone')
@@ -168,6 +172,32 @@ export async function buscarCasalCoordenador(query: string, eventoId: number): P
     }
 
     return resultados;
+}
+
+/**
+ * Busca uma pessoa elegível na base global (não inscrita no evento atual)
+ */
+export async function buscarPessoasElegiveis(query: string, eventoId: number): Promise<any[]> {
+    if (!query || query.trim().length < 2) return [];
+
+    const { data: inscritosEvento } = await supabase
+        .from('inscricoes')
+        .select('esposo_id, esposa_id')
+        .eq('evento_id', eventoId);
+
+    const pessoaIdsInscritasNoEvento = new Set<string>();
+    (inscritosEvento || []).forEach(i => {
+        if (i.esposo_id) pessoaIdsInscritasNoEvento.add(i.esposo_id);
+        if (i.esposa_id) pessoaIdsInscritasNoEvento.add(i.esposa_id);
+    });
+
+    const { data: pessoas } = await supabase
+        .from('pessoas')
+        .select('id, nome, cpf, email, telefone')
+        .ilike('nome', `%${query.trim()}%`)
+        .limit(20);
+
+    return (pessoas || []).filter(p => !pessoaIdsInscritasNoEvento.has(p.id));
 }
 
 /**

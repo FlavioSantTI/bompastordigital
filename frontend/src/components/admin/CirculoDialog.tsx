@@ -251,17 +251,17 @@ export default function CirculoDialog({
                                 if (option.esposa) {
                                     return `${option.esposo.nome} & ${option.esposa.nome}`;
                                 }
-                                return option.esposo.nome;
+                                return `${option.esposo.nome} (Individual)`;
                             }}
                             value={casalSelecionado}
                             onChange={(_, newValue) => setCasalSelecionado(newValue)}
                             onInputChange={(_, newInputValue) => handleSearchCasal(newInputValue)}
                             loading={loadingCasais}
-                            noOptionsText="Digite o nome de uma pessoa do cadastro..."
+                            noOptionsText="Digite o nome de uma pessoa do cadastro global..."
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    placeholder="Buscar por nome no cadastro global..."
+                                    placeholder="Buscar por nome do esposo/esposa..."
                                     size="small"
                                     InputProps={{
                                         ...params.InputProps,
@@ -279,7 +279,7 @@ export default function CirculoDialog({
                                     <Stack spacing={0.2} sx={{ py: 0.5 }}>
                                         <Typography variant="body2" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                             <Favorite fontSize="inherit" color="error" />
-                                            {option.esposa ? `${option.esposo.nome} & ${option.esposa.nome}` : option.esposo.nome}
+                                            {option.esposa ? `${option.esposo.nome} & ${option.esposa.nome}` : `${option.esposo.nome} (Sem cônjuge identificado)`}
                                         </Typography>
                                         <Typography variant="caption" color="text.secondary">
                                             {option.paroquia ? `Paróquia: ${option.paroquia}` : 'Sem paróquia especificada'}
@@ -296,26 +296,39 @@ export default function CirculoDialog({
                                 <Typography variant="caption" color="primary" fontWeight="bold" display="block" sx={{ mb: 0.5 }}>
                                     CASAL COORDENADOR SELECIONADO:
                                 </Typography>
-                                <Stack direction="row" spacing={1} alignItems="center">
-                                    <Avatar sx={{ width: 32, height: 32, bgcolor: cor, fontSize: 14, fontWeight: 'bold' }}>
-                                        {casalSelecionado.esposo.nome.charAt(0)}
-                                    </Avatar>
-                                    <Box>
-                                        <Typography variant="body2" fontWeight="bold">
-                                            {casalSelecionado.esposa
-                                                ? `${casalSelecionado.esposo.nome} & ${casalSelecionado.esposa.nome}`
-                                                : casalSelecionado.esposo.nome}
-                                        </Typography>
-                                        {casalSelecionado.paroquia && (
-                                            <Chip label={casalSelecionado.paroquia} size="small" variant="outlined" sx={{ height: 20, fontSize: 10, mt: 0.5 }} />
-                                        )}
-                                    </Box>
+                                <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <Avatar sx={{ width: 32, height: 32, bgcolor: cor, fontSize: 14, fontWeight: 'bold' }}>
+                                            {casalSelecionado.esposo.nome.charAt(0)}
+                                        </Avatar>
+                                        <Box>
+                                            <Typography variant="body2" fontWeight="bold">
+                                                {casalSelecionado.esposa
+                                                    ? `${casalSelecionado.esposo.nome} & ${casalSelecionado.esposa.nome}`
+                                                    : `${casalSelecionado.esposo.nome} (Individual)`}
+                                            </Typography>
+                                            {casalSelecionado.paroquia && (
+                                                <Chip label={casalSelecionado.paroquia} size="small" variant="outlined" sx={{ height: 20, fontSize: 10, mt: 0.5 }} />
+                                            )}
+                                        </Box>
+                                    </Stack>
+
+                                    {casalSelecionado.esposa && (
+                                        <Button
+                                            size="small"
+                                            color="secondary"
+                                            sx={{ fontSize: 10, textTransform: 'none' }}
+                                            onClick={() => setCasalSelecionado({ ...casalSelecionado, esposa: undefined })}
+                                        >
+                                            Desvincular Esposa
+                                        </Button>
+                                    )}
                                 </Stack>
                             </Box>
                         )}
 
                         <Alert severity="info" sx={{ mt: 1.5, py: 0.5, fontSize: 11 }}>
-                            <strong>Regra de Elegibilidade:</strong> Os coordenadores devem ser cadastrados na base global, porém <strong>não podem</strong> ter inscrição ativa neste mesmo evento.
+                            <strong>Regra de Elegibilidade:</strong> Os coordenadores são buscados da base global e <strong>não podem</strong> ter inscrição ativa neste mesmo evento.
                         </Alert>
                     </Box>
                 </Stack>
