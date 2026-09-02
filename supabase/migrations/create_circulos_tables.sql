@@ -2,7 +2,7 @@
 -- MIGRATION: Módulo de CRUD de Círculos (v6.5)
 -- ================================================================
 
--- 1. Criar Tabela de Círculos
+-- 1. Criar Tabela de Círculos (se não existir)
 CREATE TABLE IF NOT EXISTS circulos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     evento_id BIGINT NOT NULL REFERENCES eventos(id) ON DELETE CASCADE,
@@ -14,6 +14,12 @@ CREATE TABLE IF NOT EXISTS circulos (
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- 1.1 Garantir que as colunas existam caso a tabela já estivesse criada anteriormente
+ALTER TABLE circulos ADD COLUMN IF NOT EXISTS esposo_coordenador_id UUID REFERENCES pessoas(id);
+ALTER TABLE circulos ADD COLUMN IF NOT EXISTS esposa_coordenador_id UUID REFERENCES pessoas(id);
+ALTER TABLE circulos ADD COLUMN IF NOT EXISTS cor VARCHAR(7) DEFAULT '#0284C7';
+ALTER TABLE circulos ADD COLUMN IF NOT EXISTS descricao TEXT;
 
 -- 2. Criar Tabela Associativa circulo_membros
 CREATE TABLE IF NOT EXISTS circulo_membros (
