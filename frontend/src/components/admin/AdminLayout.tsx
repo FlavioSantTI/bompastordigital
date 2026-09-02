@@ -1,6 +1,6 @@
 import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment, CalendarMonth, QrCode, Groups, RecordVoiceOver, GroupWork } from '@mui/icons-material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { APP_VERSION } from '../../types';
