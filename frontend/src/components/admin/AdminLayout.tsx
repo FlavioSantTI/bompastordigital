@@ -21,11 +21,18 @@ const menuItems = [
     { text: 'Usuários', icon: <AccountCircle />, path: '/admin/usuarios' },
 ];
 
+import { triggerGuidingStarSplash } from '../../utils/guidingStarSplash';
+
 export default function AdminLayout() {
     const navigate = useNavigate();
     const location = useLocation();
     const { user, signOut } = useAuth();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+    useEffect(() => {
+        // Dispara a assinatura visual etérea v7.0.0 (Estrela Guia Celestial)
+        triggerGuidingStarSplash();
+    }, []);
 
     const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -51,7 +58,7 @@ export default function AdminLayout() {
                 <Toolbar>
                     <Typography variant="h6" noWrap component="div" sx={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, flexGrow: 1 }}>
                         BOM PASTOR DIGITAL - Administração
-                        <Typography component="span" sx={{ ml: 1.5, fontSize: '0.7rem', fontWeight: 'bold', color: '#ff9800', verticalAlign: 'super' }}>
+                        <Typography id="versao-tag" component="span" sx={{ ml: 1.5, fontSize: '0.7rem', fontWeight: 'bold', color: '#ff9800', verticalAlign: 'super' }}>
                             v{APP_VERSION}
                         </Typography>
                     </Typography>
