@@ -36,11 +36,40 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 
 | Versão | Data | Mudanças |
 |--------|----------|----------|
+| **7.1.0** | **17/09/2026** | **Módulo Unificado de Crachás v2.0 & Customização Completa de Molduras e Tamanhos**: Unificação das 4 fontes de crachás (Inscritos, Equipes de Apoio, Círculos e Palestrantes) via arquitetura Adapter canônica. Seleção de 3 tamanhos físicos padronizados (Pequeno 54×86mm com 9 por folha A4, Médio 90×120mm com 4 por folha A4 e Grande Pastoral 100×140mm com 2 por folha A4) com escalonamento proporcional inteligente. Galeria de 5 presets de moldura (Pastoral, Dourada Clássica, Minimalista, Custom Image e Tenda de Mesa). Card unificado de exibição com toggles 100% integrados ao banco de dados (Logotipo, Tag de Categoria, QR Code, Marcas de Corte Vetoriais, Paróquia, Diocese e Cidade). Nomenclatura tradicional de casais sem parênteses adicionais (`Waltuir Nunes da Silva` / `da Adeniza`). |
 | **7.0.0** | **02/09/2026** | **Módulo Completo de Círculos, Relatórios & Painel de Inscrições**: Módulo CRUD de Círculos com Casal Coordenador estrito, Alocação Dual-List fixo lado a lado, Seletor de Cores Nativo com Roda de Cores, Relatório de Círculos por Evento (PDF e Excel), Assinatura Visual Estrela Guia v7.0.0, Painel de Inscrições e Alerta de Contagem Regressiva em Vermelho. |
 | **6.5.0** | **02/09/2026** | **Módulo de CRUD de Círculos**: Lançamento do módulo de Círculos por evento, com metadados visuais (nome, descrição e cores em Hexadecimal), busca de Casal Coordenador elegível na base global (não inscritos no evento atual), gerenciador Dual-List de membros com regra de pertencimento único por participante e dashboard com métricas de alocação. |
 | **6.4.1** | **02/09/2026** | **Novos Relatórios de Equipes e por Paróquia**: Lançamento dos relatórios "Equipes por Evento" (Casal Coordenador e Membros com Telefone e Paróquia) e "Relatório por Paróquia" (agrupamento inteligente com quebra de página e exportação em PDF e Excel). |
 | **6.4** | **02/09/2026** | **Gestão de Equipes (Casal Coordenador & Exibição de Contato)**: Atualização do rótulo da liderança de equipes de "Chefe / Subchefe" para "Casal Coordenador". Remoção do CPF da lista e autocomplete de componentes/liderança, substituído pela exibição direta de Telefone e Paróquia. |
 | **6.3** | **30/07/2026** | **Correção de Pagamento PIX em Eventos Pagos**: Ajuste no retorno das RPCs PostgreSQL (`registrar_casal_ecc` e `registrar_individual_ecc`), no `registrationService` e no `RegistrationStepper` para trafegar corretamente os campos de pagamento PIX (`is_paid`, `event_price`, `pix_key`, etc.) para a tela final de confirmação. |
+
+---
+
+### 🎨 Módulo Unificado de Crachás v2.0 & Personalização de Molduras e Tamanhos (v7.1.0)
+- [x] **Arquitetura Desacoplada de Adapters**: Contrato canônico `CanonicalBadgePayload` com 4 adapters independentes (`fetchInscritosBadges`, `fetchEquipesBadges`, `fetchCirculosBadges`, `fetchPalestrantesBadges`) que conectam qualquer entidade do Supabase diretamente ao motor PDF.
+- [x] **Seleção de 3 Tamanhos Físicos Padronizados**:
+  - 📇 **Pequeno (Cartão Padrão - 54 × 86 mm / 8,6 × 5,4 cm)**: Rendimento de **até 9 crachás por folha A4** (grade 3 × 3). Ideal para protetores de PVC rígido e economia máxima de papel.
+  - 🏷️ **Médio (Credencial Média - 90 × 120 mm / 9 × 12 cm)**: Rendimento de **4 crachás por folha A4** (grade 2 × 2). Formato equilibrado para congressos e eventos.
+  - 📜 **Grande (Pastoral / A6 - 100 × 140 mm / 10 × 14 cm)**: Rendimento de **2 crachás por folha A4** (grade 1 × 2). Padrão histórico Bom Pastor para alta legibilidade à distância.
+- [x] **Escalonamento Proporcional Inteligente**: Fontes de texto, tamanhos do logo (28px a 48px), QR Code (26px a 40px), fotos de avatar e espaçamentos se autoajustam automaticamente à dimensão escolhida.
+- [x] **Galeria de 5 Presets de Moldura**:
+  - ⛪ **Padrão Pastoral**: Tarja superior temática na cor da categoria com borda suave e logo oficial.
+  - ✨ **Dourada Clássica**: Moldura dupla nobre em tom dourado (`#C5A059`) para sacerdotes, bispos e dirigentes.
+  - 🔲 **Minimalista Clean**: Sem bordas externas, foco total no nome com tarja sutil.
+  - 🖼️ **Moldura Gráfica (Upload)**: Aceita artes de fundo personalizadas PNG/JPG (feitas no Canva ou Photoshop).
+  - ⛺ **Tenda de Mesa**: Crachá dobrável com linha de vinco pontilhada para mesas de reflexão e salas.
+- [x] **Card Unificado "Padrão de Exibição & Impressão" (Toggles 100% no Banco)**:
+  - Alternância rápida e limpa via switches ON/OFF (sem digitação manual):
+    - Logotipo Oficial no Cabeçalho
+    - Tag de Categoria (Encontrista, Equipe, Círculo, Palestrante)
+    - QR Code Dinâmico de Presença / Check-in
+    - Marcas de Corte Vetoriais (Guia de Refilamento nos 4 cantos)
+    - Paróquia / Santuário (Dados da Inscrição)
+    - Diocese / Arquidiocese (Dados da Inscrição)
+    - Cidade - UF (Dados da Inscrição)
+- [x] **Nomenclatura Tradicional de Casais**: Exibição limpa do vínculo matrimonial no padrão Bom Pastor (`Waltuir Nunes da Silva` / `da Adeniza`), sem parênteses adicionais e com tipografia cursiva elegante.
+- [x] **Live Mini-Preview Interativo**: Mockup em tempo real no diálogo de customização que reflete instantaneamente o tamanho físico selecionado, moldura, cores e toggles de exibição.
+- [x] **Unificação com o Módulo de Relatórios**: O gerador de crachás acessado via **Relatórios e Fichas** consome o mesmo motor `BadgeRenderer` e aplica as configurações salvas.
 
 ---
 

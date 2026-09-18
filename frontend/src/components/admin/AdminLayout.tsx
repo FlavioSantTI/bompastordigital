@@ -1,5 +1,5 @@
 import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
-import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment, CalendarMonth, QrCode, Groups, RecordVoiceOver, GroupWork } from '@mui/icons-material';
+import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment, CalendarMonth, QrCode, Groups, RecordVoiceOver, GroupWork, Badge } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -13,6 +13,7 @@ const menuItems = [
     { text: 'Equipes', icon: <Groups />, path: '/admin/equipes' },
     { text: 'Círculos', icon: <GroupWork />, path: '/admin/circulos' },
     { text: 'Relatórios & Fichas', icon: <Assessment />, path: '/admin/relatorios' },
+    { text: 'Crachás', icon: <Badge />, path: '/admin/crachas' },
     { text: 'Eventos', icon: <Event />, path: '/admin/eventos' },
     { text: 'Cronograma', icon: <CalendarMonth />, path: '/admin/cronograma' },
     { text: 'Palestrantes', icon: <RecordVoiceOver />, path: '/admin/palestrantes' },

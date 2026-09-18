@@ -21,7 +21,9 @@ import EventosPage from './components/admin/EventosPage';
 import InscricoesPage from './components/admin/InscricoesPage';
 import ReportsPage from './components/admin/ReportsPage';
 import UsuariosPage from './components/admin/UsuariosPage';
-import CrachasPage from './components/admin/CrachasPage';
+// [DEPRECATED] CrachasPage legado mantido como fallback
+// import CrachasPage from './components/admin/CrachasPage';
+import BadgesPage from './components/admin/badges/BadgesPage';
 import EquipesPage from './components/admin/EquipesPage';
 import CirculosPage from './components/admin/CirculosPage';
 import CronogramaPage from './components/admin/CronogramaPage';
@@ -97,7 +99,7 @@ function App() {
                 <Route path="equipes" element={<EquipesPage />} />
                 <Route path="circulos" element={<CirculosPage />} />
                 <Route path="relatorios" element={<ReportsPage />} />
-                <Route path="crachas" element={<CrachasPage />} />
+                <Route path="crachas" element={<BadgesPage />} />
                 <Route path="cronograma" element={<CronogramaPage />} />
                 <Route path="palestrantes" element={<PalestrantesPage />} />
                 <Route path="usuarios" element={<UsuariosPage />} />

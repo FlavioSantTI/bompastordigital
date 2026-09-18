@@ -9,7 +9,9 @@ import { Download, Close, CloudUpload } from '@mui/icons-material';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import { Backdrop } from '@mui/material';
 import { ListaPresencaTemplate, FichasInscricaoTemplate, ListaGeralTemplate, ListaPresencaDioceseTemplate, CrachasEmBrancoTemplate, RelatorioEquipesTemplate, RelatorioParoquiaTemplate, RelatorioCirculosTemplate } from './ReportTemplates';
-import CrachaTemplate, { type CrachaData } from './CrachaTemplate';
+import BadgeRenderer from './badges/templates/BadgeRenderer';
+import { type CanonicalBadgePayload, type BadgeLayoutConfig, DEFAULT_BADGE_LAYOUT } from '../../types/badge';
+import { formatarVinculoConjuge } from '../../services/badgeAdapters';
 import { type DadosExportacao, exportService } from '../../services/exportService';
 
 interface ReportPreviewDialogProps {
@@ -61,31 +63,63 @@ export default function ReportPreviewDialog({
             return <RelatorioCirculosTemplate dados={dados} tituloEvento={tituloEvento} />;
         }
         
-        // Mapeamento para Crachás
-        const crachaParticipants: CrachaData[] = [];
+        // Mapeamento para Crachás Unificados
+        let layoutConfig: BadgeLayoutConfig = DEFAULT_BADGE_LAYOUT;
+        try {
+            const saved = localStorage.getItem('bpd_badge_layout_config');
+            if (saved) layoutConfig = JSON.parse(saved);
+        } catch {}
+
+        const payloads: CanonicalBadgePayload[] = [];
         dados.forEach(d => {
-            crachaParticipants.push({
-                inscricao_id: d.id,
-                tipo: d.tipo === 'individual' ? 'individual' : 'esposo',
-                nome: d.esposo.nome,
-                paroquia: d.pastoral.paroquia,
-                diocese: d.pastoral.diocese,
-                cidade: d.endereco.cidade,
-                evento: tituloEvento
-            });
-            if (d.tipo === 'casal' && d.esposa) {
-                crachaParticipants.push({
-                    inscricao_id: d.id,
-                    tipo: 'esposa',
-                    nome: d.esposa.nome,
-                    paroquia: d.pastoral.paroquia,
-                    diocese: d.pastoral.diocese,
-                    cidade: d.endereco.cidade,
-                    evento: tituloEvento
+            const paroquia = d.pastoral?.paroquia;
+            const diocese = d.pastoral?.diocese;
+            const cidade = d.endereco?.cidade;
+
+            const footerMeta: Array<{ label: string; value: string }> = [];
+            if (paroquia) footerMeta.push({ label: 'Paróquia', value: paroquia });
+            if (diocese) footerMeta.push({ label: 'Diocese', value: diocese });
+            if (cidade) footerMeta.push({ label: 'Cidade', value: cidade });
+
+            const nomeEsposo = d.esposo?.nome;
+            const nomeEsposa = d.esposa?.nome;
+
+            if (d.tipo === 'individual' || !nomeEsposa) {
+                payloads.push({
+                    id: `${d.id}-individual`,
+                    primary_name: nomeEsposo,
+                    secondary_name: null,
+                    category_label: 'Individual',
+                    accent_color: '#0284C7',
+                    event_info: { event_name: tituloEvento },
+                    qr_code_content: `BPD:INS:${d.id}`,
+                    footer_metadata: footerMeta,
+                });
+            } else {
+                // Casal
+                payloads.push({
+                    id: `${d.id}-esposo`,
+                    primary_name: nomeEsposo,
+                    secondary_name: formatarVinculoConjuge('esposo', nomeEsposa),
+                    category_label: 'Esposo',
+                    accent_color: '#0284C7',
+                    event_info: { event_name: tituloEvento },
+                    qr_code_content: `BPD:INS:${d.id}`,
+                    footer_metadata: footerMeta,
+                });
+                payloads.push({
+                    id: `${d.id}-esposa`,
+                    primary_name: nomeEsposa,
+                    secondary_name: formatarVinculoConjuge('esposa', nomeEsposo),
+                    category_label: 'Esposa',
+                    accent_color: '#0284C7',
+                    event_info: { event_name: tituloEvento },
+                    qr_code_content: `BPD:INS:${d.id}`,
+                    footer_metadata: footerMeta,
                 });
             }
         });
-        return <CrachaTemplate participantes={crachaParticipants} />;
+        return <BadgeRenderer payloads={payloads} layout={layoutConfig} />;
     };
 
     const getTitle = () => {
