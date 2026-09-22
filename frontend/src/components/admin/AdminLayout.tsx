@@ -30,10 +30,6 @@ export default function AdminLayout() {
     const { user, signOut } = useAuth();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-    useEffect(() => {
-        // Dispara a assinatura visual etérea v7.0.0 (Estrela Guia Celestial)
-        triggerGuidingStarSplash(true);
-    }, []);
 
     const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -162,7 +158,7 @@ export default function AdminLayout() {
                 {/* Footer Admin */}
                 <Box sx={{ mt: 4, pt: 2, textAlign: 'center', borderTop: '1px solid', borderColor: 'grey.300', opacity: 0.8 }}>
                     <Typography variant="caption" color="text.secondary" component="div">
-                        <strong>© 2026 Bom Pastor Digital</strong> - Versão 7.0.0
+                        <strong>© 2026 Bom Pastor Digital</strong> - Versão {APP_VERSION}
                     </Typography>
                     <Typography variant="caption" color="text.secondary" component="div" sx={{ mt: 0.5 }}>
                         Powered by Flavio Santiago – Consultor IA

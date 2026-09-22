@@ -130,17 +130,42 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
     const loadInitialLocation = async (dioceseId?: number | null, cidadeNome?: string) => {
         if (cidadeNome) {
             setInputMunicipio(cidadeNome);
+            
             // Tenta encontrar o objeto municipio correspondente para o Autocomplete
-            const [nome] = cidadeNome.split(' - ');
-            const { data: municipio } = await supabase
+            let nome = cidadeNome.trim();
+            let uf: string | undefined;
+
+            if (cidadeNome.includes(' - ')) {
+                const parts = cidadeNome.split(' - ');
+                nome = parts[0]?.trim();
+                uf = parts[1]?.trim();
+            } else if (cidadeNome.includes('-')) {
+                const parts = cidadeNome.split('-');
+                nome = parts[0]?.trim();
+                uf = parts[1]?.trim();
+            } else if (cidadeNome.includes('/')) {
+                const parts = cidadeNome.split('/');
+                nome = parts[0]?.trim();
+                uf = parts[1]?.trim();
+            }
+
+            let query = supabase
                 .from('municipios')
                 .select('codigo_tom, nome_ibge, uf, diocese_id')
-                .ilike('nome_ibge', nome)
-                .limit(1)
-                .single();
+                .ilike('nome_ibge', nome);
+
+            if (uf) {
+                query = query.ilike('uf', uf);
+            } else if (dioceseId) {
+                query = query.eq('diocese_id', dioceseId);
+            }
+
+            const { data: municipio } = await query.limit(1).maybeSingle();
 
             if (municipio) {
                 setSelectedMunicipio(municipio);
+                // Preenche também as opções do Autocomplete para garantir que o valor renderize corretamente
+                setMunicipios([municipio]);
             }
         }
 
@@ -151,11 +176,12 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
                 .select('codigo_tom, nome_ibge, uf, diocese_id')
                 .eq('diocese_id', dioceseId)
                 .limit(1)
-                .single();
+                .maybeSingle();
 
             if (municipio) {
                 setSelectedMunicipio(municipio);
                 setInputMunicipio(`${municipio.nome_ibge} - ${municipio.uf}`);
+                setMunicipios([municipio]);
             }
         }
 
