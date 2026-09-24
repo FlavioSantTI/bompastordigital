@@ -395,25 +395,21 @@ export const ListaPresencaDioceseTemplate = ({ dados, tituloEvento }: { dados: D
 
                         {/* Cabeçalho da tabela */}
                         <View style={[s.tableRow, s.tableHeader, { borderTopWidth: 1, borderTopColor: BORDER_COLOR }]} fixed>
-                            <View style={[s.tableCol, { width: '5%' }]}><Text style={s.tableCellHeader}>#</Text></View>
-                            <View style={[s.tableCol, { width: '40%' }]}><Text style={s.tableCellHeader}>Nome do Participante</Text></View>
-                            <View style={[s.tableCol, { width: '15%' }]}><Text style={s.tableCellHeader}>Tipo</Text></View>
-                            <View style={[s.tableCol, { width: '40%' }]}><Text style={s.tableCellHeader}>Assinatura</Text></View>
+                            <View style={[s.tableCol, { width: '10%' }]}><Text style={s.tableCellHeader}>Sequência</Text></View>
+                            <View style={[s.tableCol, { width: '45%' }]}><Text style={s.tableCellHeader}>Nome do Participante</Text></View>
+                            <View style={[s.tableCol, { width: '45%' }]}><Text style={s.tableCellHeader}>Assinatura</Text></View>
                         </View>
 
                         {/* Linhas */}
                         {pessoas.map((p, i) => (
                             <View key={i} style={[s.tableRow, i % 2 === 0 ? {} : s.tableRowStripe]} wrap={false}>
-                                <View style={[s.tableCol, { width: '5%' }]}>
+                                <View style={[s.tableCol, { width: '10%' }]}>
                                     <Text style={[s.tableCell, { textAlign: 'center' }]}>{i + 1}</Text>
                                 </View>
-                                <View style={[s.tableCol, { width: '40%' }]}>
+                                <View style={[s.tableCol, { width: '45%' }]}>
                                     <Text style={[s.tableCell, { fontWeight: 'bold' }]}>{p.nome}</Text>
                                 </View>
-                                <View style={[s.tableCol, { width: '15%' }]}>
-                                    <Text style={[s.tableCell, { textAlign: 'center' }]}>{p.tipo}</Text>
-                                </View>
-                                <View style={[s.tableCol, { width: '40%' }]} />
+                                <View style={[s.tableCol, { width: '45%' }]} />
                             </View>
                         ))}
 
