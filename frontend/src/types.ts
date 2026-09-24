@@ -3,7 +3,7 @@
  */
 
 /** Versão Global do Sistema */
-export const APP_VERSION = '7.1.0';
+export const APP_VERSION = '7.2';
 
 /**
  * Tipo de inscrição
