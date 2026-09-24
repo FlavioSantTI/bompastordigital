@@ -348,26 +348,23 @@ export const FichasInscricaoTemplate = ({ dados, tituloEvento }: { dados: DadosE
     </Document>
 );
 
-// 4. NOVO Template: Lista de Presença por Diocese (Quebra de página por Diocese)
+// 4. Template: Lista de Presença Geral (Orientação Retrato, Relação Geral com Campo Data)
 export const ListaPresencaDioceseTemplate = ({ dados, tituloEvento }: { dados: DadosExportacao[], tituloEvento: string }) => {
-    // 1. Achatar e Agrupar por Diocese
-    const agrupado: Record<string, LinhaPresenca[]> = {};
+    // 1. Achatar participantes em uma lista geral única ordenada por nome
+    const pessoas: LinhaPresenca[] = [];
     
     dados.forEach(d => {
-        const diocese = d.pastoral.diocese || 'Sem Diocese';
-        if (!agrupado[diocese]) agrupado[diocese] = [];
-        
         // Adiciona esposo/participante
-        agrupado[diocese].push({
+        pessoas.push({
             nome: d.esposo.nome,
             telefone: d.esposo.telefone,
             tipo: d.tipo === 'casal' ? 'CASAL' : 'INDIV.',
             status: d.status.toUpperCase(),
         });
 
-        // Adiciona esposa separada
+        // Adiciona esposa
         if (d.tipo === 'casal' && d.esposa) {
-            agrupado[diocese].push({
+            pessoas.push({
                 nome: d.esposa.nome,
                 telefone: d.esposa.telefone,
                 tipo: 'CASAL',
@@ -376,47 +373,42 @@ export const ListaPresencaDioceseTemplate = ({ dados, tituloEvento }: { dados: D
         }
     });
 
-    const nomesDioceses = Object.keys(agrupado).sort();
+    // Ordenar alfabeticamente
+    pessoas.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
 
     return (
-        <Document title={`Lista por Diocese - ${tituloEvento}`}>
-            {nomesDioceses.map((dioceseNome) => {
-                const pessoas = agrupado[dioceseNome].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-                
-                return (
-                    <Page key={dioceseNome} size="A4" style={s.page} orientation="landscape" wrap>
-                        <View style={s.header} fixed>
-                                    <Image src="/img/logo.jpg" style={s.logo} />
-                            <View style={s.headerText}>
-                                <Text style={s.title}>Lista de Presença</Text>
-                                <Text style={s.subtitle}>EVENTO: {tituloEvento} | DIOCESE: {dioceseNome.toUpperCase()}</Text>
-                            </View>
+        <Document title={`Lista de Presença - ${tituloEvento}`}>
+            <Page size="A4" style={s.page} orientation="portrait" wrap>
+                <View style={s.header} fixed>
+                    <Image src="/img/logo.jpg" style={s.logo} />
+                    <View style={s.headerText}>
+                        <Text style={s.title}>Lista de Presença</Text>
+                        <Text style={s.subtitle}>EVENTO: {tituloEvento}   |   Data: ____ / ____ / ________</Text>
+                    </View>
+                </View>
+
+                {/* Cabeçalho da tabela */}
+                <View style={[s.tableRow, s.tableHeader, { borderTopWidth: 1, borderTopColor: BORDER_COLOR }]} fixed>
+                    <View style={[s.tableCol, { width: '14%' }]}><Text style={s.tableCellHeader}>Sequência</Text></View>
+                    <View style={[s.tableCol, { width: '46%' }]}><Text style={s.tableCellHeader}>Nome do Participante</Text></View>
+                    <View style={[s.tableCol, { width: '40%' }]}><Text style={s.tableCellHeader}>Assinatura</Text></View>
+                </View>
+
+                {/* Linhas de dados */}
+                {pessoas.map((p, i) => (
+                    <View key={i} style={[s.tableRow, i % 2 === 0 ? {} : s.tableRowStripe]} wrap={false}>
+                        <View style={[s.tableCol, { width: '14%' }]}>
+                            <Text style={[s.tableCell, { textAlign: 'center' }]}>{i + 1}</Text>
                         </View>
-
-                        {/* Cabeçalho da tabela */}
-                        <View style={[s.tableRow, s.tableHeader, { borderTopWidth: 1, borderTopColor: BORDER_COLOR }]} fixed>
-                            <View style={[s.tableCol, { width: '10%' }]}><Text style={s.tableCellHeader}>Sequência</Text></View>
-                            <View style={[s.tableCol, { width: '45%' }]}><Text style={s.tableCellHeader}>Nome do Participante</Text></View>
-                            <View style={[s.tableCol, { width: '45%' }]}><Text style={s.tableCellHeader}>Assinatura</Text></View>
+                        <View style={[s.tableCol, { width: '46%' }]}>
+                            <Text style={[s.tableCell, { fontWeight: 'bold' }]}>{p.nome}</Text>
                         </View>
+                        <View style={[s.tableCol, { width: '40%' }]} />
+                    </View>
+                ))}
 
-                        {/* Linhas */}
-                        {pessoas.map((p, i) => (
-                            <View key={i} style={[s.tableRow, i % 2 === 0 ? {} : s.tableRowStripe]} wrap={false}>
-                                <View style={[s.tableCol, { width: '10%' }]}>
-                                    <Text style={[s.tableCell, { textAlign: 'center' }]}>{i + 1}</Text>
-                                </View>
-                                <View style={[s.tableCol, { width: '45%' }]}>
-                                    <Text style={[s.tableCell, { fontWeight: 'bold' }]}>{p.nome}</Text>
-                                </View>
-                                <View style={[s.tableCol, { width: '45%' }]} />
-                            </View>
-                        ))}
-
-                        <Text style={s.version} fixed>© 2026 Bom Pastor Digital • Versão {APP_VERSION}</Text>
-                    </Page>
-                );
-            })}
+                <Text style={s.version} fixed>© 2026 Bom Pastor Digital • Versão {APP_VERSION}</Text>
+            </Page>
         </Document>
     );
 };
