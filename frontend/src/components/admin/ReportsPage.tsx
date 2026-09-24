@@ -481,7 +481,7 @@ export default function ReportsPage() {
                                             <PictureAsPdf sx={{ fontSize: 32, mb: 0.5, color: '#1e3a5f' }} />
                                             <Typography variant="body2" fontWeight="bold" color="primary">Lista de Presença</Typography>
                                             <Typography variant="caption" color="text.secondary" display="block">
-                                                Por Diocese
+                                                Geral Retrato
                                             </Typography>
                                         </CardContent>
                                     </CardActionArea>

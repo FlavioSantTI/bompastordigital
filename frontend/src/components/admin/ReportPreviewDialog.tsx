@@ -131,7 +131,7 @@ export default function ReportPreviewDialog({
             case 'lista_geral': return 'Pré-visualização: Lista Geral de Inscritos';
             case 'fichas': return 'Pré-visualização: Fichas de Inscrição';
             case 'crachas': return 'Pré-visualização: Crachás do Evento';
-            case 'lista_presenca_diocese': return 'Pré-visualização: Lista de Presença por Diocese';
+            case 'lista_presenca_diocese': return 'Pré-visualização: Lista de Presença';
             case 'crachas_branco': return 'Pré-visualização: Crachás em Branco';
             case 'presenca_gerencial': return 'Relatório de Presença Gerencial';
             case 'equipes': return 'Pré-visualização: Relatório de Equipes por Evento';
