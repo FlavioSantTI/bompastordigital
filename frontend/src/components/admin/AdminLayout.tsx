@@ -1,9 +1,10 @@
 import { Box, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
-import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment, CalendarMonth, QrCode, Groups, RecordVoiceOver, GroupWork, Badge } from '@mui/icons-material';
-import { useState, useEffect } from 'react';
+import { Church, Event, People, Dashboard, Logout, AccountCircle, Assessment, CalendarMonth, QrCode, Groups, RecordVoiceOver, GroupWork, Badge, Menu as MenuIcon, Close } from '@mui/icons-material';
+import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { APP_VERSION } from '../../types';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 const drawerWidth = 240;
 
@@ -29,6 +30,8 @@ export default function AdminLayout() {
     const location = useLocation();
     const { user, signOut } = useAuth();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const isMobile = useIsMobile();
+    const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
 
     const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -45,6 +48,45 @@ export default function AdminLayout() {
         navigate('/login');
     };
 
+    const handleNavigation = (path: string) => {
+        navigate(path);
+        if (isMobile) {
+            setMobileDrawerOpen(false);
+        }
+    };
+
+    const drawerContent = (
+        <>
+            <Toolbar />
+            <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
+                <List>
+                    {menuItems.map((item) => (
+                        <ListItem key={item.text} disablePadding>
+                            <ListItemButton
+                                selected={location.pathname === item.path}
+                                onClick={() => handleNavigation(item.path)}
+                            >
+                                <ListItemIcon>{item.icon}</ListItemIcon>
+                                <ListItemText primary={item.text} />
+                            </ListItemButton>
+                        </ListItem>
+                    ))}
+                </List>
+            </Box>
+            <Divider />
+            <List>
+                <ListItem disablePadding>
+                    <ListItemButton onClick={handleLogout}>
+                        <ListItemIcon>
+                            <Logout />
+                        </ListItemIcon>
+                        <ListItemText primary="Sair" />
+                    </ListItemButton>
+                </ListItem>
+            </List>
+        </>
+    );
+
     return (
         <Box sx={{ display: 'flex' }}>
             {/* AppBar */}
@@ -53,8 +95,21 @@ export default function AdminLayout() {
                 sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
             >
                 <Toolbar>
-                    <Typography variant="h6" noWrap component="div" sx={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, flexGrow: 1 }}>
-                        BOM PASTOR DIGITAL - Administração
+                    {/* Hamburger menu - apenas mobile */}
+                    {isMobile && (
+                        <IconButton
+                            color="inherit"
+                            aria-label="abrir menu"
+                            edge="start"
+                            onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+                            sx={{ mr: 1 }}
+                        >
+                            {mobileDrawerOpen ? <Close /> : <MenuIcon />}
+                        </IconButton>
+                    )}
+
+                    <Typography variant="h6" noWrap component="div" sx={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, flexGrow: 1, fontSize: { xs: '0.95rem', sm: '1.25rem' } }}>
+                        {isMobile ? 'BOM PASTOR' : 'BOM PASTOR DIGITAL - Administração'}
                         <Typography id="versao-tag" component="span" sx={{ ml: 1.5, fontSize: '0.7rem', fontWeight: 'bold', color: '#ff9800', verticalAlign: 'super' }}>
                             v{APP_VERSION}
                         </Typography>
@@ -108,48 +163,44 @@ export default function AdminLayout() {
                 </Toolbar>
             </AppBar>
 
-            {/* Drawer (menu lateral) */}
-            <Drawer
-                variant="permanent"
-                sx={{
-                    width: drawerWidth,
-                    flexShrink: 0,
-                    [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
-                }}
-            >
-                <Toolbar />
-                <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
-                    <List>
-                        {menuItems.map((item) => (
-                            <ListItem key={item.text} disablePadding>
-                                <ListItemButton
-                                    selected={location.pathname === item.path}
-                                    onClick={() => navigate(item.path)}
-                                >
-                                    <ListItemIcon>{item.icon}</ListItemIcon>
-                                    <ListItemText primary={item.text} />
-                                </ListItemButton>
-                            </ListItem>
-                        ))}
-                    </List>
-                </Box>
-                <Divider />
-                <List>
-                    <ListItem disablePadding>
-                        <ListItemButton onClick={handleLogout}>
-                            <ListItemIcon>
-                                <Logout />
-                            </ListItemIcon>
-                            <ListItemText primary="Sair" />
-                        </ListItemButton>
-                    </ListItem>
-                </List>
-            </Drawer>
+            {/* Drawer — permanent em desktop, temporary em mobile */}
+            {isMobile ? (
+                <Drawer
+                    variant="temporary"
+                    open={mobileDrawerOpen}
+                    onClose={() => setMobileDrawerOpen(false)}
+                    ModalProps={{ keepMounted: true }}
+                    sx={{
+                        [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+                    }}
+                >
+                    {drawerContent}
+                </Drawer>
+            ) : (
+                <Drawer
+                    variant="permanent"
+                    sx={{
+                        width: drawerWidth,
+                        flexShrink: 0,
+                        [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+                    }}
+                >
+                    {drawerContent}
+                </Drawer>
+            )}
 
             {/* Conteúdo principal */}
             <Box
                 component="main"
-                sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
+                sx={{
+                    flexGrow: 1,
+                    bgcolor: 'background.default',
+                    p: { xs: 1.5, sm: 2, md: 3 },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    minHeight: '100vh',
+                    width: { xs: '100%', md: `calc(100% - ${drawerWidth}px)` },
+                }}
             >
                 <Toolbar />
                 <Box sx={{ flexGrow: 1 }}>

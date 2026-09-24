@@ -8,6 +8,7 @@ import { Close, Add, Delete, Category, Edit, Save, Clear } from '@mui/icons-mate
 import { useState, useEffect } from 'react';
 import { fetchCategoriasByEvento, createCategoria, updateCategoria, deleteCategoria } from '../../services/cronogramaService';
 import type { Categoria } from '../../types';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface CategoriasDialogProps {
     open: boolean;
@@ -41,6 +42,7 @@ const COLOR_OPTIONS = [
 ];
 
 export default function CategoriasDialog({ open, onClose, eventoId, onUpdate }: CategoriasDialogProps) {
+    const isMobile = useIsMobile();
     const [categorias, setCategorias] = useState<Categoria[]>([]);
     const [loading, setLoading] = useState(false);
     
@@ -121,7 +123,7 @@ export default function CategoriasDialog({ open, onClose, eventoId, onUpdate }: 
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth fullScreen={isMobile}>
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: '#f8f9fa' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Category color="primary" />

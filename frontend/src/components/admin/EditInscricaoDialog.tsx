@@ -17,9 +17,12 @@ import {
     Autocomplete,
     CircularProgress,
     Paper,
+    IconButton,
 } from '@mui/material';
+import { Close } from '@mui/icons-material';
 import { supabase } from '../../lib/supabase';
 import { PASTORAIS_DISPONIVEIS } from '../../types';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface Pessoa {
     id: string;
@@ -62,6 +65,7 @@ interface EditInscricaoDialogProps {
 const PASTORAIS_OPCOES = [...PASTORAIS_DISPONIVEIS];
 
 export default function EditInscricaoDialog({ open, inscricao, eventos, onClose, onSave }: EditInscricaoDialogProps) {
+    const isMobile = useIsMobile();
     const [error, setError] = useState('');
     const [, setSaving] = useState(false);
     const [eventoId, setEventoId] = useState<number | null>(null);
@@ -329,9 +333,14 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
     }
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth scroll="paper">
-            <DialogTitle>
-                ✏️ Editar Inscrição Completa
+        <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth fullScreen={isMobile} scroll="paper">
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="h6" fontWeight="bold">✏️ Editar Inscrição Completa</Typography>
+                {isMobile && (
+                    <IconButton onClick={onClose} edge="end" aria-label="fechar">
+                        <Close />
+                    </IconButton>
+                )}
             </DialogTitle>
             <DialogContent dividers>
                 {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -363,7 +372,7 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
                         <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="primary">
                             {inscricao.tipo === 'individual' ? '👤 Dados do Participante' : '👨 Dados do Esposo'}
                         </Typography>
-                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
                             <TextField
                                 fullWidth
                                 label="Nome Completo"
@@ -410,7 +419,7 @@ export default function EditInscricaoDialog({ open, inscricao, eventos, onClose,
                             <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="primary">
                                 👩 Dados da Esposa
                             </Typography>
-                            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
                                 <TextField
                                     fullWidth
                                     label="Nome Completo"

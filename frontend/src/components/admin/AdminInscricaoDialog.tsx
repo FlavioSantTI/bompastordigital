@@ -19,13 +19,16 @@ import {
     FormControlLabel,
     Tooltip,
     Chip,
+    IconButton,
 } from '@mui/material';
+import { Close } from '@mui/icons-material';
 import { IMaskInput } from 'react-imask';
 import React from 'react';
 import { supabase } from '../../lib/supabase';
 import { registerByAdmin } from '../../services/registrationService';
 import type { TipoInscricao } from '../../types';
 import { PASTORAIS_DISPONIVEIS } from '../../types';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 // Máscaras
 const CPFMask = React.forwardRef<HTMLInputElement, any>((props, ref) => {
@@ -93,6 +96,7 @@ interface AdminInscricaoDialogProps {
 const emptyPessoa = { nome: '', cpf: '', nascimento: '', email: '', telefone: '' };
 
 export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminInscricaoDialogProps) {
+    const isMobile = useIsMobile();
     const [tipo, setTipo] = useState<TipoInscricao>('casal');
     const [eventoId, setEventoId] = useState<number>(0);
     const [dioceseId, setDioceseId] = useState<number | null>(null);
@@ -248,9 +252,14 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-            <DialogTitle sx={{ fontWeight: 'bold' }}>
-                ➕ Nova Inscrição (Admin)
+        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isMobile}>
+            <DialogTitle sx={{ fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box component="span">➕ Nova Inscrição (Admin)</Box>
+                {isMobile && (
+                    <IconButton onClick={onClose} edge="end" aria-label="fechar">
+                        <Close />
+                    </IconButton>
+                )}
             </DialogTitle>
             <DialogContent>
                 <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -341,7 +350,7 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
                                     value={pessoa1.cpf}
                                     onChange={(e) => updatePessoa(setPessoa1, 'cpf', e.target.value)}
                                     InputProps={{ inputComponent: CPFMask as any }}
-                                    sx={{ flex: '0 0 180px' }}
+                                    sx={{ flex: { xs: '1 1 100%', sm: '0 0 180px' } }}
                                 />
                                 <TextField
                                     label="Nascimento *"
@@ -349,7 +358,7 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
                                     value={pessoa1.nascimento}
                                     onChange={(e) => updatePessoa(setPessoa1, 'nascimento', e.target.value)}
                                     InputProps={{ inputComponent: DateMask as any }}
-                                    sx={{ flex: '0 0 150px' }}
+                                    sx={{ flex: { xs: '1 1 100%', sm: '0 0 150px' } }}
                                 />
                             </Box>
                             <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
@@ -367,7 +376,7 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
                                     value={pessoa1.telefone}
                                     onChange={(e) => updatePessoa(setPessoa1, 'telefone', e.target.value)}
                                     InputProps={{ inputComponent: PhoneMask as any }}
-                                    sx={{ flex: '0 0 180px' }}
+                                    sx={{ flex: { xs: '1 1 100%', sm: '0 0 180px' } }}
                                     helperText="Opcional"
                                 />
                             </Box>
@@ -395,7 +404,7 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
                                         value={pessoa2.cpf}
                                         onChange={(e) => updatePessoa(setPessoa2, 'cpf', e.target.value)}
                                         InputProps={{ inputComponent: CPFMask as any }}
-                                        sx={{ flex: '0 0 180px' }}
+                                        sx={{ flex: { xs: '1 1 100%', sm: '0 0 180px' } }}
                                     />
                                     <TextField
                                         label="Nascimento *"
@@ -403,7 +412,7 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
                                         value={pessoa2.nascimento}
                                         onChange={(e) => updatePessoa(setPessoa2, 'nascimento', e.target.value)}
                                         InputProps={{ inputComponent: DateMask as any }}
-                                        sx={{ flex: '0 0 150px' }}
+                                        sx={{ flex: { xs: '1 1 100%', sm: '0 0 150px' } }}
                                     />
                                 </Box>
                                 <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
@@ -421,7 +430,7 @@ export default function AdminInscricaoDialog({ open, onClose, onSave }: AdminIns
                                         value={pessoa2.telefone}
                                         onChange={(e) => updatePessoa(setPessoa2, 'telefone', e.target.value)}
                                         InputProps={{ inputComponent: PhoneMask as any }}
-                                        sx={{ flex: '0 0 180px' }}
+                                        sx={{ flex: { xs: '1 1 100%', sm: '0 0 180px' } }}
                                         helperText="Opcional"
                                     />
                                 </Box>

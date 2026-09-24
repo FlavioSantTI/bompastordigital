@@ -30,12 +30,13 @@ import {
     Tooltip,
     Divider,
 } from '@mui/material';
-import { Add, Edit, Delete, CalendarMonth, HowToReg, Person } from '@mui/icons-material';
+import { Add, Edit, Delete, CalendarMonth, HowToReg, Person, Close } from '@mui/icons-material';
 import { supabase } from '../../lib/supabase';
 import MunicipioAutocomplete from '../common/MunicipioAutocomplete';
 import { validatePixKey } from '../../services/pixService';
 import type { Evento, EventoStatus } from '../../types';
 import { computeEventStatus, getStatusConfig, formatDateTime, toISOWithTimezone, toDatetimeLocal } from '../../utils/eventStatusUtils';
+import { useIsMobile, useIsSmallMobile } from '../../hooks/useIsMobile';
 
 // Filtro de status para a listagem
 const STATUS_FILTER_OPTIONS: { value: EventoStatus | 'ALL'; label: string }[] = [
@@ -50,6 +51,8 @@ const STATUS_FILTER_OPTIONS: { value: EventoStatus | 'ALL'; label: string }[] = 
 ];
 
 export default function EventosPage() {
+    const isMobile = useIsMobile();
+    const isSmallMobile = useIsSmallMobile();
     const [eventos, setEventos] = useState<Evento[]>([]);
     const [loading, setLoading] = useState(true);
     const [openDialog, setOpenDialog] = useState(false);
@@ -466,14 +469,22 @@ export default function EventosPage() {
 
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4" fontWeight="bold">
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: { xs: 'flex-start', sm: 'center' }, 
+                flexDirection: { xs: 'column', sm: 'row' }, 
+                gap: 2, 
+                mb: 3 
+            }}>
+                <Typography variant={isSmallMobile ? "h5" : "h4"} fontWeight="bold">
                     Gerenciar Eventos
                 </Typography>
                 <Button
                     variant="contained"
                     startIcon={<Add />}
                     onClick={() => handleOpenDialog()}
+                    sx={{ width: { xs: '100%', sm: 'auto' } }}
                 >
                     Novo Evento
                 </Button>
@@ -490,7 +501,7 @@ export default function EventosPage() {
                     label="Filtrar por Status"
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value as EventoStatus | 'ALL')}
-                    sx={{ minWidth: 240 }}
+                    sx={{ minWidth: { xs: '100%', sm: 240 } }}
                 >
                     {STATUS_FILTER_OPTIONS.map((opt) => (
                         <MenuItem key={opt.value} value={opt.value}>
@@ -505,16 +516,16 @@ export default function EventosPage() {
                     <CircularProgress />
                 </Box>
             ) : (
-                <TableContainer component={Paper}>
-                    <Table>
+                <TableContainer component={Paper} sx={{ overflowX: 'auto', width: '100%' }}>
+                    <Table size={isMobile ? "small" : "medium"}>
                         <TableHead>
                             <TableRow>
                                 <TableCell><strong>Nome</strong></TableCell>
-                                <TableCell><strong>Inscrição</strong></TableCell>
+                                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Inscrição</strong></TableCell>
                                 <TableCell><strong>Realização</strong></TableCell>
-                                <TableCell><strong>Local</strong></TableCell>
-                                <TableCell><strong>Entrada</strong></TableCell>
-                                <TableCell><strong>Vagas</strong></TableCell>
+                                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}><strong>Local</strong></TableCell>
+                                <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}><strong>Entrada</strong></TableCell>
+                                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}><strong>Vagas</strong></TableCell>
                                 <TableCell><strong>Status</strong></TableCell>
                                 <TableCell align="right"><strong>Ações</strong></TableCell>
                             </TableRow>
@@ -531,7 +542,9 @@ export default function EventosPage() {
                                     <TableRow key={evento.id}>
                                         <TableCell>
                                             <Box>
-                                                {evento.nome}
+                                                <Typography variant="body2" fontWeight="bold">
+                                                    {evento.nome}
+                                                </Typography>
                                                 {!evento.publicado && (
                                                     <Typography variant="caption" color="text.secondary" display="block">
                                                         (não publicado)
@@ -540,9 +553,17 @@ export default function EventosPage() {
                                                 {evento.permite_individual === false && (
                                                     <Chip label="Somente Casais" size="small" color="secondary" variant="outlined" sx={{ mt: 0.5 }} />
                                                 )}
+                                                {/* Local e Vagas em mobile para não perder a informação */}
+                                                <Box sx={{ display: { xs: 'block', sm: 'none' }, mt: 0.5 }}>
+                                                    {evento.municipio && (
+                                                        <Typography variant="caption" color="text.secondary" display="block">
+                                                            📍 {evento.municipio.nome_ibge} - {evento.municipio.uf} ({evento.vagas} vagas)
+                                                        </Typography>
+                                                    )}
+                                                </Box>
                                             </Box>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                                             <Typography variant="body2">
                                                 {formatDateTime(evento.inscricao_inicio)}
                                             </Typography>
@@ -558,10 +579,10 @@ export default function EventosPage() {
                                                 até {formatDateTime(evento.realizacao_fim)}
                                             </Typography>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                                             {evento.municipio ? `${evento.municipio.nome_ibge} - ${evento.municipio.uf}` : '-'}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
                                             {evento.is_paid ? (
                                                 <Chip 
                                                     label={`Pago: R$ ${evento.event_price?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} 
@@ -576,23 +597,25 @@ export default function EventosPage() {
                                                 />
                                             )}
                                         </TableCell>
-                                        <TableCell>{evento.vagas}</TableCell>
+                                        <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{evento.vagas}</TableCell>
                                         <TableCell>{renderStatusChip(evento)}</TableCell>
-                                        <TableCell align="right">
+                                        <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                                             <Tooltip title="Editar">
                                                 <IconButton
+                                                    size="small"
                                                     color="primary"
                                                     onClick={() => handleOpenDialog(evento)}
                                                 >
-                                                    <Edit />
+                                                    <Edit fontSize={isSmallMobile ? "small" : "medium"} />
                                                 </IconButton>
                                             </Tooltip>
                                             <Tooltip title="Excluir">
                                                 <IconButton
+                                                    size="small"
                                                     color="error"
                                                     onClick={() => handleDelete(evento.id, evento.nome)}
                                                 >
-                                                    <Delete />
+                                                    <Delete fontSize={isSmallMobile ? "small" : "medium"} />
                                                 </IconButton>
                                             </Tooltip>
                                         </TableCell>
@@ -605,9 +628,14 @@ export default function EventosPage() {
             )}
 
             {/* Dialog de Criar/Editar */}
-            <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-                <DialogTitle>
-                    {editingEvento ? 'Editar Evento' : 'Novo Evento'}
+            <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth fullScreen={isMobile}>
+                <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="h6" fontWeight="bold">{editingEvento ? 'Editar Evento' : 'Novo Evento'}</Typography>
+                    {isMobile && (
+                        <IconButton onClick={handleCloseDialog} edge="end" aria-label="fechar">
+                            <Close />
+                        </IconButton>
+                    )}
                 </DialogTitle>
                 <DialogContent>
                     {error && (
@@ -630,7 +658,7 @@ export default function EventosPage() {
                             placeholder="Ex: Encontro de Casais com Cristo - Julho 2026"
                         />
 
-                        <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
                             <MunicipioAutocomplete
                                 value={formData.municipio_id}
                                 onChange={(codigo_tom) => setFormData({ ...formData, municipio_id: codigo_tom })}
@@ -654,7 +682,7 @@ export default function EventosPage() {
                             Período de Inscrição
                         </Typography>
 
-                        <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
                             <TextField
                                 label="Início das Inscrições"
                                 type="datetime-local"
@@ -688,7 +716,7 @@ export default function EventosPage() {
                             Período de Realização
                         </Typography>
 
-                        <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
                             <TextField
                                 label="Início do Evento"
                                 type="datetime-local"
@@ -794,7 +822,7 @@ export default function EventosPage() {
                                     Configuração de Recebimento e Valor
                                 </Typography>
                                 
-                                <Box sx={{ display: 'flex', gap: 2 }}>
+                                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
                                     <TextField
                                         label="Valor da Inscrição"
                                         fullWidth
@@ -852,7 +880,7 @@ export default function EventosPage() {
                                     }
                                 />
 
-                                <Box sx={{ display: 'flex', gap: 2 }}>
+                                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
                                     <TextField
                                         label="Nome do Beneficiário"
                                         fullWidth

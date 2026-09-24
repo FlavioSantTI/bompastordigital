@@ -22,9 +22,11 @@ import {
     Favorite,
     CheckCircle,
     ColorLens,
+    Close,
 } from '@mui/icons-material';
 import { createCirculo, updateCirculo, buscarCasalCoordenador, type CasalCoordenadorOpcao } from '../../services/circuloService';
 import type { Circulo } from '../../types';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface CirculoDialogProps {
     open: boolean;
@@ -54,6 +56,7 @@ export default function CirculoDialog({
     onClose,
     onSave,
 }: CirculoDialogProps) {
+    const isMobile = useIsMobile();
     const isEdit = !!circulo;
 
     const [nome, setNome] = useState('');
@@ -164,18 +167,21 @@ export default function CirculoDialog({
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-            <DialogTitle sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box
-                    sx={{
-                        width: 14,
-                        height: 14,
-                        borderRadius: '50%',
-                        bgcolor: cor,
-                        display: 'inline-block',
-                    }}
-                />
-                {isEdit ? 'Editar Círculo' : 'Novo Círculo'}
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth fullScreen={isMobile}>
+            <DialogTitle sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box
+                        sx={{
+                            width: 14,
+                            height: 14,
+                            borderRadius: '50%',
+                            bgcolor: cor,
+                            display: 'inline-block',
+                        }}
+                    />
+                    {isEdit ? 'Editar Círculo' : 'Novo Círculo'}
+                </Box>
+                <IconButton onClick={onClose} size="small"><Close /></IconButton>
             </DialogTitle>
 
             <DialogContent dividers>

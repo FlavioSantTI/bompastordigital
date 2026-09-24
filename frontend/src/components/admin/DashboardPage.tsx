@@ -23,6 +23,7 @@ import {
     AccordionSummary,
     AccordionDetails,
 } from '@mui/material';
+import { useIsMobile, useIsSmallMobile } from '../../hooks/useIsMobile';
 import {
     Church,
     Event as EventIcon,
@@ -174,6 +175,8 @@ const exportElementAsPng = async (element: HTMLElement, filename: string) => {
 
 export default function DashboardPage() {
     const theme = useTheme();
+    const isMobile = useIsMobile();
+    const isSmallMobile = useIsSmallMobile();
 
     // Refs para snapshot de gráficos
     const refPieStatus = useRef<HTMLDivElement>(null);
@@ -595,112 +598,117 @@ export default function DashboardPage() {
             {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
             {/* ==================== CARDS DE ESTATÍSTICAS ==================== */}
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 4 }}>
-                <Box sx={{ flex: '1 1 180px' }}>
+            <Box sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(5, 1fr)' }, 
+                gap: { xs: 1.5, sm: 2, md: 3 }, 
+                mb: 4 
+            }}>
+                <Box>
                     <Card sx={{
                         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                         color: 'white',
                         height: '100%'
                     }}>
-                        <CardContent>
+                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Box>
-                                    <Typography variant="h3" fontWeight="bold">
+                                    <Typography variant={isSmallMobile ? "h4" : "h3"} fontWeight="bold">
                                         {stats.totalDioceses}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                    <Typography variant="body2" sx={{ opacity: 0.9, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                         Dioceses
                                     </Typography>
                                 </Box>
-                                <Church sx={{ fontSize: 48, opacity: 0.3 }} />
+                                <Church sx={{ fontSize: { xs: 32, sm: 48 }, opacity: 0.3 }} />
                             </Box>
                         </CardContent>
                     </Card>
                 </Box>
 
-                <Box sx={{ flex: '1 1 180px' }}>
+                <Box>
                     <Card sx={{
                         background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
                         color: 'white',
                         height: '100%'
                     }}>
-                        <CardContent>
+                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Box>
-                                    <Typography variant="h3" fontWeight="bold">
+                                    <Typography variant={isSmallMobile ? "h4" : "h3"} fontWeight="bold">
                                         {stats.totalEventos}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                    <Typography variant="body2" sx={{ opacity: 0.9, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                         Eventos
                                     </Typography>
                                 </Box>
-                                <EventIcon sx={{ fontSize: 48, opacity: 0.3 }} />
+                                <EventIcon sx={{ fontSize: { xs: 32, sm: 48 }, opacity: 0.3 }} />
                             </Box>
                         </CardContent>
                     </Card>
                 </Box>
 
-                <Box sx={{ flex: '1 1 180px' }}>
+                <Box>
                     <Card sx={{
                         background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
                         color: 'white',
                         height: '100%'
                     }}>
-                        <CardContent>
+                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Box>
-                                    <Typography variant="h3" fontWeight="bold">
+                                    <Typography variant={isSmallMobile ? "h4" : "h3"} fontWeight="bold">
                                         {stats.totalInscricoes}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                    <Typography variant="body2" sx={{ opacity: 0.9, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                         Inscrições
                                     </Typography>
                                 </Box>
-                                <People sx={{ fontSize: 48, opacity: 0.3 }} />
+                                <People sx={{ fontSize: { xs: 32, sm: 48 }, opacity: 0.3 }} />
                             </Box>
                         </CardContent>
                     </Card>
                 </Box>
 
-                <Box sx={{ flex: '1 1 180px' }}>
+                <Box>
                     <Card sx={{
                         background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
                         color: 'white',
                         height: '100%'
                     }}>
-                        <CardContent>
+                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Box>
-                                    <Typography variant="h3" fontWeight="bold">
+                                    <Typography variant={isSmallMobile ? "h4" : "h3"} fontWeight="bold">
                                         {stats.eventosAbertos}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                    <Typography variant="body2" sx={{ opacity: 0.9, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                         Ativos / Em Breve
                                     </Typography>
                                 </Box>
-                                <CheckCircle sx={{ fontSize: 48, opacity: 0.3 }} />
+                                <CheckCircle sx={{ fontSize: { xs: 32, sm: 48 }, opacity: 0.3 }} />
                             </Box>
                         </CardContent>
                     </Card>
                 </Box>
 
-                <Box sx={{ flex: '1 1 180px' }}>
+                <Box sx={{ gridColumn: { xs: 'span 2', sm: 'span 1' } }}>
                     <Card sx={{
                         background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
                         color: 'white',
                         height: '100%'
                     }}>
-                        <CardContent>
+                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Box>
-                                    <Typography variant="h3" fontWeight="bold">
+                                    <Typography variant={isSmallMobile ? "h4" : "h3"} fontWeight="bold">
                                         {stats.totalPessoas}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                                    <Typography variant="body2" sx={{ opacity: 0.9, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                         Pessoas Inscritas
                                     </Typography>
                                 </Box>
-                                <PersonAdd sx={{ fontSize: 48, opacity: 0.3 }} />
+                                <PersonAdd sx={{ fontSize: { xs: 32, sm: 48 }, opacity: 0.3 }} />
                             </Box>
                         </CardContent>
                     </Card>
@@ -732,8 +740,8 @@ export default function DashboardPage() {
                     ) : (
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, width: '100%' }}>
                             {/* Pizza: Confirmados x Pendentes */}
-                            <Box sx={{ flex: '1 1 380px', minWidth: 0 }}>
-                                <Paper sx={{ p: 3, height: '100%' }} ref={refPieStatus}>
+                            <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 380px' }, minWidth: 0 }}>
+                                <Paper sx={{ p: { xs: 2, sm: 3 }, height: '100%' }} ref={refPieStatus}>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                                         <PieChartIcon color="primary" />
                                         <Typography variant="h6" fontWeight="bold" sx={{ flex: 1 }}>
@@ -761,8 +769,8 @@ export default function DashboardPage() {
                                                     cx="50%"
                                                     cy="50%"
                                                     labelLine={false}
-                                                    label={renderCustomLabel}
-                                                    outerRadius={100}
+                                                    label={isMobile ? false : renderCustomLabel}
+                                                    outerRadius={isMobile ? 80 : 100}
                                                     fill="#8884d8"
                                                     dataKey="value"
                                                     animationBegin={0}
@@ -802,8 +810,8 @@ export default function DashboardPage() {
                             </Box>
 
                             {/* Pizza: Casais x Individuais */}
-                            <Box sx={{ flex: '1 1 380px', minWidth: 0 }}>
-                                <Paper sx={{ p: 3, height: '100%' }} ref={refPieTipo}>
+                            <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 380px' }, minWidth: 0 }}>
+                                <Paper sx={{ p: { xs: 2, sm: 3 }, height: '100%' }} ref={refPieTipo}>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                                         <PieChartIcon color="secondary" />
                                         <Typography variant="h6" fontWeight="bold" sx={{ flex: 1 }}>
@@ -831,8 +839,8 @@ export default function DashboardPage() {
                                                     cx="50%"
                                                     cy="50%"
                                                     labelLine={false}
-                                                    label={renderCustomLabel}
-                                                    outerRadius={100}
+                                                    label={isMobile ? false : renderCustomLabel}
+                                                    outerRadius={isMobile ? 80 : 100}
                                                     fill="#8884d8"
                                                     dataKey="value"
                                                     animationBegin={0}

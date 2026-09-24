@@ -371,14 +371,14 @@ export default function AtividadeDialog({
                 }}
                 PaperProps={{
                     sx: {
-                        width: { xs: '95%', sm: 450 },
+                        width: { xs: '100%', sm: 450 },
                         m: { xs: 0, sm: 2 },
                         borderRadius: { xs: 0, sm: 2 },
                         p: 0,
                         display: 'flex',
                         flexDirection: 'column',
-                        height: 'auto',
-                        maxHeight: 'calc(100% - 32px)',
+                        height: { xs: '100%', sm: 'auto' },
+                        maxHeight: { xs: '100%', sm: 'calc(100% - 32px)' },
                         boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
                         overflow: 'hidden',
                         zIndex: 3001,

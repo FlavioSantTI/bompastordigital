@@ -116,6 +116,21 @@ const theme = createTheme({
                     fontWeight: 600,
                 }
             }
+        },
+        MuiTableContainer: {
+            styleOverrides: {
+                root: {
+                    overflowX: 'auto',
+                    maxWidth: '100%',
+                },
+            },
+        },
+        MuiDialog: {
+            styleOverrides: {
+                paper: {
+                    maxWidth: 'calc(100% - 32px)',
+                },
+            },
         }
     },
 }, ptBR);

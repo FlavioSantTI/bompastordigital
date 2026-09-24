@@ -6,11 +6,13 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, Box, Typography,
     CircularProgress,
+    IconButton,
 } from '@mui/material';
 import { Download, Print, Close } from '@mui/icons-material';
 import { PDFViewer, PDFDownloadLink, pdf } from '@react-pdf/renderer';
 import CrachaTemplate, { type CrachaData } from './CrachaTemplate';
 import * as XLSX from 'xlsx';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface CrachaPreviewDialogProps {
     open: boolean;
@@ -23,6 +25,7 @@ export default function CrachaPreviewDialog({
     participantes,
     onClose,
 }: CrachaPreviewDialogProps) {
+    const isMobile = useIsMobile();
     const eventoNome = participantes[0]?.evento ?? 'crachas';
     const nomeArquivo = `crachas_${eventoNome.replace(/\s+/g, '_').toLowerCase()}.pdf`;
     const exportToExcel = () => {
@@ -50,7 +53,7 @@ export default function CrachaPreviewDialog({
 
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+        <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth fullScreen={isMobile}>
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
                     <Typography variant="h6">Pré-visualização dos Crachás</Typography>
@@ -59,6 +62,9 @@ export default function CrachaPreviewDialog({
                         ({participantes.length} participante{participantes.length !== 1 ? 's' : ''})
                     </Typography>
                 </Box>
+                <IconButton onClick={onClose} edge="end" aria-label="fechar">
+                    <Close />
+                </IconButton>
             </DialogTitle>
 
             <DialogContent sx={{ p: 0, bgcolor: '#F5F5F5', height: '70vh' }}>
@@ -73,7 +79,7 @@ export default function CrachaPreviewDialog({
                 )}
             </DialogContent>
 
-            <DialogActions sx={{ p: 2, gap: 1 }}>
+            <DialogActions sx={{ p: 2, gap: 1, flexWrap: 'wrap' }}>
                 <Button onClick={onClose} startIcon={<Close />} color="inherit">
                     Fechar
                 </Button>

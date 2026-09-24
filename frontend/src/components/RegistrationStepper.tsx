@@ -6,7 +6,9 @@ import {
     StepLabel,
     Button,
     Box,
-    CircularProgress
+    CircularProgress,
+    LinearProgress,
+    Typography
 } from '@mui/material';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -300,24 +302,53 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
     return (
         <FormProvider {...methods}>
             <Box sx={{ width: '100%' }}>
-                <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-                    {steps.map((label) => (
-                        <Step key={label}>
-                            <StepLabel>{label}</StepLabel>
-                        </Step>
-                    ))}
-                </Stepper>
+                {/* Mobile Step Indicator (< sm) */}
+                <Box sx={{ display: { xs: 'block', sm: 'none' }, mb: 3, p: 2, bgcolor: '#fbfbfb', borderRadius: 2, border: '1px solid #f0f0f0' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                            Etapa {activeStep + 1} de {steps.length}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                            {Math.round(((activeStep + 1) / steps.length) * 100)}%
+                        </Typography>
+                    </Box>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1.5, color: '#222' }}>
+                        {steps[activeStep]}
+                    </Typography>
+                    <LinearProgress 
+                        variant="determinate" 
+                        value={((activeStep + 1) / steps.length) * 100} 
+                        sx={{ 
+                            height: 6, 
+                            borderRadius: 3, 
+                            bgcolor: 'rgba(0,0,0,0.06)',
+                            '& .MuiLinearProgress-bar': { borderRadius: 3, bgcolor: '#FF921C' } 
+                        }} 
+                    />
+                </Box>
 
-                <Box sx={{ minHeight: 400 }}>
+                {/* Desktop/Tablet Stepper (>= sm) */}
+                <Box sx={{ display: { xs: 'none', sm: 'block' }, mb: 4 }}>
+                    <Stepper activeStep={activeStep} alternativeLabel>
+                        {steps.map((label) => (
+                            <Step key={label}>
+                                <StepLabel>{label}</StepLabel>
+                            </Step>
+                        ))}
+                    </Stepper>
+                </Box>
+
+                <Box sx={{ minHeight: { xs: 320, sm: 400 } }}>
                     {renderStepContent(activeStep)}
                 </Box>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4, gap: 2 }}>
                     {!isFinalStep ? (
                         <Button
                             disabled={loading || (activeStep === 0 && !onCancel)}
                             onClick={handleBack}
                             variant="outlined"
+                            sx={{ minWidth: { xs: 100, sm: 120 } }}
                         >
                             Voltar
                         </Button>
@@ -328,6 +359,7 @@ export default function RegistrationStepper({ onSuccess, onCancel }: Registratio
                         variant="contained"
                         onClick={handleNext}
                         disabled={loading}
+                        sx={{ minWidth: { xs: 120, sm: 140 } }}
                     >
                         {loading ? <CircularProgress size={24} color="inherit" /> :
                             isFinalStep ? 'Voltar ao Início' : 'Próximo'}

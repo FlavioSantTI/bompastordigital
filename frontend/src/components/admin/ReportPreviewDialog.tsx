@@ -2,7 +2,8 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, Box, Typography,
     CircularProgress,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Paper
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Paper,
+    IconButton
 } from '@mui/material';
 import { useState } from 'react';
 import { Download, Close, CloudUpload } from '@mui/icons-material';
@@ -13,6 +14,7 @@ import BadgeRenderer from './badges/templates/BadgeRenderer';
 import { type CanonicalBadgePayload, type BadgeLayoutConfig, DEFAULT_BADGE_LAYOUT } from '../../types/badge';
 import { formatarVinculoConjuge } from '../../services/badgeAdapters';
 import { type DadosExportacao, exportService } from '../../services/exportService';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface ReportPreviewDialogProps {
     open: boolean;
@@ -29,6 +31,7 @@ export default function ReportPreviewDialog({
     tituloEvento,
     onClose,
 }: ReportPreviewDialogProps) {
+    const isMobile = useIsMobile();
     const [isExportingXLS, setIsExportingXLS] = useState(false);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -139,7 +142,7 @@ export default function ReportPreviewDialog({
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+        <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth fullScreen={isMobile}>
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
                     <Typography variant="h6">
@@ -149,6 +152,9 @@ export default function ReportPreviewDialog({
                         {tituloEvento} ({dados.length} registro{dados.length !== 1 ? 's' : ''})
                     </Typography>
                 </Box>
+                <IconButton onClick={onClose} edge="end" aria-label="fechar">
+                    <Close />
+                </IconButton>
             </DialogTitle>
 
             <DialogContent sx={{ p: 0, bgcolor: '#F5F5F5', height: '75vh' }}>

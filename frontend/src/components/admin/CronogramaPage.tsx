@@ -457,11 +457,11 @@ export default function CronogramaPage() {
     return (
         <Box>
             {/* Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography variant="h4" fontWeight="bold">
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 1.5, mb: 1 }}>
+                <Typography variant="h4" fontWeight="bold" sx={{ fontSize: { xs: '1.4rem', sm: '2.125rem' } }}>
                     📅 Cronograma do Evento
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                     {selectedEventoId > 0 && (
                         <>
                             <Tooltip title="Exportar Agenda em PDF">
@@ -521,7 +521,7 @@ export default function CronogramaPage() {
                     size="small"
                     value={selectedEventoId || ''}
                     onChange={(e) => handleSelectEvento(Number(e.target.value))}
-                    sx={{ minWidth: 300 }}
+                    sx={{ minWidth: { xs: '100%', sm: 300 }, flexGrow: { xs: 1, sm: 0 } }}
                 >
                     {eventos.map((evt) => (
                         <MenuItem key={evt.id} value={evt.id}>
@@ -714,6 +714,10 @@ export default function CronogramaPage() {
                                                 width: 70,
                                                 minWidth: 70,
                                                 bgcolor: `${theme.palette.primary.dark} !important`,
+                                                position: 'sticky',
+                                                left: 0,
+                                                top: 0,
+                                                zIndex: 3,
                                             }}
                                         >
                                             Horário

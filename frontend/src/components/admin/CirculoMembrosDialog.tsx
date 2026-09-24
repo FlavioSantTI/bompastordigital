@@ -41,6 +41,7 @@ import {
     type InscricaoDisponivel,
 } from '../../services/circuloService';
 import type { Circulo } from '../../types';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface CirculoMembrosDialogProps {
     open: boolean;
@@ -57,6 +58,7 @@ export default function CirculoMembrosDialog({
     onClose,
     onSave,
 }: CirculoMembrosDialogProps) {
+    const isMobile = useIsMobile();
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -211,7 +213,7 @@ export default function CirculoMembrosDialog({
     if (!circulo) return null;
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
+        <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth fullScreen={isMobile}>
             <DialogTitle
                 sx={{
                     fontWeight: 'bold',

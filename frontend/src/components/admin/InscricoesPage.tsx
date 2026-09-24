@@ -24,7 +24,7 @@ import {
     Tooltip,
     ListSubheader,
 } from '@mui/material';
-import { Visibility, Delete, FilterList, EditNote, AttachMoney, Add, RocketLaunch, Warning } from '@mui/icons-material';
+import { Visibility, Delete, FilterList, EditNote, AttachMoney, Add, RocketLaunch, Warning, Close } from '@mui/icons-material';
 import EditInscricaoDialog from './EditInscricaoDialog';
 import PagamentoDialog from './PagamentoDialog';
 import AdminInscricaoDialog from './AdminInscricaoDialog';
@@ -33,6 +33,7 @@ import type { Promovido } from './PromoverReservaDialog';
 import { getResumoReservas, getFilaEspera, promoverReservasLote } from '../../services/reservaService';
 import type { ResumoReservas } from '../../services/reservaService';
 import { supabase } from '../../lib/supabase';
+import { useIsMobile, useIsSmallMobile } from '../../hooks/useIsMobile';
 
 interface Pessoa {
     id: string;
@@ -76,6 +77,8 @@ interface Evento {
 }
 
 export default function InscricoesPage() {
+    const isMobile = useIsMobile();
+    const isSmallMobile = useIsSmallMobile();
     const [inscricoes, setInscricoes] = useState<Inscricao[]>([]);
     const [eventos, setEventos] = useState<Evento[]>([]);
     const [loading, setLoading] = useState(true);
@@ -443,18 +446,31 @@ export default function InscricoesPage() {
 
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h4" fontWeight="bold">
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: { xs: 'flex-start', md: 'center' }, 
+                flexDirection: { xs: 'column', md: 'row' }, 
+                gap: 2, 
+                mb: 2 
+            }}>
+                <Typography variant={isSmallMobile ? "h5" : "h4"} fontWeight="bold">
                     Painel de Inscrições
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <Box sx={{ 
+                    display: 'flex', 
+                    gap: 1.5, 
+                    alignItems: 'center', 
+                    flexWrap: 'wrap', 
+                    width: { xs: '100%', md: 'auto' } 
+                }}>
                     <TextField
                         select
                         size="small"
                         label="Filtrar por Evento"
                         value={filtroEvento === -1 ? '' : filtroEvento}
                         onChange={(e) => setFiltroEvento(Number(e.target.value))}
-                        sx={{ minWidth: 220 }}
+                        sx={{ minWidth: { xs: '100%', sm: 220 }, flex: { xs: 1, md: 'none' } }}
                         InputProps={{
                             startAdornment: <FilterList sx={{ mr: 1 }} />
                         }}
@@ -498,7 +514,7 @@ export default function InscricoesPage() {
                         variant="contained"
                         startIcon={<Add />}
                         onClick={() => setOpenAdminDialog(true)}
-                        sx={{ whiteSpace: 'nowrap', px: 3 }}
+                        sx={{ whiteSpace: 'nowrap', px: 3, width: { xs: '100%', sm: 'auto' } }}
                     >
                         Nova Inscrição
                     </Button>
@@ -643,13 +659,13 @@ export default function InscricoesPage() {
             )}
 
             {/* Barra de busca e ordenação */}
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 3, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', mb: 3, flexWrap: 'wrap' }}>
                 <TextField
                     size="small"
                     placeholder="Buscar por nome ou cidade..."
                     value={termoBusca}
                     onChange={(e) => setTermoBusca(e.target.value)}
-                    sx={{ flexGrow: 1, minWidth: 220 }}
+                    sx={{ flexGrow: 1, minWidth: { xs: '100%', sm: 220 } }}
                 />
                 <TextField
                     select
@@ -657,7 +673,7 @@ export default function InscricoesPage() {
                     label="Status"
                     value={filtroStatus}
                     onChange={(e) => setFiltroStatus(e.target.value)}
-                    sx={{ minWidth: 150 }}
+                    sx={{ minWidth: { xs: 'calc(50% - 6px)', sm: 150 }, flexGrow: { xs: 1, sm: 0 } }}
                 >
                     <MenuItem value="">Todos</MenuItem>
                     <MenuItem value="pendente">Pendente</MenuItem>
@@ -670,7 +686,7 @@ export default function InscricoesPage() {
                     label="Ordenar por"
                     value={ordenacao}
                     onChange={(e) => setOrdenacao(e.target.value)}
-                    sx={{ minWidth: 180 }}
+                    sx={{ minWidth: { xs: 'calc(50% - 6px)', sm: 180 }, flexGrow: { xs: 1, sm: 0 } }}
                 >
                     <MenuItem value="recentes">Mais recentes</MenuItem>
                     <MenuItem value="antigos">Mais antigos</MenuItem>
@@ -688,18 +704,18 @@ export default function InscricoesPage() {
                     <CircularProgress />
                 </Box>
             ) : (
-                <TableContainer component={Paper}>
-                    <Table>
+                <TableContainer component={Paper} sx={{ overflowX: 'auto', width: '100%' }}>
+                    <Table size={isMobile ? "small" : "medium"}>
                         <TableHead>
                             <TableRow>
                                 {filtroStatus === 'reserva' && <TableCell align="center" width="60"><strong>#</strong></TableCell>}
-                                <TableCell><strong>Tipo</strong></TableCell>
+                                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}><strong>Tipo</strong></TableCell>
                                 <TableCell><strong>Pessoa 1</strong></TableCell>
-                                <TableCell><strong>Pessoa 2</strong></TableCell>
-                                <TableCell><strong>Contato</strong></TableCell>
-                                <TableCell><strong>Localização</strong></TableCell>
+                                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}><strong>Pessoa 2</strong></TableCell>
+                                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}><strong>Contato</strong></TableCell>
+                                <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}><strong>Localização</strong></TableCell>
                                 <TableCell><strong>Status</strong></TableCell>
-                                <TableCell sx={{ whiteSpace: 'nowrap' }}><strong>Data Inscr.</strong></TableCell>
+                                <TableCell sx={{ whiteSpace: 'nowrap', display: { xs: 'none', md: 'table-cell' } }}><strong>Data Inscr.</strong></TableCell>
                                 <TableCell align="right"><strong>Ações</strong></TableCell>
                             </TableRow>
                         </TableHead>
@@ -735,7 +751,7 @@ export default function InscricoesPage() {
                                                     />
                                                 </TableCell>
                                             )}
-                                            <TableCell>
+                                            <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                                             <Chip
                                                 label={inscricao.tipo === 'individual' ? 'Individual' : 'Casal'}
                                                 color={inscricao.tipo === 'individual' ? 'info' : 'default'}
@@ -747,13 +763,18 @@ export default function InscricoesPage() {
                                             <Typography variant="body2" fontWeight={inscricao.tipo === 'individual' ? 'bold' : 'normal'}>
                                                 {inscricao.esposo?.nome || (inscricao.tipo === 'individual' ? 'Não informado' : '-')}
                                             </Typography>
+                                            {inscricao.tipo !== 'individual' && inscricao.esposa?.nome && (
+                                                <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'block', md: 'none' } }}>
+                                                    & {inscricao.esposa.nome}
+                                                </Typography>
+                                            )}
                                             {inscricao.esposo?.cpf && (
-                                                <Typography variant="caption" color="text.secondary">
+                                                <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
                                                     {formatCPF(inscricao.esposo.cpf)}
                                                 </Typography>
                                             )}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                                             {inscricao.tipo === 'individual' ? (
                                                 <Typography variant="caption" color="text.secondary">---</Typography>
                                             ) : (
@@ -769,7 +790,7 @@ export default function InscricoesPage() {
                                                 </>
                                             )}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                                             {inscricao.esposo?.email && (
                                                 <Typography variant="body2" fontSize="0.85rem">
                                                     📧 {inscricao.esposo.email}
@@ -781,7 +802,7 @@ export default function InscricoesPage() {
                                                 </Typography>
                                             )}
                                         </TableCell>
-                                        <TableCell sx={{ minWidth: 200, maxWidth: 300 }}>
+                                        <TableCell sx={{ minWidth: 200, maxWidth: 300, display: { xs: 'none', lg: 'table-cell' } }}>
                                             <Typography variant="body2" fontWeight="medium" noWrap title={inscricao.dados_conjuntos?.cidade || inscricao.dados_conjuntos?.endereco || '-'}>
                                                 📍 {inscricao.dados_conjuntos?.cidade || inscricao.dados_conjuntos?.endereco || '-'}
                                             </Typography>
@@ -813,39 +834,43 @@ export default function InscricoesPage() {
                                                 />
                                             </Tooltip>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                                             {formatDate(inscricao.created_at)}
                                         </TableCell>
-                                        <TableCell align="right">
+                                        <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                                             <IconButton
+                                                size="small"
                                                 color="primary"
                                                 onClick={() => handleViewDetails(inscricao)}
                                                 title="Ver detalhes"
                                             >
-                                                <Visibility />
+                                                <Visibility fontSize={isSmallMobile ? "small" : "medium"} />
                                             </IconButton>
 
                                             <IconButton
+                                                size="small"
                                                 color="success"
                                                 onClick={() => handleOpenPagamento(inscricao)}
                                                 title="Gerenciar Pagamento e Comprovantes"
                                             >
-                                                <AttachMoney />
+                                                <AttachMoney fontSize={isSmallMobile ? "small" : "medium"} />
                                             </IconButton>
 
                                             <IconButton
+                                                size="small"
                                                 color="info"
                                                 onClick={() => handleFullEdit(inscricao)}
                                                 title="Editar todos os dados"
                                             >
-                                                <EditNote />
+                                                <EditNote fontSize={isSmallMobile ? "small" : "medium"} />
                                             </IconButton>
                                             <IconButton
+                                                size="small"
                                                 color="error"
                                                 onClick={() => handleDeleteRequest(inscricao)}
                                                 title="Excluir inscrição"
                                             >
-                                                <Delete />
+                                                <Delete fontSize={isSmallMobile ? "small" : "medium"} />
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
@@ -890,9 +915,14 @@ export default function InscricoesPage() {
             </Dialog>
 
             {/* Dialog de Detalhes */}
-            <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-                <DialogTitle>
-                    Detalhes da Inscrição
+            <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth fullScreen={isMobile}>
+                <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="h6" fontWeight="bold">Detalhes da Inscrição</Typography>
+                    {isMobile && (
+                        <IconButton onClick={handleCloseDialog} edge="end" aria-label="fechar">
+                            <Close />
+                        </IconButton>
+                    )}
                 </DialogTitle>
                 <DialogContent>
                     {selectedInscricao && (

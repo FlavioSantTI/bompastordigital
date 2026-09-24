@@ -240,19 +240,19 @@ export function PresencaQRCodePage() {
           <div className="flex-1 flex flex-col items-center">
             
             {/* Visualização na Tela (Preview) */}
-            <div className="print:hidden w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center justify-center">
-              <div className="text-center mb-8">
-                <h2 className="text-4xl font-extrabold text-blue-900 tracking-tight mb-2">Registro de Presença</h2>
-                <p className="text-gray-500 text-xl font-medium">Aponte a câmera do seu celular para validar</p>
+            <div className="print:hidden w-full bg-white p-4 sm:p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center justify-center">
+              <div className="text-center mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-4xl font-extrabold text-blue-900 tracking-tight mb-2">Registro de Presença</h2>
+                <p className="text-gray-500 text-sm sm:text-xl font-medium">Aponte a câmera do seu celular para validar</p>
               </div>
 
-              <div ref={qrRef} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+              <div ref={qrRef} className="bg-white p-4 sm:p-6 rounded-3xl border border-gray-200 shadow-sm max-w-full overflow-hidden">
                 <QRCodeCanvas 
                   value={urlWhatsapp} 
-                  size={300}
+                  size={260}
                   level="H"
                   includeMargin={true}
-                  className="mx-auto"
+                  className="mx-auto max-w-full h-auto"
                 />
               </div>
               

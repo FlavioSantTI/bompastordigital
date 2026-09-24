@@ -164,19 +164,19 @@ export default function PresencaPublica() {
                             <Table stickyHeader aria-label="tabela de presença">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell sx={{ bgcolor: '#fff', fontWeight: 800, color: '#FF921C', fontSize: '0.85rem', textTransform: 'uppercase' }}>Participante</TableCell>
-                                        <TableCell sx={{ bgcolor: '#fff', fontWeight: 800, color: '#FF921C', fontSize: '0.85rem', textTransform: 'uppercase' }}>Turno</TableCell>
-                                        <TableCell sx={{ bgcolor: '#fff', fontWeight: 800, color: '#FF921C', fontSize: '0.85rem', textTransform: 'uppercase' }}>Data</TableCell>
-                                        <TableCell sx={{ bgcolor: '#fff', fontWeight: 800, color: '#FF921C', fontSize: '0.85rem', textTransform: 'uppercase' }}>Chegada</TableCell>
-                                        <TableCell sx={{ bgcolor: '#fff', fontWeight: 800, color: '#FF921C', fontSize: '0.85rem', textTransform: 'uppercase' }}>Diocese</TableCell>
-                                        <TableCell sx={{ bgcolor: '#fff', fontWeight: 800, color: '#FF921C', fontSize: '0.85rem', textTransform: 'uppercase' }}>Cidade</TableCell>
+                                        <TableCell sx={{ bgcolor: '#fff', fontWeight: 800, color: '#FF921C', fontSize: { xs: '0.75rem', sm: '0.85rem' }, textTransform: 'uppercase' }}>Participante</TableCell>
+                                        <TableCell sx={{ bgcolor: '#fff', fontWeight: 800, color: '#FF921C', fontSize: { xs: '0.75rem', sm: '0.85rem' }, textTransform: 'uppercase' }}>Turno</TableCell>
+                                        <TableCell sx={{ bgcolor: '#fff', fontWeight: 800, color: '#FF921C', fontSize: { xs: '0.75rem', sm: '0.85rem' }, textTransform: 'uppercase', display: { xs: 'none', sm: 'table-cell' } }}>Data</TableCell>
+                                        <TableCell sx={{ bgcolor: '#fff', fontWeight: 800, color: '#FF921C', fontSize: { xs: '0.75rem', sm: '0.85rem' }, textTransform: 'uppercase' }}>Chegada</TableCell>
+                                        <TableCell sx={{ bgcolor: '#fff', fontWeight: 800, color: '#FF921C', fontSize: { xs: '0.75rem', sm: '0.85rem' }, textTransform: 'uppercase', display: { xs: 'none', md: 'table-cell' } }}>Diocese</TableCell>
+                                        <TableCell sx={{ bgcolor: '#fff', fontWeight: 800, color: '#FF921C', fontSize: { xs: '0.75rem', sm: '0.85rem' }, textTransform: 'uppercase', display: { xs: 'none', sm: 'table-cell' } }}>Cidade</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {(() => {
                                         const dadosFiltrados = tabIndex === 0 
                                             ? dados 
-                                            : dados.filter(d => d.data_evento.split('T')[0] === datasDisponiveis[tabIndex - 1]);
+                                             : dados.filter(d => d.data_evento.split('T')[0] === datasDisponiveis[tabIndex - 1]);
 
                                         if (dadosFiltrados.length === 0) {
                                             return (
@@ -192,24 +192,30 @@ export default function PresencaPublica() {
                                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                             .map((row, idx) => (
                                                 <TableRow key={idx} hover sx={{ '&:nth-of-type(even)': { bgcolor: '#fcfcfc' } }}>
-                                                    <TableCell sx={{ fontWeight: 'bold', color: '#333' }}>{row.participante}</TableCell>
+                                                    <TableCell sx={{ fontWeight: 'bold', color: '#333' }}>
+                                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{row.participante}</Typography>
+                                                        <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'block', sm: 'none' } }}>
+                                                            {new Date(row.data_evento).toLocaleDateString('pt-BR')} • {row.cidade_inscricao || row.diocese || ''}
+                                                        </Typography>
+                                                    </TableCell>
                                                     <TableCell>
                                                         <Chip 
                                                             label={row.turno} 
                                                             size="small" 
                                                             sx={{ 
                                                                 fontWeight: 'bold',
+                                                                fontSize: { xs: '0.7rem', sm: '0.8125rem' },
                                                                 bgcolor: row.turno === 'MANHA' ? '#e3f2fd' : row.turno === 'TARDE' ? '#fff3e0' : '#f3e5f5',
                                                                 color: row.turno === 'MANHA' ? '#1565c0' : row.turno === 'TARDE' ? '#e65100' : '#7b1fa2'
                                                             }} 
                                                         />
                                                     </TableCell>
-                                                    <TableCell>{new Date(row.data_evento).toLocaleDateString('pt-BR')}</TableCell>
-                                                    <TableCell sx={{ color: '#2e7d32', fontWeight: 'medium' }}>
+                                                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{new Date(row.data_evento).toLocaleDateString('pt-BR')}</TableCell>
+                                                    <TableCell sx={{ color: '#2e7d32', fontWeight: 'medium', fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                                         {row.hora_chegada ? new Date(row.hora_chegada).toLocaleTimeString('pt-BR') : '-'}
                                                     </TableCell>
-                                                    <TableCell color="text.secondary">{row.diocese}</TableCell>
-                                                    <TableCell color="text.secondary">{row.cidade_inscricao}</TableCell>
+                                                    <TableCell color="text.secondary" sx={{ display: { xs: 'none', md: 'table-cell' } }}>{row.diocese}</TableCell>
+                                                    <TableCell color="text.secondary" sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{row.cidade_inscricao}</TableCell>
                                                 </TableRow>
                                             ));
                                     })()}

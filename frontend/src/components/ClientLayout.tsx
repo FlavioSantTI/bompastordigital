@@ -35,7 +35,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
                                     mr: 2
                                 }}
                             />
-                            <Typography variant="h6" component="div" sx={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, color: '#1E3A5F' }}>
+                            <Typography variant="h6" component="div" sx={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, color: '#1E3A5F', fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                                 BOM PASTOR DIGITAL
                             </Typography>
                         </Box>
@@ -69,7 +69,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
                                         textTransform: 'none',
                                         fontWeight: 600,
                                         borderRadius: 2,
-                                        px: 2
+                                        px: { xs: 1.5, sm: 2 }
                                     }}
                                 >
                                     Sair
@@ -81,8 +81,8 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
             </AppBar>
 
             {/* Conteúdo Principal */}
-            <Box component="main" sx={{ flexGrow: 1, py: 4 }}>
-                <Container maxWidth="md">
+            <Box component="main" sx={{ flexGrow: 1, py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 0 } }}>
+                <Container maxWidth="md" disableGutters sx={{ px: { xs: 1, sm: 2 } }}>
                     {children}
                 </Container>
             </Box>
@@ -90,7 +90,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
             {/* Footer */}
             <Box component="footer" sx={{ py: 3, textAlign: 'center', bgcolor: 'transparent' }}>
                 <Typography variant="caption" color="text.secondary" component="div">
-                    <strong>© 2026 Bom Pastor Digital</strong> - Versão 7.0.0
+                    <strong>© 2026 Bom Pastor Digital</strong> - Versão 7.1.0
                 </Typography>
                 <Typography variant="caption" color="text.secondary" component="div" sx={{ mt: 0.5, opacity: 0.8 }}>
                     Powered by Flavio Santiago – Consultor IA

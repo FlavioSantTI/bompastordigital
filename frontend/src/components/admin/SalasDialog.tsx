@@ -29,6 +29,7 @@ import {
     updateSala,
     deleteSala,
 } from '../../services/cronogramaService';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface SalasDialogProps {
     open: boolean;
@@ -45,6 +46,7 @@ export default function SalasDialog({
     eventoNome,
     onSalasChanged,
 }: SalasDialogProps) {
+    const isMobile = useIsMobile();
     const [salas, setSalas] = useState<Sala[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -151,7 +153,7 @@ export default function SalasDialog({
     };
 
     return (
-        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth fullScreen={isMobile}>
             <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box sx={{ flex: 1 }}>
                     <Typography variant="h6" fontWeight="bold">
