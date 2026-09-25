@@ -15,6 +15,7 @@ import {
     Chip,
     Avatar,
     InputAdornment,
+    IconButton,
 } from '@mui/material';
 import {
     Palette,
