@@ -3,7 +3,7 @@
  */
 
 /** Versão Global do Sistema */
-export const APP_VERSION = '7.2.2';
+export const APP_VERSION = '7.3.0';
 
 /**
  * Tipo de inscrição
@@ -312,5 +312,34 @@ export interface CirculoMembro {
     inscricao_id: string;
     created_at?: string;
     inscricao?: any;
+}
+
+// ========================================
+// MÓDULO ARQUIVAMENTO DE MÍDIAS E DOCUMENTOS
+// ========================================
+
+export type CategoriaArquivo = 'planilhas' | 'liturgia' | 'foto' | 'video' | 'audio' | 'documentos' | 'cronograma' | 'outros';
+
+export interface EventoArquivo {
+    id: string;
+    evento_id: number;
+    titulo: string;
+    nome_original: string;
+    categoria: CategoriaArquivo;
+    tamanho_bytes: number;
+    mimetype: string;
+    storage_path: string;
+    storage_url: string;
+    criado_por?: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface MidiaQuotaInfo {
+    usadoBytes: number;
+    limiteBytes: number;
+    percentual: number;
+    disponivelBytes: number;
+    status: 'normal' | 'alerta' | 'critico';
 }
 

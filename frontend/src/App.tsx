@@ -24,6 +24,7 @@ import UsuariosPage from './components/admin/UsuariosPage';
 // [DEPRECATED] CrachasPage legado mantido como fallback
 // import CrachasPage from './components/admin/CrachasPage';
 import BadgesPage from './components/admin/badges/BadgesPage';
+import MidiasPage from './components/admin/MidiasPage';
 import EquipesPage from './components/admin/EquipesPage';
 import CirculosPage from './components/admin/CirculosPage';
 import CronogramaPage from './components/admin/CronogramaPage';
@@ -100,6 +101,7 @@ function App() {
                 <Route path="circulos" element={<CirculosPage />} />
                 <Route path="relatorios" element={<ReportsPage />} />
                 <Route path="crachas" element={<BadgesPage />} />
+                <Route path="midias" element={<MidiasPage />} />
                 <Route path="cronograma" element={<CronogramaPage />} />
                 <Route path="palestrantes" element={<PalestrantesPage />} />
                 <Route path="usuarios" element={<UsuariosPage />} />

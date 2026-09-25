@@ -2,18 +2,20 @@
 
 Este documento centraliza o planejamento de funcionalidades e melhorias para as próximas versões do sistema.
 
+## Versões Concluídas
+
+- **v7.3.0**: **Módulo de Arquivamento de Mídias e Documentos** (Upload, QuotaBar de 150 MB, Visualização estilo Windows Explorer Lista/Grade, Download Direto, Edição de Título).
+- **v7.2.0**: **Módulo Unificado de Crachás v2.0 & Relatórios Dinâmicos**.
+- **v7.1.0**: **Responsividade Mobile-First em 100% dos Fluxos**.
+- **v7.0.0**: **Módulo de Círculos & Cores Hexadecimais**.
+- **v6.4.0**: **Gestão de Equipes & Casais Coordenadores**.
+- **v5.0.0**: **Módulo de Palestrantes & Cronograma de Eventos**.
+
 ## Versões Futuras e Planejamento
 
 ### Módulo de Inscrição & Usuário
 - **Edição de Dados**: Permitir que o responsável pela inscrição edite os dados enquanto o status estiver como "Pendente".
 - **Validação de Vínculos**: Refinar a integridade entre as tabelas `inscricoes` e `pessoas` para garantir que o histórico dos participantes seja preservado corretamente entre diferentes eventos.
-
-### Administração Avançada (Próximas Versões)
-- **Crachás**: Geração automatizada de PDFs para impressão de crachás (participantes e equipe).
-- **Montagem de Turmas**: Funcionalidade para agrupar inscritos em turmas ou grupos de trabalho.
-- **Inscrição de Palestrantes**: Cadastro específico para palestrantes com gestão de temas e horários.
-- **Cronograma do Evento**: Ferramenta visual para montagem e exibição do cronograma completo.
-- **Equipe de Apoio**: Gestão de voluntários e atribuição de funções durante o evento.
 
 ### Logística e Comunicação
 - **Gestão de Materiais**: Controle de estoque de insumos necessários para o encontro.
@@ -22,4 +24,4 @@ Este documento centraliza o planejamento de funcionalidades e melhorias para as 
 
 ---
 
-*Última atualização: 10/02/2026*
+*Última atualização: 25/09/2026 (v7.3.0)*

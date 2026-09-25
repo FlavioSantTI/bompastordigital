@@ -36,6 +36,7 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 
 | Versão | Data | Mudanças |
 |--------|----------|----------|
+| **7.3.0** | **25/09/2026** | **Módulo de Arquivamento de Mídias e Documentos**: Repositório central de arquivos por evento no Supabase Storage (`eventos_midias`) com tabela isolada `evento_arquivos`. Controle de cota de 150 MB por evento com barra de status visual colorida (Verde/Laranja/Vermelho) e bloqueio preventivo. Categorização automática (Planilhas, Fotos, Vídeos, Áudios, Documentos) com bloqueio estrito de `.wav`. Visualização dupla alternável inspirada no Windows Explorer (Lista Detalhada padrão + Mini-Cards horizontais). Ações de download direto para o computador, edição rápida de título no banco, visualização em nova aba e exclusão segura. Acesso restrito a administradores e coordenadores (`/admin/midias`). |
 | **7.2.2** | **24/09/2026** | **Hotfix Mobile & Refatoração da Lista de Presença**: Correção crítica de importação no mobile (`IconButton` em Círculos), atualização e padronização global dos rótulos de versão para `7.2.2`. Conversão do relatório de "Lista por Diocese" para "Relação Geral em Retrato" sem agrupamento e com cabeçalho limpo. |
 | **7.1.0** | **21/09/2026** | **Mobile First Responsiveness & UX Overhaul**: Transformação responsiva completa para smartphones e tablets em 100% dos fluxos (AdminLayout com drawer retrátil e hamburger, tabelas com colunas adaptativas inteligentes em Inscrições/Eventos/Presença Pública, Stepper de Inscrição com indicador compacto e barra de progresso linear no mobile, modais e formulários com `fullScreen` responsivo, grids de Dashboard e KPIs auto-ajustáveis, remoção de travas de largura fixa do template Vite). <br/><br/> **Correção de Municípios Homônimos e Ajustes de UI**: Correção crítica no modal de edição de inscrição que ignorava a UF na busca de cidades, resultando na seleção de municípios de outros estados (ex: Palmas - PR em vez de Palmas - TO). Implementado parse inteligente de UF e desempate por Diocese. Remoção da animação "Estrela Guia Celestial" na tela inicial do painel para um login mais ágil. <br/><br/> **Módulo Unificado de Crachás v2.0 & Customização**: Unificação das 4 fontes de crachás (Inscritos, Equipes, Círculos, Palestrantes). Seleção de 3 tamanhos físicos padronizados (Pequeno, Médio, Grande) com escalonamento inteligente. Galeria de 5 presets de moldura (Pastoral, Dourada Clássica, Minimalista, Custom Image e Tenda de Mesa). Card unificado de exibição com toggles 100% integrados ao banco de dados. Nomenclatura tradicional de casais sem parênteses adicionais. |
 | **7.0.0** | **02/09/2026** | **Módulo Completo de Círculos, Relatórios & Painel de Inscrições**: Módulo CRUD de Círculos com Casal Coordenador estrito, Alocação Dual-List fixo lado a lado, Seletor de Cores Nativo com Roda de Cores, Relatório de Círculos por Evento (PDF e Excel), Assinatura Visual Estrela Guia v7.0.0, Painel de Inscrições e Alerta de Contagem Regressiva em Vermelho. |
@@ -222,7 +223,28 @@ O **Bom Pastor Digital** automatiza todo o ciclo de vida de um evento pastoral:
 ### ✅ Inscrições & Financeiro
 - [x] Formulário multi-etapas com validação de CPF e IBGE
 - [x] Dashboard Analítico com gráficos Recharts e Heatmaps de Diocese
-- [x] Sistema de upload e conferência de comprovantes PIX
+### 📁 Módulo de Arquivamento de Mídias e Documentos (v7.3.0)
+- [x] **Repositório Centralizado por Evento**: Organização de arquivos no Supabase Storage (`eventos_midias`) vinculados à tabela isolada `evento_arquivos`.
+- [x] **Controle de Cota Inteligente (150 MB)**:
+  - Barra visual `QuotaBar` com 3 estados dinâmicos de cor: 🟢 Normal (< 80%), 🟠 Alerta (80–89%) e 🔴 Crítico (≥ 90%).
+  - Cálculo instantâneo somando o tamanho real dos arquivos e bloqueio preventivo de uploads ao esgotar a cota.
+- [x] **Categorização Otimizada**:
+  - 📊 **Planilhas** (`.xlsx`, `.xls`, `.csv` e escalas)
+  - 🖼️ **Fotos** (`.jpg`, `.jpeg`, `.png`, `.webp` até 10 MB)
+  - 🎬 **Vídeos** (`.mp4` até 50 MB)
+  - 🎙️ **Áudios** (`.mp3`, `.aac`, `.m4a` até 25 MB)
+  - 📁 **Documentos** (`.pdf`, `.docx`, roteiros e textos administrativos)
+  - 🚫 **Bloqueio Estrito no Cliente**: Formato de áudio `.wav` proibido para conservação de espaço.
+- [x] **Visualização Dupla Alternável (Google Drive / Windows Explorer)**:
+  - ☰ **Modo Lista Detalhada (Padrão)**: Tabela compacta (linhas de ~44px), exibindo Ícone, Título/Nome Original, Categoria, Tamanho, Data de Envio e Ações.
+  - ⊞ **Modo Grade**: Mini-cards horizontais compactos (~60px de altura).
+  - Preferência de visualização persistida no `localStorage`.
+- [x] **Ações Rápidas por Arquivo**:
+  - ✏️ **Edição de Título**: Modal de edição rápida do título amigável sem alterar o arquivo físico.
+  - 📥 **Download Direto**: Força o download do arquivo original diretamente para o computador com nome e extensão corretos.
+  - ↗️ **Visualização**: Abertura direta do arquivo em nova aba do navegador.
+  - 🗑️ **Exclusão Segura**: Remove do banco e do Storage físico com confirmação, liberando espaço na cota.
+- [x] **Acesso 100% Administrativo**: Módulo restrito à coordenação e administradores na rota protegida `/admin/midias`.
 
 ---
 
@@ -245,4 +267,4 @@ Acesse: `http://localhost:5173`
 ## 🤝 Contribuição
 Desenvolvido por **Flávio Santiago** com assistência de IA (Antigravity).
 Contato: flavio.santiago.ti@outlook.com
-© 2026 Bom Pastor Digital • **Versão 7.2.2**
+© 2026 Bom Pastor Digital • **Versão 7.3.0**
